@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nextcom Multi-Admin Pro</title>
+    <title>Nextcom Multi-Admin Pro | Taller de Reparaciones</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -14,35 +14,55 @@
             --st-terminado: #1e8e3e; --st-entregado: #202124;
             --st-cancelado: #d93025;
         }
+
         * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
         body { margin: 0; background: var(--bg); color: var(--dark); overflow-x: hidden; }
-        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--primary); }
+
+        /* --- LOGIN --- */
+        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--primary); z-index: 1000; position: relative; }
         .login-card { background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+        /* --- LAYOUT --- */
         #main-app { display: none; }
         header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
         .sidebar { position: fixed; bottom: 0; width: 100%; background: var(--white); display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid var(--border); z-index: 100; }
+        
         .container { padding: 20px; max-width: 1000px; margin: 0 auto 80px auto; }
-        .section { display: none; } .section.active { display: block; }
+        .section { display: none; animation: fadeIn 0.3s ease; } 
+        .section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- COMPONENTES --- */
         .card { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-top: 5px; font-size: 14px; }
+        
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-top: 5px; font-size: 14px; outline: none; }
+        input:focus { border-color: var(--primary); }
         label { font-size: 12px; font-weight: 600; color: #5f6368; }
+        
         .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
         .btn-primary { background: var(--primary); color: white; }
         .btn-wa { background: #25D366; color: white; margin-top: 10px; width: 100%; }
-        .order-item { border-left: 8px solid #ccc; transition: 0.2s; }
-        .st-Recibido { border-color: var(--st-recibido); }
-        .st-Diagnóstico { border-color: var(--st-diagnostico); }
-        .st-Reparación { border-color: var(--st-reparacion); }
-        .st-Terminado { border-color: var(--st-terminado); }
         
-        /* Estilo para tabla de inventario */
+        /* --- ESTADOS Y COLORES --- */
+        .order-item { border-left: 8px solid #ccc; position: relative; }
+        .st-Recibido { border-left-color: var(--st-recibido); }
+        .st-Endiagnóstico { border-left-color: var(--st-diagnostico); }
+        .st-Enreparación { border-left-color: var(--st-reparacion); }
+        .st-Enesperaderepuesto { border-left-color: var(--st-espera); }
+        .st-Terminado { border-left-color: var(--st-terminado); }
+        .st-Entregado { border-left-color: var(--st-entregado); }
+        .st-Cancelado { border-left-color: var(--st-cancelado); }
+
+        /* TABLAS */
         .inv-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
         .inv-table th, .inv-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
         .inv-table th { background: #f1f3f4; }
 
         @media (min-width: 768px) {
-            .sidebar { width: 240px; height: 100vh; flex-direction: column; justify-content: flex-start; top: 60px; left: 0; }
+            .sidebar { width: 240px; height: 100vh; flex-direction: column; justify-content: flex-start; top: 60px; left: 0; padding: 20px; }
+            .sidebar .btn { margin-bottom: 10px; text-align: left; background: none; color: var(--dark); }
+            .sidebar .btn:hover { background: #f1f3f4; }
             .container { margin-left: 260px; margin-bottom: 20px; }
         }
     </style>
@@ -51,59 +71,64 @@
 
 <div id="login-page">
     <div class="login-card">
-        <h1 style="color:var(--primary)">NEXTCOM</h1>
+        <h1 style="color:var(--primary); margin-bottom: 5px;">NEXTCOM</h1>
+        <p style="font-size: 12px; color: gray; margin-bottom: 20px;">ADMINISTRACIÓN DE TALLER</p>
         <input type="text" id="log-user" placeholder="Usuario">
         <input type="password" id="log-pass" placeholder="Contraseña">
-        <button class="btn btn-primary" style="width:100%; margin-top:15px;" onclick="handleLogin()">Entrar</button>
+        <button class="btn btn-primary" style="width:100%; margin-top:15px;" onclick="handleLogin()">INGRESAR</button>
     </div>
 </div>
 
 <div id="main-app">
     <header>
-        <strong>SISTEMA NEXTCOM</strong>
-        <span id="user-display" style="font-size:12px; color:var(--primary)"></span>
+        <strong>NEXTCOM MULTISERVICIOS</strong>
+        <span id="user-display" style="font-size:12px; font-weight: bold; color:var(--primary)"></span>
     </header>
 
     <div class="sidebar">
-        <button class="btn" onclick="nav('dash')">📊 Panel</button>
+        <button class="btn" onclick="nav('dash')">📊 Panel Principal</button>
         <button class="btn" onclick="nav('new')">➕ Nueva Orden</button>
         <button class="btn" onclick="nav('inv')">📦 Inventario</button>
-        <button class="btn" onclick="logout()">❌ Salir</button>
+        <button class="btn" style="color: var(--st-cancelado)" onclick="logout()">❌ Cerrar Sesión</button>
     </div>
 
     <div class="container">
         <div id="sec-dash" class="section active">
+            <h3 id="dash-title">Equipos en Taller</h3>
+            <input type="text" id="main-search" placeholder="🔍 Buscar por cliente, modelo o falla..." style="margin-bottom: 20px;">
             <div id="orders-list"></div>
         </div>
 
         <div id="sec-new" class="section">
             <div class="card">
-                <h3>📋 Datos de Orden</h3>
+                <h3>📋 Registro de Nueva Orden</h3>
                 <div class="grid">
-                    <input type="text" id="o-cliente" placeholder="Nombre completo">
-                    <input type="number" id="o-tel" placeholder="WhatsApp">
+                    <div><label>Nombre del Cliente</label><input type="text" id="o-cliente" placeholder="Nombre completo"></div>
+                    <div><label>WhatsApp</label><input type="number" id="o-tel" placeholder="Ej: 50377777777"></div>
                 </div>
                 <div class="grid" style="margin-top:15px;">
                     <div>
-                        <label>Modelo (Autocompletado)</label>
-                        <input type="text" id="o-modelo" list="lista-modelos" placeholder="Ej: A03" oninput="logicAutoFill()">
+                        <label>Modelo (Autocompletado Inteligente)</label>
+                        <input type="text" id="o-modelo" list="lista-modelos" placeholder="Escribe modelo..." oninput="logicAutoFill()">
                         <datalist id="lista-modelos"></datalist>
                     </div>
                     <div>
-                        <label>Falla</label>
-                        <select id="o-falla">
+                        <label>Falla Reportada</label>
+                        <select id="o-falla" onchange="logicAutoFill()">
                             <option value="Cambio de Pantalla">Cambio de Pantalla</option>
                             <option value="Cambio de Batería">Cambio de Batería</option>
                             <option value="Centro de Carga">Centro de Carga</option>
+                            <option value="No enciende">No enciende</option>
+                            <option value="Software">Software</option>
                         </select>
                     </div>
                 </div>
-                <div class="grid">
-                    <input type="number" id="o-costo" placeholder="Costo $" oninput="calcSaldo()">
-                    <input type="number" id="o-anticipo" placeholder="Anticipo $" oninput="calcSaldo()">
-                    <input type="text" id="o-saldo" placeholder="Saldo" readonly>
+                <div class="grid" style="margin-top:15px;">
+                    <div><label>Costo Total ($)</label><input type="number" id="o-costo" oninput="calcSaldo()"></div>
+                    <div><label>Anticipo ($)</label><input type="number" id="o-anticipo" oninput="calcSaldo()"></div>
+                    <div><label>Saldo Pendiente ($)</label><input type="text" id="o-saldo" readonly style="background:#f1f3f4; font-weight:bold;"></div>
                 </div>
-                <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="saveOrder()">CREAR ORDEN</button>
+                <button class="btn btn-primary" style="width:100%; margin-top:25px;" onclick="saveOrder()">GUARDAR E IMPRIMIR TICKET</button>
             </div>
         </div>
 
@@ -115,12 +140,12 @@
                     <input type="text" id="i-marca" placeholder="Marca">
                     <input type="text" id="i-modelo" placeholder="Modelo Exacto">
                     <input type="number" id="i-precio" placeholder="Precio Venta $">
-                    <input type="number" id="i-stock" placeholder="Stock Inicial">
+                    <input type="number" id="i-stock" placeholder="Stock">
                 </div>
-                <button class="btn btn-primary" style="margin-top:15px" onclick="saveInventory()">Guardar en Base de Datos</button>
+                <button class="btn btn-primary" style="margin-top:15px" onclick="saveInventory()">AGREGAR REPUESTO</button>
             </div>
             <div class="card">
-                <h3>Lista de Repuestos Disponibles</h3>
+                <h3>Repuestos Registrados</h3>
                 <div style="overflow-x: auto;">
                     <table class="inv-table">
                         <thead>
@@ -133,6 +158,8 @@
         </div>
     </div>
 </div>
+
+
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -149,107 +176,133 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    let localInventory = [];
 
-    // --- FUNCIÓN CENTRAL: CAMBIO DE ESTADO ---
-    window.updateStatus = async (id, nuevoEstado, oldEstado) => {
-        if (nuevoEstado === oldEstado) return;
+    // --- SEGURIDAD Y NAVEGACIÓN ---
+    window.handleLogin = () => {
+        const u = document.getElementById('log-user').value;
+        const p = document.getElementById('log-pass').value;
+        if(u === "Nextcom" && p === "1234") {
+            localStorage.setItem('session_user', u);
+            location.reload();
+        } else { alert("Usuario o clave incorrecta"); }
+    };
+    if(localStorage.getItem('session_user')) {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('user-display').innerText = "Técnico: " + localStorage.getItem('session_user');
+    }
+    window.logout = () => { localStorage.clear(); location.reload(); };
+    window.nav = (id) => {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('sec-' + id).classList.add('active');
+    };
 
-        const user = localStorage.getItem('user') || 'Sistema';
-        const fechaHora = new Date().toLocaleString();
-        
-        try {
-            const docRef = doc(db, "ordenes", id);
-            
-            // 1. Persistencia en BD
-            await updateDoc(docRef, { 
-                estado: nuevoEstado,
-                // Registro de historial dentro del mismo documento
-                historial: arrayUnion({
-                    de: oldEstado,
-                    a: nuevoEstado,
-                    fecha: fechaHora,
-                    usuario: user
-                })
-            });
+    // --- LÓGICA DE INVENTARIO Y AUTOCOMPLETADO ---
+    window.saveInventory = async () => {
+        const item = {
+            tipo: document.getElementById('i-tipo').value,
+            marca: document.getElementById('i-marca').value,
+            modelo: document.getElementById('i-modelo').value,
+            precio: document.getElementById('i-precio').value,
+            stock: document.getElementById('i-stock').value,
+            ts: new Date()
+        };
+        if(!item.modelo || !item.precio) return alert("Faltan datos");
+        await addDoc(collection(db, "inventario"), item);
+        alert("Repuesto guardado");
+        document.querySelectorAll('#sec-inv input').forEach(i => i.value = "");
+    };
 
-            // 2. El cambio visual y de WhatsApp ocurre automáticamente 
-            // gracias al onSnapshot que detecta el cambio en la BD.
-            console.log(`Estado actualizado a ${nuevoEstado} para la orden ${id}`);
-        } catch (e) {
-            console.error("Error al actualizar estado:", e);
-            alert("Error al guardar el estado. Revisa tu conexión.");
+    onSnapshot(query(collection(db, "inventario"), orderBy("ts", "desc")), (snap) => {
+        const body = document.getElementById('inv-table-body');
+        const datalist = document.getElementById('lista-modelos');
+        body.innerHTML = "";
+        datalist.innerHTML = "";
+        localInventory = [];
+        snap.forEach(d => {
+            const data = d.data();
+            localInventory.push(data);
+            body.innerHTML += `<tr><td>${data.tipo}</td><td>${data.marca}</td><td>${data.modelo}</td><td>$${data.precio}</td><td>${data.stock}</td></tr>`;
+            datalist.innerHTML += `<option value="${data.modelo}">`;
+        });
+    });
+
+    window.logicAutoFill = () => {
+        const inputMod = document.getElementById('o-modelo').value.toLowerCase();
+        const inputFalla = document.getElementById('o-falla').value.toLowerCase();
+        const match = localInventory.find(i => i.modelo.toLowerCase() === inputMod && inputFalla.includes(i.tipo.toLowerCase()));
+        if(match) {
+            document.getElementById('o-costo').value = match.precio;
+            calcSaldo();
         }
     };
 
-    // --- GENERADOR DE WHATSAPP (SIN ICONOS) ---
+    // --- GESTIÓN DE ÓRDENES Y ESTADOS ---
+    window.calcSaldo = () => {
+        const c = document.getElementById('o-costo').value || 0;
+        const a = document.getElementById('o-anticipo').value || 0;
+        document.getElementById('o-saldo').value = (c - a);
+    };
+
+    window.saveOrder = async () => {
+        const o = {
+            cliente: document.getElementById('o-cliente').value,
+            tel: document.getElementById('o-tel').value,
+            modelo: document.getElementById('o-modelo').value,
+            falla: document.getElementById('o-falla').value,
+            costo: document.getElementById('o-costo').value,
+            anticipo: document.getElementById('o-anticipo').value,
+            saldo: document.getElementById('o-costo').value - document.getElementById('o-anticipo').value,
+            estado: 'Recibido',
+            fecha: new Date().toISOString(),
+            num: Math.floor(Math.random()*1000)
+        };
+        await addDoc(collection(db, "ordenes"), o);
+        enviarWA(o);
+        alert("Orden creada con éxito");
+        nav('dash');
+    };
+
+    window.updateStatus = async (id, nuevo, anterior) => {
+        if(nuevo === anterior) return;
+        const user = localStorage.getItem('session_user');
+        await updateDoc(doc(db, "ordenes", id), { 
+            estado: nuevo,
+            historial: arrayUnion({ de: anterior, a: nuevo, fecha: new Date().toLocaleString(), tecnico: user })
+        });
+    };
+
     window.enviarWA = (d) => {
-        let msg = `NEXTCOM MULTISERVICIOS\n`;
-        msg += `Hola ${d.cliente}\n`;
-        msg += `Tu equipo ${d.modelo} se encuentra en estado: ${d.estado}\n`;
-        
-        if(d.estado === "Terminado") {
-            msg += `Saldo pendiente: $${d.saldo}\n`;
-            msg += `Puedes pasar a recogerlo cuando gustes.\nGarantia: 30 dias.`;
-        } else if(d.estado === "Entregado") {
-            msg += `Confirmamos la entrega de tu equipo. Gracias por tu confianza.`;
-        } else if(d.estado === "En reparación") {
-            msg += `Ya estamos trabajando en la solucion de tu equipo. Te avisaremos al finalizar.`;
-        }
-
-        const encoded = encodeURIComponent(msg);
-        window.open(`https://wa.me/${d.tel}?text=${encoded}`, '_blank');
+        let msg = `NEXTCOM MULTISERVICIOS\nHola ${d.cliente}\nTu equipo ${d.modelo} ha pasado a estado: ${d.estado}\n`;
+        if(d.estado === "Terminado") msg += `Saldo pendiente: $${d.saldo}\nPuedes recogerlo cuando gustes.\nGarantia: 30 dias.`;
+        window.open(`https://wa.me/${d.tel}?text=${encodeURIComponent(msg)}`, '_blank');
     };
 
-    // --- RENDERIZADO DINÁMICO (REACTIVO) ---
     onSnapshot(query(collection(db, "ordenes"), orderBy("fecha", "desc")), (snap) => {
         const list = document.getElementById('orders-list');
-        if(!list) return;
         list.innerHTML = "";
-        
-        snap.forEach(documento => {
-            const d = documento.data();
-            const id = documento.id;
-
+        snap.forEach(docSnap => {
+            const d = docSnap.data();
+            const id = docSnap.id;
             const card = document.createElement('div');
-            // La clase cambia automáticamente según el estado para el color CSS
-            card.className = `card order-item st-${d.estado.replace(" ", "")}`;
-            
+            card.className = `card order-item st-${d.estado.replace(/\s+/g, '')}`;
             card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <strong>${d.cliente}</strong>
-                    <span style="font-size:12px; font-weight:700;">$${d.saldo}</span>
-                </div>
-                <div style="font-size:13px; margin:5px 0;">${d.modelo} | ${d.falla}</div>
-                
-                <label style="font-size:10px; display:block; margin-top:10px;">CAMBIAR ESTADO:</label>
-                <select onchange="updateStatus('${id}', this.value, '${d.estado}')" style="margin-bottom:10px;">
-                    <option value="Recibido" ${d.estado==='Recibido'?'selected':''}>Recibido</option>
-                    <option value="En diagnóstico" ${d.estado==='En diagnóstico'?'selected':''}>En diagnóstico</option>
-                    <option value="En reparación" ${d.estado==='En reparación'?'selected':''}>En reparación</option>
-                    <option value="En espera de repuesto" ${d.estado==='En espera de repuesto'?'selected':''}>En espera de repuesto</option>
-                    <option value="Terminado" ${d.estado==='Terminado'?'selected':''}>Terminado</option>
-                    <option value="Entregado" ${d.estado==='Entregado'?'selected':''}>Entregado</option>
-                    <option value="Cancelado" ${d.estado==='Cancelado'?'selected':''}>Cancelado</option>
+                <div style="display:flex; justify-content:space-between"><strong>#${d.num} | ${d.cliente}</strong> <b>$${d.saldo}</b></div>
+                <p style="font-size:13px; margin:5px 0;">${d.modelo} - ${d.falla}</p>
+                <select onchange="updateStatus('${id}', this.value, '${d.estado}')">
+                    <option value="Recibido" ${d.estado=='Recibido'?'selected':''}>Recibido</option>
+                    <option value="En diagnóstico" ${d.estado=='En diagnóstico'?'selected':''}>En diagnóstico</option>
+                    <option value="En reparación" ${d.estado=='En reparación'?'selected':''}>En reparación</option>
+                    <option value="En espera de repuesto" ${d.estado=='En espera de repuesto'?'selected':''}>En espera de repuesto</option>
+                    <option value="Terminado" ${d.estado=='Terminado'?'selected':''}>Terminado</option>
+                    <option value="Entregado" ${d.estado=='Entregado'?'selected':''}>Entregado</option>
                 </select>
-
-                <button class="btn btn-wa" onclick='enviarWA(${JSON.stringify({
-                    cliente: d.cliente, 
-                    tel: d.tel, 
-                    modelo: d.modelo, 
-                    estado: d.estado, 
-                    saldo: d.saldo
-                })})'>Enviar WhatsApp de ${d.estado}</button>
-                
-                <div style="font-size:9px; color:gray; margin-top:8px; text-align:right;">
-                    Ultima actualizacion: ${d.fecha.split('T')[0]}
-                </div>
+                <button class="btn btn-wa" onclick='enviarWA(${JSON.stringify(d)})'>Enviar WA (${d.estado})</button>
             `;
             list.appendChild(card);
         });
     });
-
-    // Mantener las funciones de Login e Inventario que ya tenías funcionando...
-    // [Resto de funciones de navegación y guardado de orden e inventario]
 </script>
 </body>
 </html>
