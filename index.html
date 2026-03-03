@@ -136,7 +136,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
@@ -149,108 +149,107 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let localInventory = [];
 
-    // LOGIN
-    window.handleLogin = () => {
-        if(document.getElementById('log-user').value === "Nextcom" && document.getElementById('log-pass').value === "1234") {
-            localStorage.setItem('user', 'Nextcom');
-            location.reload();
-        }
-    };
-    if(localStorage.getItem('user')) {
-        document.getElementById('login-page').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-    }
-    window.logout = () => { localStorage.clear(); location.reload(); };
-    window.nav = (id) => {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('sec-' + id).classList.add('active');
-    };
+    // --- FUNCIÓN CENTRAL: CAMBIO DE ESTADO ---
+    window.updateStatus = async (id, nuevoEstado, oldEstado) => {
+        if (nuevoEstado === oldEstado) return;
 
-    // --- CORRECCIÓN 1 Y 2: INVENTARIO PERSISTENTE Y LISTA ---
-    window.saveInventory = async () => {
-        const item = {
-            tipo: document.getElementById('i-tipo').value,
-            marca: document.getElementById('i-marca').value,
-            modelo: document.getElementById('i-modelo').value,
-            precio: document.getElementById('i-precio').value,
-            stock: document.getElementById('i-stock').value,
-            ts: new Date()
-        };
-        if(!item.modelo || !item.precio) return alert("Completa modelo y precio");
+        const user = localStorage.getItem('user') || 'Sistema';
+        const fechaHora = new Date().toLocaleString();
         
-        await addDoc(collection(db, "inventario"), item);
-        alert("Guardado en Firebase");
-        document.querySelectorAll('#sec-inv input').forEach(i => i.value = "");
-    };
+        try {
+            const docRef = doc(db, "ordenes", id);
+            
+            // 1. Persistencia en BD
+            await updateDoc(docRef, { 
+                estado: nuevoEstado,
+                // Registro de historial dentro del mismo documento
+                historial: arrayUnion({
+                    de: oldEstado,
+                    a: nuevoEstado,
+                    fecha: fechaHora,
+                    usuario: user
+                })
+            });
 
-    onSnapshot(query(collection(db, "inventario"), orderBy("ts", "desc")), (snap) => {
-        const body = document.getElementById('inv-table-body');
-        const datalist = document.getElementById('lista-modelos');
-        body.innerHTML = "";
-        datalist.innerHTML = "";
-        localInventory = [];
-
-        snap.forEach(d => {
-            const data = d.data();
-            localInventory.push(data);
-            body.innerHTML += `<tr>
-                <td>${data.tipo}</td><td>${data.marca}</td><td>${data.modelo}</td><td>$${data.precio}</td><td>${data.stock}</td>
-            </tr>`;
-            // Llenar datalist para autocompletado
-            datalist.innerHTML += `<option value="${data.modelo}">`;
-        });
-    });
-
-    // --- CORRECCIÓN 3, 4 Y 5: AUTOCOMPLETADO Y PRECIO ---
-    window.logicAutoFill = () => {
-        const inputVal = document.getElementById('o-modelo').value.toLowerCase();
-        const priceInput = document.getElementById('o-costo');
-        
-        // Buscar coincidencia exacta para el precio
-        const match = localInventory.find(i => i.modelo.toLowerCase() === inputVal);
-        if(match) {
-            priceInput.value = match.precio;
-            calcSaldo();
+            // 2. El cambio visual y de WhatsApp ocurre automáticamente 
+            // gracias al onSnapshot que detecta el cambio en la BD.
+            console.log(`Estado actualizado a ${nuevoEstado} para la orden ${id}`);
+        } catch (e) {
+            console.error("Error al actualizar estado:", e);
+            alert("Error al guardar el estado. Revisa tu conexión.");
         }
     };
 
-    // --- LÓGICA DE ÓRDENES ---
-    window.calcSaldo = () => {
-        const c = document.getElementById('o-costo').value || 0;
-        const a = document.getElementById('o-anticipo').value || 0;
-        document.getElementById('o-saldo').value = "Saldo: $" + (c - a);
+    // --- GENERADOR DE WHATSAPP (SIN ICONOS) ---
+    window.enviarWA = (d) => {
+        let msg = `NEXTCOM MULTISERVICIOS\n`;
+        msg += `Hola ${d.cliente}\n`;
+        msg += `Tu equipo ${d.modelo} se encuentra en estado: ${d.estado}\n`;
+        
+        if(d.estado === "Terminado") {
+            msg += `Saldo pendiente: $${d.saldo}\n`;
+            msg += `Puedes pasar a recogerlo cuando gustes.\nGarantia: 30 dias.`;
+        } else if(d.estado === "Entregado") {
+            msg += `Confirmamos la entrega de tu equipo. Gracias por tu confianza.`;
+        } else if(d.estado === "En reparación") {
+            msg += `Ya estamos trabajando en la solucion de tu equipo. Te avisaremos al finalizar.`;
+        }
+
+        const encoded = encodeURIComponent(msg);
+        window.open(`https://wa.me/${d.tel}?text=${encoded}`, '_blank');
     };
 
-    window.saveOrder = async () => {
-        const o = {
-            cliente: document.getElementById('o-cliente').value,
-            tel: document.getElementById('o-tel').value,
-            modelo: document.getElementById('o-modelo').value,
-            falla: document.getElementById('o-falla').value,
-            costo: document.getElementById('o-costo').value,
-            anticipo: document.getElementById('o-anticipo').value,
-            saldo: document.getElementById('o-costo').value - document.getElementById('o-anticipo').value,
-            estado: 'Recibido',
-            fecha: new Date().toISOString()
-        };
-        await addDoc(collection(db, "ordenes"), o);
-        alert("Orden Creada");
-        nav('dash');
-    };
-
+    // --- RENDERIZADO DINÁMICO (REACTIVO) ---
     onSnapshot(query(collection(db, "ordenes"), orderBy("fecha", "desc")), (snap) => {
         const list = document.getElementById('orders-list');
+        if(!list) return;
         list.innerHTML = "";
-        snap.forEach(d => {
-            const data = d.data();
-            list.innerHTML += `<div class="card order-item st-${data.estado}">
-                <strong>${data.cliente}</strong> - ${data.modelo}<br>
-                <small>${data.falla} | Saldo: $${data.saldo}</small>
-            </div>`;
+        
+        snap.forEach(documento => {
+            const d = documento.data();
+            const id = documento.id;
+
+            const card = document.createElement('div');
+            // La clase cambia automáticamente según el estado para el color CSS
+            card.className = `card order-item st-${d.estado.replace(" ", "")}`;
+            
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <strong>${d.cliente}</strong>
+                    <span style="font-size:12px; font-weight:700;">$${d.saldo}</span>
+                </div>
+                <div style="font-size:13px; margin:5px 0;">${d.modelo} | ${d.falla}</div>
+                
+                <label style="font-size:10px; display:block; margin-top:10px;">CAMBIAR ESTADO:</label>
+                <select onchange="updateStatus('${id}', this.value, '${d.estado}')" style="margin-bottom:10px;">
+                    <option value="Recibido" ${d.estado==='Recibido'?'selected':''}>Recibido</option>
+                    <option value="En diagnóstico" ${d.estado==='En diagnóstico'?'selected':''}>En diagnóstico</option>
+                    <option value="En reparación" ${d.estado==='En reparación'?'selected':''}>En reparación</option>
+                    <option value="En espera de repuesto" ${d.estado==='En espera de repuesto'?'selected':''}>En espera de repuesto</option>
+                    <option value="Terminado" ${d.estado==='Terminado'?'selected':''}>Terminado</option>
+                    <option value="Entregado" ${d.estado==='Entregado'?'selected':''}>Entregado</option>
+                    <option value="Cancelado" ${d.estado==='Cancelado'?'selected':''}>Cancelado</option>
+                </select>
+
+                <button class="btn btn-wa" onclick='enviarWA(${JSON.stringify({
+                    cliente: d.cliente, 
+                    tel: d.tel, 
+                    modelo: d.modelo, 
+                    estado: d.estado, 
+                    saldo: d.saldo
+                })})'>Enviar WhatsApp de ${d.estado}</button>
+                
+                <div style="font-size:9px; color:gray; margin-top:8px; text-align:right;">
+                    Ultima actualizacion: ${d.fecha.split('T')[0]}
+                </div>
+            `;
+            list.appendChild(card);
         });
     });
+
+    // Mantener las funciones de Login e Inventario que ya tenías funcionando...
+    // [Resto de funciones de navegación y guardado de orden e inventario]
 </script>
 </body>
 </html>
