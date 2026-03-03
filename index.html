@@ -3,35 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Panel de Datos</title>
+    <title>Acceso Privado - Nextcom</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin-bottom: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        
+        /* Estilos del Login */
+        #login-screen { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; margin-top: 50px; }
+        #login-screen h1 { color: #1a73e8; margin-bottom: 20px; }
+        
+        /* Estilos de la App (Oculta por defecto) */
+        #main-app { display: none; width: 100%; max-width: 400px; }
+        
+        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
         h2 { text-align: center; color: #1a73e8; margin-top: 0; }
         input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        button#btnGuardar { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
         
-        .lista-container { width: 100%; max-width: 400px; }
+        #btnGuardar { background-color: #1a73e8; color: white; }
+        #btnEntrar { background-color: #1a73e8; color: white; margin-top: 10px; }
+        #btnSalir { background-color: #666; color: white; margin-top: 20px; padding: 8px; font-size: 12px; }
+
         .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
         .card-info h4 { margin: 0; color: #333; }
-        .card-info p { margin: 5px 0 0; color: #666; font-size: 14px; }
-        .btn-borrar { background-color: #ff4d4d; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
-        .btn-borrar:hover { background-color: #cc0000; }
-        #estado { text-align: center; font-size: 14px; margin-top: 10px; }
+        .btn-borrar { background-color: #ff4d4d; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Nuevo Registro</h2>
-    <input type="text" id="nombreDato" placeholder="Título">
-    <input type="text" id="contenidoDato" placeholder="Descripción">
-    <button id="btnGuardar">Guardar</button>
-    <p id="estado"></p>
+<div id="login-screen">
+    <h1>Nextcom</h1>
+    <p>Ingresa tus credenciales</p>
+    <input type="text" id="user" placeholder="Usuario">
+    <input type="password" id="pass" placeholder="Contraseña">
+    <button id="btnEntrar">Entrar</button>
+    <p id="error-login" style="color: red; display: none; font-size: 14px; margin-top: 10px;">Datos incorrectos</p>
 </div>
 
-<div class="lista-container" id="listaDatos">
+<div id="main-app">
+    <div class="container">
+        <h2>Nuevo Registro</h2>
+        <input type="text" id="nombreDato" placeholder="Título">
+        <input type="text" id="contenidoDato" placeholder="Descripción">
+        <button id="btnGuardar">Guardar en Firebase</button>
     </div>
+
+    <div id="listaDatos"></div>
+    
+    <button id="btnSalir">Cerrar Sesión</button>
+</div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -50,61 +69,81 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  const btnGuardar = document.getElementById('btnGuardar');
-  const listaContenedor = document.getElementById('listaDatos');
-  const estado = document.getElementById('estado');
+  // ELEMENTOS DEL DOM
+  const loginScreen = document.getElementById('login-screen');
+  const mainApp = document.getElementById('main-app');
+  const btnEntrar = document.getElementById('btnEntrar');
+  const btnSalir = document.getElementById('btnSalir');
+  const errorLogin = document.getElementById('error-login');
 
-  // --- FUNCIÓN PARA GUARDAR ---
-  btnGuardar.addEventListener('click', async () => {
+  // LÓGICA DE LOGIN
+  const credenciales = { usuario: "Nextcom", clave: "1234" };
+
+  function verificarSesion() {
+    if (sessionStorage.getItem('logueado') === 'true') {
+        loginScreen.style.display = 'none';
+        mainApp.style.display = 'block';
+        cargarDatos();
+    }
+  }
+
+  btnEntrar.addEventListener('click', () => {
+    const userVal = document.getElementById('user').value;
+    const passVal = document.getElementById('pass').value;
+
+    if (userVal === credenciales.usuario && passVal === credenciales.clave) {
+        sessionStorage.setItem('logueado', 'true');
+        location.reload(); // Recargar para activar Firestore
+    } else {
+        errorLogin.style.display = 'block';
+    }
+  });
+
+  btnSalir.addEventListener('click', () => {
+    sessionStorage.removeItem('logueado');
+    location.reload();
+  });
+
+  // CARGAR DATOS (Solo si está logueado)
+  function cargarDatos() {
+      const q = query(collection(db, "mis_datos"), orderBy("fecha", "desc"));
+      onSnapshot(q, (snapshot) => {
+        const lista = document.getElementById('listaDatos');
+        lista.innerHTML = "";
+        snapshot.forEach((documento) => {
+          const data = documento.data();
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `
+            <div class="card-info">
+                <h4>${data.titulo}</h4>
+                <p>${data.descripcion}</p>
+            </div>
+            <button class="btn-borrar" onclick="borrarDoc('${documento.id}')">Borrar</button>
+          `;
+          lista.appendChild(card);
+        });
+      });
+  }
+
+  // GUARDAR DATOS
+  document.getElementById('btnGuardar').addEventListener('click', async () => {
     const titulo = document.getElementById('nombreDato').value;
     const desc = document.getElementById('contenidoDato').value;
-
-    if(!titulo || !desc) return alert("Llena ambos campos");
-
-    try {
-      await addDoc(collection(db, "mis_datos"), {
-        titulo: titulo,
-        descripcion: desc,
-        fecha: new Date()
-      });
-      document.getElementById('nombreDato').value = "";
-      document.getElementById('contenidoDato').value = "";
-    } catch (e) { console.error(e); }
+    if(!titulo || !desc) return;
+    await addDoc(collection(db, "mis_datos"), { titulo, descripcion: desc, fecha: new Date() });
+    document.getElementById('nombreDato').value = "";
+    document.getElementById('contenidoDato').value = "";
   });
 
-  // --- FUNCIÓN PARA LEER EN TIEMPO REAL ---
-  const q = query(collection(db, "mis_datos"), orderBy("fecha", "desc"));
-  
-  onSnapshot(q, (snapshot) => {
-    listaContenedor.innerHTML = ""; // Limpiar lista antes de recargar
-    
-    snapshot.forEach((documento) => {
-      const data = documento.data();
-      const id = documento.id;
+  // BORRAR DATOS
+  window.borrarDoc = async (id) => {
+    if(confirm("¿Eliminar registro?")) {
+        await deleteDoc(doc(db, "mis_datos", id));
+    }
+  };
 
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div class="card-info">
-            <h4>${data.titulo}</h4>
-            <p>${data.descripcion}</p>
-        </div>
-        <button class="btn-borrar" data-id="${id}">Borrar</button>
-      `;
-      listaContenedor.appendChild(card);
-    });
-
-    // Asignar eventos a los botones de borrar creados
-    document.querySelectorAll('.btn-borrar').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-            const docId = e.target.getAttribute('data-id');
-            if(confirm("¿Seguro que quieres eliminar este dato?")) {
-                await deleteDoc(doc(db, "mis_datos", docId));
-            }
-        });
-    });
-  });
-
+  verificarSesion();
 </script>
 </body>
 </html>
