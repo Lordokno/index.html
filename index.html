@@ -3,160 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nextcom Multiservicios - Gestión de Taller</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <title>Nextcom Multiservicios - Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1a73e8;
-            --secondary: #5f6368;
-            --success: #28a745;
-            --warning: #fbbc04;
-            --danger: #d93025;
-            --bg: #f8f9fa;
-            --card: #ffffff;
+            --primary: #1a73e8; --bg: #f1f3f4;
+            --color-recibido: #e8f0fe; --text-recibido: #1967d2;
+            --color-diagnostico: #fef7e0; --text-diagnostico: #b06000;
+            --color-reparacion: #feefe3; --text-reparacion: #e67c73;
+            --color-terminado: #e6f4ea; --text-terminado: #137333;
+            --color-entregado: #f1f3f4; --text-entregado: #5f6368;
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; color: #3c4043; }
-        
-        /* LOGIN */
-        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--primary); }
-        .login-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 350px; text-align: center; }
-        
-        /* LAYOUT */
-        #app-content { display: none; }
-        nav { background: var(--primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .nav-tabs { display: flex; overflow-x: auto; background: white; padding: 10px; gap: 10px; border-bottom: 1px solid #ddd; }
-        .tab-btn { padding: 10px 20px; border: none; background: #eee; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: 600; color: var(--secondary); }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 50px; }
+        nav { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .nav-tabs { display: flex; background: white; padding: 10px; gap: 8px; border-bottom: 1px solid #ddd; overflow-x: auto; }
+        .tab-btn { padding: 8px 16px; border: none; background: #eee; border-radius: 20px; cursor: pointer; font-weight: 600; white-space: nowrap; }
         .tab-btn.active { background: var(--primary); color: white; }
 
-        /* FORMS & CARDS */
-        .container { padding: 20px; max-width: 800px; margin: auto; }
-        .section { display: none; animation: fadeIn 0.3s; }
-        .section.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .container { padding: 15px; max-width: 600px; margin: auto; }
+        .section { display: none; } .section.active { display: block; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; }
+        
+        /* Colores de Estados */
+        .status-Recibido { border-left-color: var(--text-recibido); background-color: var(--color-recibido); }
+        .status-Diagnóstico { border-left-color: var(--text-diagnostico); background-color: var(--color-diagnostico); }
+        .status-Reparación { border-left-color: var(--text-reparacion); background-color: var(--color-reparacion); }
+        .status-Terminado { border-left-color: var(--text-terminado); background-color: var(--color-terminado); }
+        .status-Entregado { border-left-color: var(--text-entregado); background-color: var(--color-entregado); }
 
-        .card { background: var(--card); padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        label { display: block; margin-bottom: 5px; font-size: 13px; font-weight: 600; color: var(--secondary); }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 15px; }
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
         
-        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; font-size: 15px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-whatsapp { background: #25D366; color: white; margin-top: 10px; }
-        .btn-danger { background: var(--danger); color: white; }
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        .btn { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-save { background: var(--primary); color: white; }
+        .btn-wa { background: #25D366; color: white; }
+        .btn-del { background: #ea4335; color: white; margin-top: 5px; padding: 5px; font-size: 11px; }
 
-        /* DASHBOARD STATS */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-box { padding: 15px; border-radius: 12px; text-align: center; color: white; }
-        .bg-blue { background: #4285f4; } .bg-green { background: #34a853; } .bg-yellow { background: #fabb05; } .bg-red { background: #ea4335; }
+        .header-card { display: flex; justify-content: space-between; align-items: flex-start; }
+        .price-tag { color: var(--text-recibido); font-weight: bold; font-size: 18px; }
         
-        /* LISTS */
-        .order-card { border-left: 5px solid var(--primary); margin-bottom: 15px; position: relative; }
-        .status-badge { font-size: 11px; padding: 4px 8px; border-radius: 4px; text-transform: uppercase; font-weight: bold; }
-        
-        @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--primary); }
+        .login-box { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 300px; }
     </style>
 </head>
 <body>
 
 <div id="login-page">
-    <div class="login-card">
-        <h1 style="color:var(--primary); margin:0;">NEXTCOM</h1>
-        <p>Software de Gestión Técnica</p>
-        <input type="text" id="user" placeholder="Usuario">
-        <input type="password" id="pass" placeholder="Contraseña" style="margin-top:10px;">
-        <button class="btn btn-primary" style="margin-top:20px;" onclick="login()">Ingresar</button>
-        <p id="login-err" style="color:red; display:none; font-size:13px; margin-top:10px;">Credenciales incorrectas</p>
+    <div class="login-box">
+        <h2 style="color:var(--primary)">NEXTCOM</h2>
+        <input type="text" id="u" placeholder="Usuario">
+        <input type="password" id="p" placeholder="Contraseña">
+        <button class="btn btn-save" onclick="login()">ENTRAR</button>
     </div>
 </div>
 
-<div id="app-content">
-    <nav>
-        <span style="font-weight:bold; font-size:20px;">NEXTCOM</span>
-        <button onclick="logout()" style="background:none; border:none; color:white; cursor:pointer;">Salir</button>
-    </nav>
-
+<div id="app" style="display:none;">
+    <nav> <strong>NEXTCOM MULTISERVICIOS</strong> <span onclick="logout()" style="font-size:12px; opacity:0.8">Cerrar Sesión</span> </nav>
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="showSection('dashboard')">Dashboard</button>
-        <button class="tab-btn" onclick="showSection('nuevo')">Nueva Orden</button>
-        <button class="tab-btn" onclick="showSection('historial')">Historial</button>
+        <button class="tab-btn active" onclick="tab('dash')">Panel</button>
+        <button class="tab-btn" onclick="tab('new')">+ Nueva Orden</button>
+        <button class="tab-btn" onclick="tab('hist')">Historial</button>
     </div>
 
     <div class="container">
+        <div id="new" class="section">
+            <div class="card" style="border-left-color: var(--primary)">
+                <h3>Registro de Equipo</h3>
+                <input type="text" id="nom" placeholder="Nombre del Cliente">
+                <input type="number" id="tel" placeholder="WhatsApp (ej: 503...)">
+                <input type="text" id="mod" placeholder="Marca y Modelo">
+                <input type="text" id="fal" placeholder="Falla técnica">
+                <input type="number" id="cos" placeholder="Costo Total $" oninput="calc()">
+                <input type="number" id="ant" placeholder="Anticipo $" oninput="calc()">
+                <div style="padding:10px; background:#eee; border-radius:8px;">Saldo Pendiente: $<span id="sal">0</span></div>
+                <button class="btn btn-save" onclick="guardar()">GENERAR ORDEN</button>
+            </div>
+        </div>
+
+        <div id="dash" class="section active">
+            <div id="lista-ordenes"></div>
+        </div>
         
-        <div id="dashboard" class="section active">
-            <div class="stats-grid">
-                <div class="stat-box bg-blue"><h3 id="stat-total">0</h3><p>Total</p></div>
-                <div class="stat-box bg-yellow"><h3 id="stat-reparacion">0</h3><p>En Reparación</p></div>
-                <div class="stat-box bg-green"><h3 id="stat-listo">0</h3><p>Terminados</p></div>
-                <div class="stat-box bg-red"><h3 id="stat-caja">$0</h3><p>Caja Mes</p></div>
-            </div>
-            <h3>Equipos Recientes</h3>
-            <div id="recientes-list"></div>
+        <div id="hist" class="section">
+            <input type="text" id="bus" placeholder="Buscar cliente o equipo..." oninput="filtrar()">
+            <div id="lista-historial"></div>
         </div>
-
-        <div id="nuevo" class="section">
-            <div class="card">
-                <h3>📋 Información Cliente</h3>
-                <div class="grid">
-                    <div><label>Nombre Completo</label><input type="text" id="c-nombre"></div>
-                    <div><label>WhatsApp (ej: 50377777777)</label><input type="number" id="c-tel"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>📱 Información Equipo</h3>
-                <div class="grid">
-                    <div>
-                        <label>Marca</label>
-                        <select id="e-marca">
-                            <option value="Samsung">Samsung</option>
-                            <option value="iPhone">iPhone</option>
-                            <option value="Xiaomi">Xiaomi</option>
-                            <option value="Motorola">Motorola</option>
-                            <option value="Huawei">Huawei</option>
-                            <option value="Otro">Otro</option>
-                        </select>
-                    </div>
-                    <div><label>Modelo</label><input type="text" id="e-modelo"></div>
-                    <div><label>Falla</label>
-                        <select id="e-falla">
-                            <option value="Cambio de Pantalla">Cambio de Pantalla</option>
-                            <option value="Cambio de Batería">Cambio de Batería</option>
-                            <option value="Centro de Carga">Centro de Carga</option>
-                            <option value="No enciende">No enciende</option>
-                            <option value="Mojado">Mojado</option>
-                        </select>
-                    </div>
-                    <div><label>Estado Físico</label><input type="text" id="e-estado" placeholder="Ej: Pantalla quebrada, rayado"></div>
-                </div>
-            </div>
-
-            <div class="card">
-                <h3>💰 Costos y Garantía</h3>
-                <div class="grid">
-                    <div><label>Costo Total ($)</label><input type="number" id="m-costo" oninput="calcSaldo()"></div>
-                    <div><label>Anticipo ($)</label><input type="number" id="m-adelanto" oninput="calcSaldo()"></div>
-                    <div><label>Saldo Pendiente ($)</label><input type="number" id="m-saldo" readonly style="background:#eee"></div>
-                    <div><label>Garantía (Días)</label><input type="number" id="m-garantia" value="30"></div>
-                </div>
-                <br>
-                <button class="btn btn-primary" onclick="guardarOrden()">CREAR ORDEN Y GENERAR TICKET</button>
-            </div>
-        </div>
-
-        <div id="historial" class="section">
-            <input type="text" id="buscador" placeholder="Buscar por cliente, modelo o IMEI..." oninput="buscarOrden()">
-            <div id="historial-list" style="margin-top:20px;"></div>
-        </div>
-
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
@@ -164,131 +102,123 @@
         projectId: "nextcom--multiservicos-server",
         storageBucket: "nextcom--multiservicos-server.firebasestorage.app",
         messagingSenderId: "1011344400777",
-        appId: "1:1011344400777:web:e40a1a66d9f77046bd8158",
-        measurementId: "G-YJZYPHRXZ6"
+        appId: "1:1011344400777:web:e40a1a66d9f77046bd8158"
     };
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // LOGIN SISTEMA
+    // LOGIN
     window.login = () => {
-        const u = document.getElementById('user').value;
-        const p = document.getElementById('pass').value;
-        if(u === "Nextcom" && p === "1234") {
-            localStorage.setItem('session', 'true');
+        if(document.getElementById('u').value === "Nextcom" && document.getElementById('p').value === "1234") {
+            localStorage.setItem('session', 'ok');
             location.reload();
-        } else {
-            document.getElementById('login-err').style.display = 'block';
         }
     };
-
-    window.logout = () => {
-        localStorage.removeItem('session');
-        location.reload();
-    };
-
     if(localStorage.getItem('session')) {
-        document.getElementById('login-page').style.display = 'none';
-        document.getElementById('app-content').style.display = 'block';
+        document.getElementById('login-page').style.display='none';
+        document.getElementById('app').style.display='block';
     }
+    window.logout = () => { localStorage.removeItem('session'); location.reload(); };
 
     // NAVEGACIÓN
-    window.showSection = (id) => {
+    window.tab = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
-        event.currentTarget.classList.add('active');
+        event.target.classList.add('active');
     };
 
-    window.calcSaldo = () => {
-        const total = document.getElementById('m-costo').value || 0;
-        const adelanto = document.getElementById('m-adelanto').value || 0;
-        document.getElementById('m-saldo').value = total - adelanto;
+    window.calc = () => {
+        const c = document.getElementById('cos').value || 0;
+        const a = document.getElementById('ant').value || 0;
+        document.getElementById('sal').innerText = c - a;
     };
 
-    // GUARDAR ORDEN
-    window.guardarOrden = async () => {
-        const orden = {
-            cliente: document.getElementById('c-nombre').value,
-            tel: document.getElementById('c-tel').value,
-            equipo: document.getElementById('e-marca').value + " " + document.getElementById('e-modelo').value,
-            falla: document.getElementById('e-falla').value,
-            estadoFisico: document.getElementById('e-estado').value,
-            costo: document.getElementById('m-costo').value,
-            anticipo: document.getElementById('m-adelanto').value,
-            saldo: document.getElementById('m-saldo').value,
-            garantia: document.getElementById('m-garantia').value,
+    // GUARDAR
+    window.guardar = async () => {
+        const datos = {
+            cliente: document.getElementById('nom').value,
+            tel: document.getElementById('tel').value,
+            equipo: document.getElementById('mod').value,
+            falla: document.getElementById('fal').value,
+            costo: document.getElementById('cos').value,
+            anticipo: document.getElementById('ant').value,
+            saldo: document.getElementById('sal').innerText,
             estado: 'Recibido',
-            fechaIngreso: new Date().toLocaleDateString(),
-            timestamp: new Date()
+            fecha: new Date().toLocaleString(),
+            ts: new Date()
         };
-
-        if(!orden.cliente || !orden.equipo) return alert("Datos mínimos: Cliente y Equipo");
-
-        try {
-            const docRef = await addDoc(collection(db, "ordenes"), orden);
-            generarTicketWhatsApp(orden);
-            alert("Orden guardada!");
-            showSection('dashboard');
-        } catch (e) { console.error(e); }
+        if(!datos.cliente || !datos.tel) return alert("Faltan datos");
+        await addDoc(collection(db, "ordenes"), datos);
+        enviarWA(datos, "Recibido");
+        alert("¡Orden Creada!");
+        location.reload();
     };
 
-    function generarTicketWhatsApp(o) {
-        const msj = `📱 *NEXTCOM MULTISERVICIOS*%0A%0A*Cliente:* ${o.cliente}%0A*Equipo:* ${o.equipo}%0A*Falla:* ${o.falla}%0A*Estado:* ${o.estadoFisico}%0A%0A*Costo:* $${o.costo}%0A*Anticipo:* $${o.anticipo}%0A*Saldo:* $${o.saldo}%0A*Garantía:* ${o.garantia} días%0A%0A_Gracias por su confianza_`;
-        const url = `https://wa.me/${o.tel}?text=${msj}`;
-        window.open(url, '_blank');
-    }
+    // CAMBIAR ESTADO
+    window.cambiarEstado = async (id, nuevoEstado) => {
+        await updateDoc(doc(db, "ordenes", id), { estado: nuevoEstado });
+    };
 
-    // CARGAR DASHBOARD Y LISTAS
-    const q = query(collection(db, "ordenes"), orderBy("timestamp", "desc"));
-    onSnapshot(q, (snapshot) => {
-        const listaRecientes = document.getElementById('recientes-list');
-        const listaHistorial = document.getElementById('historial-list');
-        listaRecientes.innerHTML = "";
-        listaHistorial.innerHTML = "";
-        
-        let total = 0, reparacion = 0, listo = 0, caja = 0;
+    // ENVIAR WHATSAPP DINÁMICO
+    window.enviarWA = (d, estadoActual) => {
+        let msg = "";
+        const intro = `📱 *NEXTCOM MULTISERVICIOS*%0A%0A`;
+        const info = `*Equipo:* ${d.equipo}%0A*Falla:* ${d.falla}%0A`;
 
-        snapshot.forEach(docSnap => {
-            const d = docSnap.data();
-            const id = docSnap.id;
-            total++;
-            if(d.estado === 'Recibido' || d.estado === 'En reparación') reparacion++;
-            if(d.estado === 'Terminado') listo++;
-            caja += parseFloat(d.costo || 0);
+        if(estadoActual === "Recibido") {
+            msg = `${intro}Hola *${d.cliente}*, hemos recibido tu equipo correctamente.%0A${info}*Estado:* 📥 Recibido%0A*Saldo:* $${d.saldo}`;
+        } else if(estadoActual === "Diagnóstico") {
+            msg = `${intro}*${d.cliente}*, tu equipo ya está en revisión técnica.%0A${info}*Estado:* 🔍 En Diagnóstico`;
+        } else if(estadoActual === "Reparación") {
+            msg = `${intro}*${d.cliente}*, buenas noticias. Ya estamos trabajando en la reparación de tu equipo.%0A${info}*Estado:* 🔧 En Reparación`;
+        } else if(estadoActual === "Terminado") {
+            msg = `${intro}✅ *¡TU EQUIPO ESTÁ LISTO!*%0AHola *${d.cliente}*, ya puedes pasar a recoger tu *${d.equipo}*.%0A*Saldo a pagar:* $${d.saldo}%0A*Horario:* 8am - 6pm`;
+        } else {
+            msg = `${intro}Hola *${d.cliente}*, confirmamos la entrega de tu equipo. ¡Gracias por confiar en Nextcom!`;
+        }
 
-            const cardHtml = `
-                <div class="card order-card">
+        window.open(`https://wa.me/${d.tel}?text=${msg}`, '_blank');
+    };
+
+    // MOSTRAR DATOS
+    const q = query(collection(db, "ordenes"), orderBy("ts", "desc"));
+    onSnapshot(q, (snaps) => {
+        const container = document.getElementById('lista-ordenes');
+        container.innerHTML = "";
+        snaps.forEach(s => {
+            const d = s.data();
+            const id = s.id;
+            const card = document.createElement('div');
+            card.className = `card status-${d.estado}`;
+            card.innerHTML = `
+                <div class="header-card">
                     <div>
-                        <strong>${d.cliente}</strong> <span class="status-badge" style="background:#eee">${d.estado}</span><br>
-                        <small>${d.equipo} - ${d.falla}</small><br>
-                        <small style="color:blue">Saldo: $${d.saldo}</small>
+                        <strong>${d.cliente}</strong><br>
+                        <small>${d.equipo}</small>
                     </div>
-                    <div style="margin-top:10px;">
-                        <button class="btn btn-whatsapp" style="width:auto; padding:5px 10px;" onclick="enviarWA('${d.tel}', '${d.cliente}', '${d.equipo}', '${d.saldo}')">WhatsApp</button>
-                        <button class="btn btn-danger" style="width:auto; padding:5px 10px;" onclick="borrarOrden('${id}')">Borrar</button>
-                    </div>
+                    <div class="price-tag">$${d.saldo}</div>
                 </div>
-            `;
-            listaRecientes.innerHTML += cardHtml;
-            listaHistorial.innerHTML += cardHtml;
-        });
+                <p style="font-size:13px; margin:10px 0;">Falla: ${d.falla}</p>
+                
+                <label style="font-size:11px;">Cambiar Estado:</label>
+                <select onchange="cambiarEstado('${id}', this.value)">
+                    <option value="Recibido" ${d.estado=='Recibido'?'selected':''}>📥 Recibido</option>
+                    <option value="Diagnóstico" ${d.estado=='Diagnóstico'?'selected':''}>🔍 Diagnóstico</option>
+                    <option value="Reparación" ${d.estado=='Reparación'?'selected':''}>🔧 Reparación</option>
+                    <option value="Terminado" ${d.estado=='Terminado'?'selected':''}>✅ Terminado</option>
+                    <option value="Entregado" ${d.estado=='Entregado'?'selected':''}>📦 Entregado</option>
+                </select>
 
-        document.getElementById('stat-total').innerText = total;
-        document.getElementById('stat-reparacion').innerText = reparacion;
-        document.getElementById('stat-listo').innerText = listo;
-        document.getElementById('stat-caja').innerText = "$" + caja;
+                <button class="btn btn-wa" onclick='enviarWA(${JSON.stringify(d)}, "${d.estado}")'>Enviar WhatsApp de ${d.estado}</button>
+                <button class="btn btn-del" onclick="eliminar('${id}')">Eliminar Orden</button>
+            `;
+            container.appendChild(card);
+        });
     });
 
-    window.enviarWA = (tel, cliente, equipo, saldo) => {
-        const msj = `Hola *${cliente}*, tu equipo *${equipo}* ya tiene actualización en NEXTCOM. Saldo pendiente: $${saldo}`;
-        window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msj)}`, '_blank');
-    };
-
-    window.borrarOrden = async (id) => {
-        if(confirm("¿Eliminar permanentemente?")) await deleteDoc(doc(db, "ordenes", id));
-    };
+    window.eliminar = async (id) => { if(confirm("¿Borrar orden?")) await deleteDoc(doc(db, "ordenes", id)); };
 
 </script>
 </body>
