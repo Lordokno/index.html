@@ -3,92 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nextcom Multiservicios - Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Nextcom Multiservicios - Gestión Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1a73e8; --bg: #f1f3f4;
-            --color-recibido: #e8f0fe; --text-recibido: #1967d2;
-            --color-diagnostico: #fef7e0; --text-diagnostico: #b06000;
-            --color-reparacion: #feefe3; --text-reparacion: #e67c73;
-            --color-terminado: #e6f4ea; --text-terminado: #137333;
-            --color-entregado: #f1f3f4; --text-entregado: #5f6368;
+            --primary: #1a73e8;
+            --secondary: #5f6368;
+            --success: #28a745;
+            --warning: #fbbc04;
+            --danger: #d93025;
+            --bg: #f8f9fa;
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding-bottom: 50px; }
-        nav { background: var(--primary); color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
-        .nav-tabs { display: flex; background: white; padding: 10px; gap: 8px; border-bottom: 1px solid #ddd; overflow-x: auto; }
-        .tab-btn { padding: 8px 16px; border: none; background: #eee; border-radius: 20px; cursor: pointer; font-weight: 600; white-space: nowrap; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; color: #3c4043; padding-bottom: 50px; }
+        
+        /* LOGIN */
+        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--primary); }
+        .login-card { background: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); width: 100%; max-width: 350px; text-align: center; }
+        
+        /* NAV & TABS */
+        nav { background: var(--primary); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .nav-tabs { display: flex; overflow-x: auto; background: white; padding: 10px; gap: 10px; border-bottom: 1px solid #ddd; }
+        .tab-btn { padding: 10px 20px; border: none; background: #eee; border-radius: 20px; cursor: pointer; white-space: nowrap; font-weight: 600; color: var(--secondary); }
         .tab-btn.active { background: var(--primary); color: white; }
 
-        .container { padding: 15px; max-width: 600px; margin: auto; }
-        .section { display: none; } .section.active { display: block; }
-        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); margin-bottom: 15px; border-left: 6px solid #ccc; }
-        
-        /* Colores de Estados */
-        .status-Recibido { border-left-color: var(--text-recibido); background-color: var(--color-recibido); }
-        .status-Diagnóstico { border-left-color: var(--text-diagnostico); background-color: var(--color-diagnostico); }
-        .status-Reparación { border-left-color: var(--text-reparacion); background-color: var(--color-reparacion); }
-        .status-Terminado { border-left-color: var(--text-terminado); background-color: var(--color-terminado); }
-        .status-Entregado { border-left-color: var(--text-entregado); background-color: var(--color-entregado); }
+        .container { padding: 20px; max-width: 600px; margin: auto; }
+        .section { display: none; }
+        .section.active { display: block; }
 
-        .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        /* CARDS */
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 20px; border-left: 6px solid #ccc; position: relative; }
         
-        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
-        .btn { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
-        .btn-save { background: var(--primary); color: white; }
-        .btn-wa { background: #25D366; color: white; }
-        .btn-del { background: #ea4335; color: white; margin-top: 5px; padding: 5px; font-size: 11px; }
+        /* COLORES POR ESTADO */
+        .status-Recibido { border-left-color: #4285f4; }
+        .status-Diagnóstico { border-left-color: #fbbc04; }
+        .status-Reparación { border-left-color: #e67c73; }
+        .status-Terminado { border-left-color: #34a853; }
+        .status-Entregado { border-left-color: #bdc1c6; }
+
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 15px; margin-top: 5px; margin-bottom: 15px; }
+        
+        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; font-size: 15px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-whatsapp { background: #25D366; color: white; margin-top: 10px; }
+        .btn-danger { background: none; color: var(--danger); font-size: 12px; margin-top: 10px; border: 1px solid var(--danger); }
 
         .header-card { display: flex; justify-content: space-between; align-items: flex-start; }
-        .price-tag { color: var(--text-recibido); font-weight: bold; font-size: 18px; }
-        
-        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--primary); }
-        .login-box { background: white; padding: 30px; border-radius: 15px; text-align: center; width: 300px; }
+        .price-info { text-align: right; color: var(--primary); font-weight: bold; }
+        label { font-size: 12px; font-weight: bold; color: var(--secondary); }
     </style>
 </head>
 <body>
 
 <div id="login-page">
-    <div class="login-box">
-        <h2 style="color:var(--primary)">NEXTCOM</h2>
-        <input type="text" id="u" placeholder="Usuario">
-        <input type="password" id="p" placeholder="Contraseña">
-        <button class="btn btn-save" onclick="login()">ENTRAR</button>
+    <div class="login-card">
+        <h1 style="color:var(--primary); margin:0;">NEXTCOM</h1>
+        <input type="text" id="user" placeholder="Usuario">
+        <input type="password" id="pass" placeholder="Contraseña" style="margin-top:10px;">
+        <button class="btn btn-primary" style="margin-top:20px;" onclick="login()">Ingresar</button>
     </div>
 </div>
 
 <div id="app" style="display:none;">
-    <nav> <strong>NEXTCOM MULTISERVICIOS</strong> <span onclick="logout()" style="font-size:12px; opacity:0.8">Cerrar Sesión</span> </nav>
+    <nav>
+        <span style="font-weight:bold; font-size:18px;">NEXTCOM MULTISERVICIOS</span>
+        <span onclick="logout()" style="cursor:pointer; font-size:12px;">Salir</span>
+    </nav>
+
     <div class="nav-tabs">
-        <button class="tab-btn active" onclick="tab('dash')">Panel</button>
-        <button class="tab-btn" onclick="tab('new')">+ Nueva Orden</button>
-        <button class="tab-btn" onclick="tab('hist')">Historial</button>
+        <button class="tab-btn active" onclick="showTab('dashboard')">Panel</button>
+        <button class="tab-btn" onclick="showTab('nuevo')">+ Nueva Orden</button>
     </div>
 
     <div class="container">
-        <div id="new" class="section">
+        
+        <div id="nuevo" class="section">
             <div class="card" style="border-left-color: var(--primary)">
-                <h3>Registro de Equipo</h3>
-                <input type="text" id="nom" placeholder="Nombre del Cliente">
-                <input type="number" id="tel" placeholder="WhatsApp (ej: 503...)">
-                <input type="text" id="mod" placeholder="Marca y Modelo">
-                <input type="text" id="fal" placeholder="Falla técnica">
-                <input type="number" id="cos" placeholder="Costo Total $" oninput="calc()">
-                <input type="number" id="ant" placeholder="Anticipo $" oninput="calc()">
-                <div style="padding:10px; background:#eee; border-radius:8px;">Saldo Pendiente: $<span id="sal">0</span></div>
-                <button class="btn btn-save" onclick="guardar()">GENERAR ORDEN</button>
+                <h3>📋 Datos de Orden</h3>
+                <label>Nombre Cliente</label><input type="text" id="n-cliente">
+                <label>WhatsApp (ej: 503...)</label><input type="number" id="n-tel">
+                <label>Equipo (Marca/Modelo)</label><input type="text" id="n-equipo">
+                <label>Falla</label><input type="text" id="n-falla">
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div><label>Costo $</label><input type="number" id="n-costo" oninput="calc()"></div>
+                    <div><label>Anticipo $</label><input type="number" id="n-anticipo" oninput="calc()"></div>
+                </div>
+                <div style="background:#f1f3f4; padding:10px; border-radius:8px; text-align:center; font-weight:bold;">
+                    Saldo Pendiente: $<span id="n-saldo">0</span>
+                </div>
+                <button class="btn btn-primary" style="margin-top:15px;" onclick="guardar()">CREAR ORDEN</button>
             </div>
         </div>
 
-        <div id="dash" class="section active">
+        <div id="dashboard" class="section active">
             <div id="lista-ordenes"></div>
         </div>
-        
-        <div id="hist" class="section">
-            <input type="text" id="bus" placeholder="Buscar cliente o equipo..." oninput="filtrar()">
-            <div id="lista-historial"></div>
-        </div>
+
     </div>
 </div>
 
@@ -110,19 +120,19 @@
 
     // LOGIN
     window.login = () => {
-        if(document.getElementById('u').value === "Nextcom" && document.getElementById('p').value === "1234") {
-            localStorage.setItem('session', 'ok');
+        if(document.getElementById('user').value === "Nextcom" && document.getElementById('pass').value === "1234") {
+            localStorage.setItem('next_session', 'true');
             location.reload();
         }
     };
-    if(localStorage.getItem('session')) {
+    if(localStorage.getItem('next_session')) {
         document.getElementById('login-page').style.display='none';
         document.getElementById('app').style.display='block';
     }
-    window.logout = () => { localStorage.removeItem('session'); location.reload(); };
+    window.logout = () => { localStorage.removeItem('next_session'); location.reload(); };
 
-    // NAVEGACIÓN
-    window.tab = (id) => {
+    // TABS
+    window.showTab = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById(id).classList.add('active');
@@ -130,95 +140,85 @@
     };
 
     window.calc = () => {
-        const c = document.getElementById('cos').value || 0;
-        const a = document.getElementById('ant').value || 0;
-        document.getElementById('sal').innerText = c - a;
+        const c = document.getElementById('n-costo').value || 0;
+        const a = document.getElementById('n-anticipo').value || 0;
+        document.getElementById('n-saldo').innerText = c - a;
     };
 
     // GUARDAR
     window.guardar = async () => {
-        const datos = {
-            cliente: document.getElementById('nom').value,
-            tel: document.getElementById('tel').value,
-            equipo: document.getElementById('mod').value,
-            falla: document.getElementById('fal').value,
-            costo: document.getElementById('cos').value,
-            anticipo: document.getElementById('ant').value,
-            saldo: document.getElementById('sal').innerText,
+        const d = {
+            cliente: document.getElementById('n-cliente').value,
+            tel: document.getElementById('n-tel').value,
+            equipo: document.getElementById('n-equipo').value,
+            falla: document.getElementById('n-falla').value,
+            costo: document.getElementById('n-costo').value,
+            anticipo: document.getElementById('n-anticipo').value,
+            saldo: document.getElementById('n-saldo').innerText,
             estado: 'Recibido',
-            fecha: new Date().toLocaleString(),
             ts: new Date()
         };
-        if(!datos.cliente || !datos.tel) return alert("Faltan datos");
-        await addDoc(collection(db, "ordenes"), datos);
-        enviarWA(datos, "Recibido");
-        alert("¡Orden Creada!");
-        location.reload();
+        if(!d.cliente || !d.tel) return alert("Faltan datos");
+        await addDoc(collection(db, "ordenes"), d);
+        enviarWA(d, "Recibido");
+        alert("Orden registrada!");
+        showTab('dashboard');
     };
 
-    // CAMBIAR ESTADO
-    window.cambiarEstado = async (id, nuevoEstado) => {
-        await updateDoc(doc(db, "ordenes", id), { estado: nuevoEstado });
+    window.cambiarEstado = async (id, nuevo) => {
+        await updateDoc(doc(db, "ordenes", id), { estado: nuevo });
     };
 
-    // ENVIAR WHATSAPP DINÁMICO
-    window.enviarWA = (d, estadoActual) => {
-        let msg = "";
-        const intro = `📱 *NEXTCOM MULTISERVICIOS*%0A%0A`;
-        const info = `*Equipo:* ${d.equipo}%0A*Falla:* ${d.falla}%0A`;
-
-        if(estadoActual === "Recibido") {
-            msg = `${intro}Hola *${d.cliente}*, hemos recibido tu equipo correctamente.%0A${info}*Estado:* 📥 Recibido%0A*Saldo:* $${d.saldo}`;
-        } else if(estadoActual === "Diagnóstico") {
-            msg = `${intro}*${d.cliente}*, tu equipo ya está en revisión técnica.%0A${info}*Estado:* 🔍 En Diagnóstico`;
-        } else if(estadoActual === "Reparación") {
-            msg = `${intro}*${d.cliente}*, buenas noticias. Ya estamos trabajando en la reparación de tu equipo.%0A${info}*Estado:* 🔧 En Reparación`;
-        } else if(estadoActual === "Terminado") {
-            msg = `${intro}✅ *¡TU EQUIPO ESTÁ LISTO!*%0AHola *${d.cliente}*, ya puedes pasar a recoger tu *${d.equipo}*.%0A*Saldo a pagar:* $${d.saldo}%0A*Horario:* 8am - 6pm`;
-        } else {
-            msg = `${intro}Hola *${d.cliente}*, confirmamos la entrega de tu equipo. ¡Gracias por confiar en Nextcom!`;
-        }
-
+    window.enviarWA = (d, est) => {
+        let msg = `📱 *NEXTCOM MULTISERVICIOS*%0A%0A*Equipo:* ${d.equipo}%0A*Falla:* ${d.falla}%0A`;
+        if(est === "Recibido") msg += `*Estado:* 📥 Recibido correctamente. Saldo: $${d.saldo}`;
+        else if(est === "Diagnóstico") msg += `*Estado:* 🔍 Ya está en diagnóstico técnico.`;
+        else if(est === "Reparación") msg += `*Estado:* 🔧 Ya estamos trabajando en la reparación.`;
+        else if(est === "Terminado") msg += `✅ *¡ESTÁ LISTO!*%0A*${d.cliente}*, ya puedes retirar tu equipo. Saldo: $${d.saldo}`;
+        else msg += `✅ Equipo entregado. ¡Gracias!`;
+        
         window.open(`https://wa.me/${d.tel}?text=${msg}`, '_blank');
     };
 
-    // MOSTRAR DATOS
+    // MOSTRAR LISTA
     const q = query(collection(db, "ordenes"), orderBy("ts", "desc"));
     onSnapshot(q, (snaps) => {
-        const container = document.getElementById('lista-ordenes');
-        container.innerHTML = "";
+        const list = document.getElementById('lista-ordenes');
+        list.innerHTML = "";
         snaps.forEach(s => {
             const d = s.data();
             const id = s.id;
-            const card = document.createElement('div');
-            card.className = `card status-${d.estado}`;
-            card.innerHTML = `
+            const item = document.createElement('div');
+            item.className = `card status-${d.estado}`;
+            item.innerHTML = `
                 <div class="header-card">
                     <div>
-                        <strong>${d.cliente}</strong><br>
-                        <small>${d.equipo}</small>
+                        <strong style="font-size:18px;">${d.cliente}</strong><br>
+                        <span style="color:var(--secondary)">${d.equipo}</span>
                     </div>
-                    <div class="price-tag">$${d.saldo}</div>
+                    <div class="price-info">Saldo: $${d.saldo}</div>
                 </div>
-                <p style="font-size:13px; margin:10px 0;">Falla: ${d.falla}</p>
+                <p style="margin:10px 0; font-size:14px;"><strong>Falla:</strong> ${d.falla}</p>
                 
-                <label style="font-size:11px;">Cambiar Estado:</label>
+                <label>Actualizar Estado:</label>
                 <select onchange="cambiarEstado('${id}', this.value)">
-                    <option value="Recibido" ${d.estado=='Recibido'?'selected':''}>📥 Recibido</option>
-                    <option value="Diagnóstico" ${d.estado=='Diagnóstico'?'selected':''}>🔍 Diagnóstico</option>
-                    <option value="Reparación" ${d.estado=='Reparación'?'selected':''}>🔧 Reparación</option>
-                    <option value="Terminado" ${d.estado=='Terminado'?'selected':''}>✅ Terminado</option>
-                    <option value="Entregado" ${d.estado=='Entregado'?'selected':''}>📦 Entregado</option>
+                    <option value="Recibido" ${d.estado=='Recibido'?'selected':''}>Recibido</option>
+                    <option value="Diagnóstico" ${d.estado=='Diagnóstico'?'selected':''}>En Diagnóstico</option>
+                    <option value="Reparación" ${d.estado=='Reparación'?'selected':''}>En Reparación</option>
+                    <option value="Terminado" ${d.estado=='Terminado'?'selected':''}>Terminado / Listo</option>
+                    <option value="Entregado" ${d.estado=='Entregado'?'selected':''}>Entregado</option>
                 </select>
 
-                <button class="btn btn-wa" onclick='enviarWA(${JSON.stringify(d)}, "${d.estado}")'>Enviar WhatsApp de ${d.estado}</button>
-                <button class="btn btn-del" onclick="eliminar('${id}')">Eliminar Orden</button>
+                <button class="btn btn-whatsapp" onclick='enviarWA(${JSON.stringify(d)}, "${d.estado}")'>
+                    WhatsApp (${d.estado})
+                </button>
+                <button class="btn btn-danger" onclick="eliminar('${id}')">Eliminar Registro</button>
             `;
-            container.appendChild(card);
+            list.appendChild(item);
         });
     });
 
-    window.eliminar = async (id) => { if(confirm("¿Borrar orden?")) await deleteDoc(doc(db, "ordenes", id)); };
+    window.eliminar = async (id) => { if(confirm("¿Borrar definitivamente?")) await deleteDoc(doc(db, "ordenes", id)); };
 
 </script>
 </body>
