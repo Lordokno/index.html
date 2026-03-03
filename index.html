@@ -3,33 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Proyecto Personal</title>
+    <title>Mi Panel de Datos</title>
     <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
-        h2 { text-align: center; color: #333; }
-        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        button:hover { background-color: #218838; }
-        #estado { text-align: center; margin-top: 10px; font-size: 14px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; margin-bottom: 20px; }
+        h2 { text-align: center; color: #1a73e8; margin-top: 0; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        button#btnGuardar { width: 100%; padding: 12px; background-color: #1a73e8; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        
+        .lista-container { width: 100%; max-width: 400px; }
+        .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .card-info h4 { margin: 0; color: #333; }
+        .card-info p { margin: 5px 0 0; color: #666; font-size: 14px; }
+        .btn-borrar { background-color: #ff4d4d; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-borrar:hover { background-color: #cc0000; }
+        #estado { text-align: center; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Guardar Datos</h2>
-    <input type="text" id="nombreDato" placeholder="Nombre o Título">
+    <h2>Nuevo Registro</h2>
+    <input type="text" id="nombreDato" placeholder="Título">
     <input type="text" id="contenidoDato" placeholder="Descripción">
-    <button id="btnGuardar">Guardar en Firebase</button>
+    <button id="btnGuardar">Guardar</button>
     <p id="estado"></p>
 </div>
 
-<script type="module">
-  // 1. Importamos lo necesario (App y Firestore)
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+<div class="lista-container" id="listaDatos">
+    </div>
 
-  // 2. Tu configuración que me pasaste
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
   const firebaseConfig = {
     apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
     authDomain: "nextcom--multiservicos-server.firebaseapp.com",
@@ -40,50 +47,64 @@
     measurementId: "G-YJZYPHRXZ6"
   };
 
-  // 3. Inicializar Firebase
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 4. Lógica para guardar
-  const btn = document.getElementById('btnGuardar');
+  const btnGuardar = document.getElementById('btnGuardar');
+  const listaContenedor = document.getElementById('listaDatos');
   const estado = document.getElementById('estado');
 
-  btn.addEventListener('click', async () => {
-    const nombre = document.getElementById('nombreDato').value;
-    const contenido = document.getElementById('contenidoDato').value;
+  // --- FUNCIÓN PARA GUARDAR ---
+  btnGuardar.addEventListener('click', async () => {
+    const titulo = document.getElementById('nombreDato').value;
+    const desc = document.getElementById('contenidoDato').value;
 
-    if(nombre === "" || contenido === "") {
-        estado.innerText = "❌ Completa los campos";
-        estado.style.color = "red";
-        return;
-    }
-
-    estado.innerText = "⏳ Guardando...";
-    estado.style.color = "orange";
+    if(!titulo || !desc) return alert("Llena ambos campos");
 
     try {
-      // "mis_datos" es el nombre de la colección que verás en Firebase
-      const docRef = await addDoc(collection(db, "mis_datos"), {
-        titulo: nombre,
-        descripcion: contenido,
+      await addDoc(collection(db, "mis_datos"), {
+        titulo: titulo,
+        descripcion: desc,
         fecha: new Date()
       });
-      
-      estado.innerText = "✅ ¡Guardado con éxito!";
-      estado.style.color = "green";
-      
-      // Limpiar campos
       document.getElementById('nombreDato').value = "";
       document.getElementById('contenidoDato').value = "";
-
-      console.log("ID del documento: ", docRef.id);
-    } catch (e) {
-      console.error("Error detallado: ", e);
-      estado.innerText = "❌ Error: Revisa la consola (F12)";
-      estado.style.color = "red";
-    }
+    } catch (e) { console.error(e); }
   });
-</script>
 
+  // --- FUNCIÓN PARA LEER EN TIEMPO REAL ---
+  const q = query(collection(db, "mis_datos"), orderBy("fecha", "desc"));
+  
+  onSnapshot(q, (snapshot) => {
+    listaContenedor.innerHTML = ""; // Limpiar lista antes de recargar
+    
+    snapshot.forEach((documento) => {
+      const data = documento.data();
+      const id = documento.id;
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="card-info">
+            <h4>${data.titulo}</h4>
+            <p>${data.descripcion}</p>
+        </div>
+        <button class="btn-borrar" data-id="${id}">Borrar</button>
+      `;
+      listaContenedor.appendChild(card);
+    });
+
+    // Asignar eventos a los botones de borrar creados
+    document.querySelectorAll('.btn-borrar').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+            const docId = e.target.getAttribute('data-id');
+            if(confirm("¿Seguro que quieres eliminar este dato?")) {
+                await deleteDoc(doc(db, "mis_datos", docId));
+            }
+        });
+    });
+  });
+
+</script>
 </body>
 </html>
