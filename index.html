@@ -2,64 +2,88 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mi Sitio Privado</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Proyecto Personal</title>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 400px; }
-        input { display: block; width: 100%; margin-bottom: 10px; padding: 8px; }
-        button { background: #007bff; color: white; border: none; padding: 10px; cursor: pointer; }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 300px; }
+        h2 { text-align: center; color: #333; }
+        input { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #218838; }
+        #estado { text-align: center; margin-top: 10px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <h2>Ingresar Datos</h2>
-    <form id="miFormulario">
-        <input type="text" id="nombre" placeholder="Nombre del dato" required>
-        <input type="number" id="valor" placeholder="Valor o cantidad" required>
-        <button type="submit">Guardar en Firebase</button>
-    </form>
+<div class="container">
+    <h2>Guardar Datos</h2>
+    <input type="text" id="nombreDato" placeholder="Nombre o Título">
+    <input type="text" id="contenidoDato" placeholder="Descripción">
+    <button id="btnGuardar">Guardar en Firebase</button>
+    <p id="estado"></p>
+</div>
 
-    <div id="mensaje"></div>
+<script type="module">
+  // 1. Importamos lo necesario (App y Firestore)
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        // CONFIGURACIÓN (Pega aquí lo que copiaste de tu consola de Firebase)
-        const firebaseConfig = {
-            apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
+  // 2. Tu configuración que me pasaste
+  const firebaseConfig = {
+    apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
     authDomain: "nextcom--multiservicos-server.firebaseapp.com",
     projectId: "nextcom--multiservicos-server",
     storageBucket: "nextcom--multiservicos-server.firebasestorage.app",
     messagingSenderId: "1011344400777",
     appId: "1:1011344400777:web:e40a1a66d9f77046bd8158",
     measurementId: "G-YJZYPHRXZ6"
-        };
+  };
 
-        // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+  // 3. Inicializar Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-        // Lógica del Formulario
-        const formulario = document.getElementById('miFormulario');
-        formulario.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const nombre = document.getElementById('nombre').value;
-            const valor = document.getElementById('valor').value;
+  // 4. Lógica para guardar
+  const btn = document.getElementById('btnGuardar');
+  const estado = document.getElementById('estado');
 
-            try {
-                // Guardar en la colección "mis_registros"
-                await addDoc(collection(db, "mis_registros"), {
-                    nombre: nombre,
-                    valor: valor,
-                    fecha: new Date()
-                });
-                document.getElementById('mensaje').innerText = "¡Guardado con éxito!";
-                formulario.reset();
-            } catch (error) {
-                console.error("Error al guardar: ", error);
-            }
-        });
-    </script>
+  btn.addEventListener('click', async () => {
+    const nombre = document.getElementById('nombreDato').value;
+    const contenido = document.getElementById('contenidoDato').value;
+
+    if(nombre === "" || contenido === "") {
+        estado.innerText = "❌ Completa los campos";
+        estado.style.color = "red";
+        return;
+    }
+
+    estado.innerText = "⏳ Guardando...";
+    estado.style.color = "orange";
+
+    try {
+      // "mis_datos" es el nombre de la colección que verás en Firebase
+      const docRef = await addDoc(collection(db, "mis_datos"), {
+        titulo: nombre,
+        descripcion: contenido,
+        fecha: new Date()
+      });
+      
+      estado.innerText = "✅ ¡Guardado con éxito!";
+      estado.style.color = "green";
+      
+      // Limpiar campos
+      document.getElementById('nombreDato').value = "";
+      document.getElementById('contenidoDato').value = "";
+
+      console.log("ID del documento: ", docRef.id);
+    } catch (e) {
+      console.error("Error detallado: ", e);
+      estado.innerText = "❌ Error: Revisa la consola (F12)";
+      estado.style.color = "red";
+    }
+  });
+</script>
+
 </body>
 </html>
