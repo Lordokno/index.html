@@ -4,6 +4,168 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXTCOM_OS_v2.2_STABLE_MERGE</title>
+
+
+
+
+
+<style>
+    /* UI EXTENSIONS - STOCK MODULE */
+    .status-tag { padding: 2px 5px; font-weight: bold; }
+    .tag-low { color: #000; background: var(--amber); animation: blink 1.5s infinite; }
+    .tag-out { color: #fff; background: #ff0000; animation: blink 0.5s infinite; }
+    
+    .reorder-panel {
+        display: none;
+        position: fixed;
+        top: 50%; left: 50%;
+        transform: translate(-50%, -50%);
+        width: 400px;
+        background: #000;
+        border: 2px solid var(--amber);
+        padding: 20px;
+        z-index: 10005;
+    }
+    .log-entry-stock { color: #00ff00; border-left: 2px solid #00ff00; padding-left: 5px; }
+</style>
+
+<div id="reorder-modal" class="reorder-panel">
+    <h3>=== REABASTECER_PRODUCTO ===</h3>
+    <p>ID_REF: <span id="re-id">---</span></p>
+    <p>NOMBRE: <span id="re-nombre">---</span></p>
+    <p>STOCK_ACTUAL: <span id="re-actual">0</span></p>
+    <hr style="border-color: var(--amber-dim)">
+    <div style="margin-top: 10px;">
+        <label>> CANTIDAD_A_AGREGAR:</label>
+        <input type="number" id="re-qty" placeholder="0">
+        <label style="margin-top: 10px; display:block">> COSTO_UNITARIO_NUEVO:</label>
+        <input type="number" id="re-cost" placeholder="0.00">
+    </div>
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+        <button class="btn" onclick="confirmReorder()">[ EJECUTAR_CARGA ]</button>
+        <button class="btn" onclick="closeReorder()">[ ABORTAR ]</button>
+    </div>
+</div>
+
+<script>
+    /* MODULO_STOCK.JS - EXTENSIÓN DE NÚCLEO */
+
+    // 1. CONFIGURACIÓN DE UMBRAL (LOCALSTORAGE)
+    let sysConfig = JSON.parse(localStorage.getItem('nextcom_config')) || { stock_min: 3 };
+
+    // 2. DETECCIÓN Y RENDERIZADO (Se integra en el render de tablas existente)
+    function getStockStatus(qty) {
+        if (qty <= 0) return `<span class="status-tag tag-out">PRODUCTO AGOTADO</span>`;
+        if (qty <= sysConfig.stock_min) return `<span class="status-tag tag-low">STOCK BAJO</span>`;
+        return `<span style="color: #00ff00">OK</span>`;
+    }
+
+    // 3. LOGICA MODULAR DE MOVIMIENTOS
+    window.updateStock = async (productId, quantity, type, collectionName = "accesorios") => {
+        // Obtenemos referencia mediante Firebase (integrado con el db de v2.2)
+        const itemRef = doc(db, collectionName, productId);
+        const itemSnap = await getDoc(itemRef);
+        
+        if (itemSnap.exists()) {
+            const currentData = itemSnap.exists() ? itemSnap.data() : { stock: 0, entradas: 0, salidas: 0 };
+            let newStock = currentData.stock || 0;
+            let newEntradas = currentData.entradas || 0;
+            let newSalidas = currentData.salidas || 0;
+
+            if (type === "entrada") {
+                newStock += parseInt(quantity);
+                newEntradas += parseInt(quantity);
+                pushLog(`STOCK_ACTUALIZADO: ${currentData.nombre} +${quantity} UNIDADES`);
+            } else if (type === "salida") {
+                newStock -= parseInt(quantity);
+                newSalidas += parseInt(quantity);
+                pushLog(`SALIDA_INVENTARIO: ${currentData.nombre} -${quantity} UNIDADES`);
+            }
+
+            await updateDoc(itemRef, {
+                stock: newStock,
+                entradas: newEntradas,
+                salidas: newSalidas,
+                last_update: Timestamp.now()
+            });
+            
+            console.log("ACTUALIZANDO STOCK... DATOS GUARDADOS");
+        }
+    };
+
+    // 4. INTERFAZ DE USUARIO PARA REABASTECIMIENTO
+    window.openReorder = (id, nombre, stock) => {
+        document.getElementById('re-id').innerText = id.substring(0,8);
+        document.getElementById('re-nombre').innerText = nombre;
+        document.getElementById('re-actual').innerText = stock;
+        document.getElementById('reorder-modal').style.display = 'block';
+        window.currentReorderId = id;
+    };
+
+    window.closeReorder = () => {
+        document.getElementById('reorder-modal').style.display = 'none';
+        document.getElementById('re-qty').value = "";
+        document.getElementById('re-cost').value = "";
+    };
+
+    window.confirmReorder = async () => {
+        const qty = document.getElementById('re-qty').value;
+        const cost = document.getElementById('re-cost').value;
+        
+        if (!qty || qty <= 0) {
+            alert("CANTIDAD INVALIDA");
+            return;
+        }
+
+        console.log("ACTUALIZANDO STOCK...");
+        
+        // Ejecutar actualización
+        await updateStock(window.currentReorderId, qty, "entrada");
+        
+        // Opcional: Actualizar precio de costo si se ingresó uno nuevo
+        if (cost > 0) {
+            await updateDoc(doc(db, "accesorios", window.currentReorderId), { costo: parseFloat(cost) });
+        }
+
+        alert("STOCK RESTAURADO CORRECTAMENTE");
+        closeReorder();
+    };
+
+    // 5. INTEGRACIÓN EN TABLA DE ACCESORIOS (Modificar el render existente)
+    // Se debe agregar a la función onSnapshot de accesorios lo siguiente:
+    /*
+    localAcc.forEach(a => {
+        const status = getStockStatus(a.stock);
+        tb.innerHTML += `<tr>
+            <td>${a.nombre} <br> ${status}</td>
+            <td>
+                S_ACT: ${a.stock} <br>
+                <small>E: ${a.entradas || 0} | S: ${a.salidas || 0}</small>
+            </td>
+            <td>
+                <button class="btn" onclick="openReorder('${a.id}', '${a.nombre}', ${a.stock})">[ REABASTECER ]</button>
+                <button class="btn" onclick="deleteR('accesorios','${a.id}')">X</button>
+            </td>
+        </tr>`;
+    });
+    */
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    
     <style>
         /* UI-EFFECTS.JS: ESTÉTICA TERMINAL Y CRT */
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
