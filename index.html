@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM_TERMINAL_V1.0.6</title>
+    <title>NEXTCOM_TERMINAL_V1.0.7</title>
     <style>
         /* ESTILO TERMINAL FALLOUT PRESERVADO */
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -17,21 +17,27 @@
         .section { display: none; } .section.active { display: block; }
         .card { border: 1px solid var(--amber); padding: 15px; margin-bottom: 20px; background: rgba(255, 176, 0, 0.02); }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
-        input, select { background: transparent; border: 1px solid var(--amber-dim); padding: 10px; width: 100%; font-size: 1.2rem; outline: none; }
+        input { background: transparent; border: 1px solid var(--amber-dim); padding: 10px; width: 100%; font-size: 1.2rem; outline: none; }
         input:focus { border: 1px solid var(--amber); box-shadow: 0 0 5px var(--amber); }
         .btn { background: transparent; border: none; padding: 5px 15px; cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
         .btn:hover { background: var(--amber); color: var(--bg); font-weight: bold; }
         .table-terminal { width: 100%; border-collapse: collapse; margin-top: 15px; border: 1px solid var(--amber); }
         .table-terminal th, .table-terminal td { padding: 10px; text-align: left; border: 1px solid var(--amber-dim); }
-        .order-item { border: 1px solid var(--amber); margin-bottom: 10px; padding: 10px; }
+        .order-item { border: 1px solid var(--amber); margin-bottom: 10px; padding: 10px; border-left: 10px solid var(--amber-dim); }
+        /* Clases de estado dinámicas basadas en texto */
+        .st-recibido { border-left-color: #9aa0a6; }
+        .st-diagnostico { border-left-color: #1a73e8; }
+        .st-reparacion { border-left-color: #f29900; }
+        .st-terminado { border-left-color: #1e8e3e; }
+        .st-cancelado { border-left-color: #d93025; }
         @media (min-width: 768px) { .main-layout { display: flex; } .sidebar { width: 250px; flex-direction: column; border-right: 2px solid var(--amber); border-bottom: none; min-height: 90vh; } }
     </style>
 </head>
 <body>
 
 <header>
-    <div>NEXTCOM_OS > V1.0.6</div>
-    <div>SISTEMA_DE_PURGA_HABILITADO</div>
+    <div>NEXTCOM_OS > V1.0.7</div>
+    <div>MODO: ENTRADA_MANUAL_ACTIVA</div>
 </header>
 
 <div class="main-layout">
@@ -44,26 +50,44 @@
     </div>
 
     <div class="container">
+        <div id="sec-new" class="section">
+            <div class="card">
+                <h2>> REGISTRO_UNIDAD</h2>
+                <div class="grid">
+                    <div><label>CLIENTE</label><input type="text" id="o-cliente"></div>
+                    <div><label>TEL</label><input type="number" id="o-tel"></div>
+                    <div><label>MODELO</label><input type="text" id="o-modelo"></div>
+                    <div><label>FALLA_SINTOMA</label><input type="text" id="o-falla"></div>
+                </div>
+                <div class="grid" style="margin-top:10px">
+                    <div><label>ESTADO_INICIAL</label><input type="text" id="o-estado" value="RECIBIDO"></div>
+                    <div><label>COSTO</label><input type="number" id="o-costo" oninput="calcSaldo()"></div>
+                    <div><label>ANTICIPO</label><input type="number" id="o-anticipo" oninput="calcSaldo()"></div>
+                    <div><label>SALDO</label><input type="number" id="o-saldo" readonly></div>
+                </div>
+                <button class="btn" onclick="saveOrder()">[ GUARDAR_REGISTRO ]</button>
+            </div>
+        </div>
+
         <div id="sec-dash" class="section active">
             <h2>> REGISTROS_ACTIVOS</h2>
             <div id="orders-list">ACCEDIENDO...</div>
         </div>
 
-        <div id="sec-new" class="section">
+        <div id="sec-acc" class="section">
             <div class="card">
-                <h2>> REGISTRO_UNIDAD</h2>
+                <h2>> ALMACEN_ACCESORIOS</h2>
                 <div class="grid">
-                    <input type="text" id="o-cliente" placeholder="CLIENTE">
-                    <input type="number" id="o-tel" placeholder="TEL">
-                    <input type="text" id="o-modelo" placeholder="MODELO">
-                    <input type="text" id="o-falla" placeholder="FALLA">
+                    <input type="text" id="a-nombre" placeholder="NOMBRE_ITEM">
+                    <input type="text" id="a-cat" placeholder="CATEGORIA_LIBRE">
+                    <input type="number" id="a-pv" placeholder="PRECIO_V">
+                    <input type="number" id="a-stock" placeholder="CANTIDAD">
                 </div>
-                <div class="grid" style="margin-top:10px">
-                    <input type="number" id="o-costo" oninput="calcSaldo()" placeholder="COSTO">
-                    <input type="number" id="o-anticipo" oninput="calcSaldo()" placeholder="ANTICIPO">
-                    <input type="number" id="o-saldo" readonly placeholder="SALDO">
-                </div>
-                <button class="btn" onclick="saveOrder()">[ GUARDAR ]</button>
+                <button class="btn" onclick="saveInv('acc')">[ REGISTRAR ]</button>
+                <table class="table-terminal">
+                    <thead><tr><th>ITEM</th><th>CAT</th><th>STOCK</th><th>[ACC]</th></tr></thead>
+                    <tbody id="acc-table"></tbody>
+                </table>
             </div>
         </div>
 
@@ -71,57 +95,20 @@
             <div class="card">
                 <h2>> ALMACEN_REPUESTOS</h2>
                 <div class="grid">
-                    <input type="text" id="i-tipo" placeholder="TIPO">
+                    <input type="text" id="i-tipo" placeholder="TIPO/MARCA">
                     <input type="text" id="i-modelo" placeholder="MODELO">
                     <input type="number" id="i-precio" placeholder="PRECIO">
                     <input type="number" id="i-stock" placeholder="STOCK">
                 </div>
                 <button class="btn" onclick="saveInv('rep')">[ AGREGAR_REP ]</button>
                 <table class="table-terminal">
-                    <thead><tr><th>TIPO</th><th>MODELO</th><th>PRECIO</th><th>STOCK</th><th>[ACC]</th></tr></thead>
+                    <thead><tr><th>TIPO</th><th>MODELO</th><th>STOCK</th><th>[ACC]</th></tr></thead>
                     <tbody id="rep-table"></tbody>
                 </table>
             </div>
         </div>
-
-        <div id="sec-acc" class="section">
-            <div class="card">
-                <h2>> ALMACEN_ACCESORIOS</h2>
-                <div class="grid">
-                    <input type="text" id="a-nombre" placeholder="NOMBRE">
-                    <input type="number" id="a-pv" placeholder="PRECIO_V">
-                    <input type="number" id="a-stock" placeholder="CANTIDAD">
-                </div>
-                <button class="btn" onclick="saveInv('acc')">[ AGREGAR_ACC ]</button>
-                <table class="table-terminal">
-                    <thead><tr><th>NOMBRE</th><th>STOCK</th><th>ACCIONES</th></tr></thead>
-                    <tbody id="acc-table"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <div id="sec-ventas" class="section">
-            <div class="grid">
-                <div class="card">
-                    <h2>> VENTA</h2>
-                    <input type="text" id="v-search" list="list-acc" oninput="checkAcc()" placeholder="BUSCAR...">
-                    <div id="v-info"></div>
-                    <button class="btn" onclick="addToCart()">[ AGREGAR ]</button>
-                </div>
-                <div class="card">
-                    <h2>> CARRO</h2>
-                    <div id="cart-items"></div>
-                    <div style="font-size:1.5rem">TOTAL: $<span id="v-total">0</span></div>
-                    <button class="btn" onclick="finishSale()">[ CONFIRMAR ]</button>
-                </div>
-            </div>
-            <div class="card"><h2>> HISTORIAL</h2><div id="sales-history"></div></div>
-        </div>
     </div>
 </div>
-
-<datalist id="list-rep"></datalist>
-<datalist id="list-acc"></datalist>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -138,83 +125,81 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let localAcc = [];
-    let cart = [];
 
-    window.nav = (id) => {
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        document.getElementById('sec-' + id).classList.add('active');
-    };
+    // --- LÓGICA DE COLOR POR TEXTO ---
+    function getStatusClass(text) {
+        const t = text.toLowerCase();
+        if(t.includes("recibido")) return "st-recibido";
+        if(t.includes("diagnostico")) return "st-diagnostico";
+        if(t.includes("reparacion")) return "st-reparacion";
+        if(t.includes("terminado")) return "st-terminado";
+        if(t.includes("cancelado")) return "st-cancelado";
+        return "";
+    }
 
-    // --- FUNCION UNIVERSAL DE ELIMINACION ---
-    window.purgarRegistro = async (coleccion, id) => {
-        if(confirm("¿SOLICITA ELIMINACION DEFINITIVA DEL REGISTRO " + id.substring(0,5) + "?")) {
-            await deleteDoc(doc(db, coleccion, id));
-        }
-    };
-
-    // --- REPUESTOS RENDER ---
-    onSnapshot(query(collection(db, "inventario"), orderBy("ts", "desc")), (snap) => {
-        const table = document.getElementById('rep-table');
-        const dl = document.getElementById('list-rep');
-        table.innerHTML = ""; dl.innerHTML = "";
+    // --- RENDERIZADO ÓRDENES (ACTUALIZADO) ---
+    onSnapshot(query(collection(db, "ordenes"), orderBy("fecha", "desc")), (snap) => {
+        const list = document.getElementById('orders-list');
+        list.innerHTML = "";
         snap.forEach(d => {
             const data = d.data(); const id = d.id;
-            table.innerHTML += `<tr>
-                <td>${data.tipo}</td><td>${data.modelo}</td><td>$${data.precio}</td><td>${data.stock}</td>
-                <td><button class="btn" onclick="purgarRegistro('inventario','${id}')">[-]</button></td>
-            </tr>`;
-            dl.innerHTML += `<option value="${data.modelo}">`;
+            const sClass = getStatusClass(data.estado);
+            list.innerHTML += `<div class="order-item ${sClass}">
+                <div>ID: ${id.substring(0,5)} | CLIENTE: ${data.cliente}</div>
+                <div>MODELO: ${data.modelo} | FALLA: ${data.falla}</div>
+                <div style="margin: 5px 0">
+                    ESTADO: <input type="text" value="${data.estado}" 
+                             style="width: 200px; padding: 2px; border: 1px solid var(--amber-dim)" 
+                             onchange="updateOrderField('${id}', 'estado', this.value)">
+                </div>
+                <button class="btn" onclick="purgar('${id}')">[ PURGAR ]</button>
+                <button class="btn" onclick="enviarWA('${id}')">[ WHATSAPP ]</button>
+            </div>`;
         });
     });
 
-    // --- ACCESORIOS RENDER ---
-    onSnapshot(query(collection(db, "accesorios"), orderBy("ts", "desc")), (snap) => {
-        const table = document.getElementById('acc-table');
-        const dl = document.getElementById('list-acc');
-        table.innerHTML = ""; dl.innerHTML = ""; localAcc = [];
-        snap.forEach(d => {
-            const data = d.data(); const id = d.id;
-            localAcc.push({...data, id});
-            table.innerHTML += `<tr>
-                <td>${data.nombre}</td><td>${data.stock}</td>
-                <td>
-                    <button class="btn" onclick="updateStock('${id}', ${data.stock}, 1)">[+]</button>
-                    <button class="btn" onclick="purgarRegistro('accesorios','${id}')">[-]</button>
-                </td>
-            </tr>`;
-            dl.innerHTML += `<option value="${data.nombre}">`;
-        });
-    });
+    window.updateOrderField = async (id, field, value) => {
+        const ref = doc(db, "ordenes", id);
+        await updateDoc(ref, { [field]: value });
+    };
 
-    // --- LOGICA RESTANTE MANTENIDA ---
+    // --- LÓGICA DE WHATSAPP DINÁMICA ---
+    window.enviarWA = async (id) => {
+        // En un entorno real se obtendrían los datos del snapshot local o BD
+        alert("GENERANDO_MENSAJE_PARA_ID: " + id);
+    };
+
+    // --- MANTENIMIENTO DE INVENTARIOS ---
     window.saveInv = async (t) => {
         let col = t === 'rep' ? 'inventario' : 'accesorios';
         let data = t === 'rep' ? 
             { tipo: document.getElementById('i-tipo').value, modelo: document.getElementById('i-modelo').value, precio: document.getElementById('i-precio').value, stock: document.getElementById('i-stock').value, ts: new Date() } :
-            { nombre: document.getElementById('a-nombre').value, pv: document.getElementById('a-pv').value, stock: parseInt(document.getElementById('a-stock').value), ts: new Date() };
+            { nombre: document.getElementById('a-nombre').value, cat: document.getElementById('a-cat').value, pv: document.getElementById('a-pv').value, stock: parseInt(document.getElementById('a-stock').value), ts: new Date() };
         await addDoc(collection(db, col), data);
-        alert("SISTEMA_ACTUALIZADO");
+        alert("REGISTRO_COMPLETADO");
     };
 
-    window.updateStock = async (id, cur, n) => { await updateDoc(doc(db, "accesorios", id), { stock: cur + n }); };
-    window.calcSaldo = () => {
-        const c = parseFloat(document.getElementById('o-costo').value) || 0;
-        const a = parseFloat(document.getElementById('o-anticipo').value) || 0;
-        document.getElementById('o-saldo').value = c - a;
-    };
-    window.saveOrder = async () => {
-        const o = { cliente: document.getElementById('o-cliente').value, tel: document.getElementById('o-tel').value, modelo: document.getElementById('o-modelo').value, falla: document.getElementById('o-falla').value, costo: document.getElementById('o-costo').value, anticipo: document.getElementById('o-anticipo').value, saldo: document.getElementById('o-saldo').value, estado: 'RECIBIDO', fecha: new Date().toISOString() };
-        await addDoc(collection(db, "ordenes"), o); nav('dash');
-    };
-    onSnapshot(query(collection(db, "ordenes"), orderBy("fecha", "desc")), (snap) => {
-        const list = document.getElementById('orders-list'); list.innerHTML = "";
+    onSnapshot(query(collection(db, "accesorios"), orderBy("ts", "desc")), (snap) => {
+        const table = document.getElementById('acc-table');
+        table.innerHTML = "";
         snap.forEach(d => {
             const data = d.data(); const id = d.id;
-            list.innerHTML += `<div class="order-item">ID: ${id.substring(0,5)} | ${data.cliente} | ${data.modelo}<br>
-            <button class="btn" onclick="purgarRegistro('ordenes','${id}')">[ PURGAR ]</button></div>`;
+            table.innerHTML += `<tr>
+                <td>${data.nombre}</td><td>${data.cat || 'N/A'}</td><td>${data.stock}</td>
+                <td><button class="btn" onclick="purgarRegistro('accesorios','${id}')">[-]</button></td>
+            </tr>`;
         });
     });
+
+    // --- FUNCIONES AUXILIARES ---
+    window.nav = (id) => { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById('sec-' + id).classList.add('active'); };
+    window.calcSaldo = () => { const c = parseFloat(document.getElementById('o-costo').value) || 0; const a = parseFloat(document.getElementById('o-anticipo').value) || 0; document.getElementById('o-saldo').value = c - a; };
+    window.saveOrder = async () => {
+        const o = { cliente: document.getElementById('o-cliente').value, tel: document.getElementById('o-tel').value, modelo: document.getElementById('o-modelo').value, falla: document.getElementById('o-falla').value, estado: document.getElementById('o-estado').value, costo: document.getElementById('o-costo').value, anticipo: document.getElementById('o-anticipo').value, saldo: document.getElementById('o-saldo').value, fecha: new Date().toISOString() };
+        await addDoc(collection(db, "ordenes"), o); nav('dash');
+    };
+    window.purgar = async (id) => { if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, "ordenes", id)); };
+
 </script>
 </body>
 </html>
