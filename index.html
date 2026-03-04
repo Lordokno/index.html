@@ -149,8 +149,14 @@
     <div id="stats-data"></div>
     <button class="btn" onclick="this.parentElement.style.display='none'" style="margin-top:20px">[ SALIR ]</button>
 </div>
+<div class="card">
+    <h2>=== HISTORIAL_DE_VENTAS_LOG ===</h2>
+    <div id="vta-list" style="max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid var(--amber-dim);">
+        CARGANDO_LOGS...
+    </div>
+</div>
 
-<script type="module">
+    <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, Timestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -346,7 +352,110 @@
     };
 
     window.deleteItem = async (c, id) => { if(confirm("¿BORRAR?")) await deleteDoc(doc(db, c, id)); };
+// --- SALES-MODULE.JS: LÓGICA DE PERSISTENCIA Y CONTROL ---
 
+// 1. Inicialización de Persistencia Local (Respaldo)
+if (!localStorage.getItem('salesHistory')) {
+    localStorage.setItem('salesHistory', JSON.stringify([]));
+}
+
+// 2. Función Principal: PROCESAR VENTA (Sincronizada)
+window.processSale = async () => {
+    if (cart.length === 0) return;
+
+    console.log("VALIDANDO STOCK...");
+    
+    // Verificar stock antes de cualquier movimiento
+    for (let item of cart) {
+        if (item.stock <= 0) {
+            playBeep('error');
+            alert(`ERROR: STOCK INSUFICIENTE PARA ${item.nombre}`);
+            return;
+        }
+    }
+
+    console.log("PROCESANDO VENTA...");
+    const saleId = `SALE-${Date.now()}`;
+    const totalVenta = cart.reduce((acc, item) => acc + item.pv, 0);
+    const gananciaVenta = cart.reduce((acc, item) => acc + (item.pv - item.costo), 0);
+    const fechaActual = new Date().toLocaleString();
+
+    try {
+        // A. Actualizar Inventario (Firebase + Stock Local)
+        for (let item of cart) {
+            await window.updateStock(item.id, 1, 'salida');
+        }
+
+        // B. Crear objeto de venta estructurado
+        const nuevaVenta = {
+            id: saleId,
+            items: cart.map(i => i.nombre),
+            total: totalVenta,
+            ganancia: gananciaVenta,
+            fecha: fechaActual,
+            ts: Date.now()
+        };
+
+        // C. Guardar en Firebase
+        await addDoc(collection(db, "ventas"), nuevaVenta);
+
+        // D. Guardar en localStorage (Para evitar desaparición al recargar)
+        const localHistory = JSON.parse(localStorage.getItem('salesHistory'));
+        localHistory.push(nuevaVenta);
+        localStorage.setItem('salesHistory', JSON.stringify(localHistory));
+
+        console.log("VENTA REGISTRADA | INVENTARIO ACTUALIZADO");
+        
+        // E. Limpieza y Feedback
+        cart = [];
+        renderCart();
+        renderSalesHistory(); // Actualizar la tabla de historial
+        playBeep('nav');
+        alert(`VENTA EXITOSA: ${saleId}`);
+
+    } catch (error) {
+        console.error("CRITICAL_ERROR_POS:", error);
+        playBeep('error');
+    }
+};
+
+// 3. Renderizado de Historial (Sin duplicados)
+window.renderSalesHistory = () => {
+    const historyContainer = document.getElementById('vta-list');
+    if (!historyContainer) return;
+
+    // Obtener datos combinados (priorizando LocalStorage para rapidez)
+    const sales = JSON.parse(localStorage.getItem('salesHistory')) || [];
+    
+    // Ordenar por fecha (más reciente arriba)
+    sales.sort((a, b) => b.ts - a.ts);
+
+    historyContainer.innerHTML = sales.map(v => `
+        <div style="border-bottom: 1px solid var(--amber-dim); padding: 5px 0; font-size: 0.9rem;">
+            [${v.fecha}] <span style="color: #fff;">${v.id}</span><br>
+            ITEMS: ${v.items.join(", ")}<br>
+            TOTAL: $${v.total.toFixed(2)} | GANANCIA: $${v.ganancia.toFixed(2)}
+        </div>
+    `).join("");
+
+    updateSalesTotals(sales);
+};
+
+// 4. Cálculo de Totales (Ventas del día/mes)
+function updateSalesTotals(sales) {
+    const hoy = new Date().toLocaleDateString();
+    const totalDia = sales
+        .filter(s => new Date(s.ts).toLocaleDateString() === hoy)
+        .reduce((acc, s) => acc + s.total, 0);
+
+    const totalMes = sales.reduce((acc, s) => acc + s.total, 0);
+
+    // Si existe el módulo de stats, actualizarlo
+    const statsBox = document.getElementById('stats-data');
+    if (statsBox && document.getElementById('stats-overlay').style.display === 'block') {
+        showStats(); // Refrescar stats si el modal está abierto
+    }
+}
 </script>
 </body>
 </html>
