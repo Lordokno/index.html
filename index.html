@@ -93,16 +93,53 @@
                     <select id="o-falla"><option>Cambio de Pantalla</option><option>Batería</option><option>Centro Carga</option></select>
                 </div>
                 <div class="grid">
-                    <input type="number" id="o-costo" placeholder="Costo $" oninput="calcSaldo()">
-                    <input type="number" id="o-anticipo" placeholder="Anticipo $" oninput="calcSaldo()">
-                    <input type="text" id="o-saldo" placeholder="Saldo" readonly>
+                    <div><label>Costo Total $</label><input type="number" id="o-costo" oninput="calcSaldo()" placeholder="0.00"></div>
+                    <div><label>Anticipo $</label><input type="number" id="o-anticipo" oninput="calcSaldo()" placeholder="0.00"></div>
+                    <div><label>Saldo Pendiente $</label><input type="number" id="o-saldo" readonly value="0"></div>
                 </div>
                 <button class="btn btn-primary" style="width:100%; margin-top:15px" onclick="saveOrder()">GUARDAR ORDEN</button>
             </div>
         </div>
 
-        <div id="sec-inv" class="section">
+        <div id="sec-acc" class="section">
             <div class="card">
+                <h3>Inventario de Accesorios</h3>
+                <div class="grid">
+                    <input type="text" id="a-nombre" placeholder="Nombre">
+                    <select id="a-cat"><option>Cargadores</option><option>Fundas</option><option>Vidrios</option><option>Audífonos</option></select>
+                    <input type="number" id="a-pv" placeholder="Venta $">
+                    <input type="number" id="a-pc" placeholder="Costo $">
+                    <input type="number" id="a-stock" placeholder="Stock">
+                </div>
+                <button class="btn btn-primary" style="margin-top:10px" onclick="saveInv('accesorios')">Guardar Accesorio</button>
+                <table class="inv-table"><thead><tr><th>Nombre</th><th>Stock Actual</th><th>Acciones</th></tr></thead><tbody id="acc-table"></tbody></table>
+            </div>
+        </div>
+
+        <div id="sec-ventas" class="section">
+            <div class="grid">
+                <div class="card">
+                    <h3>Punto de Venta</h3>
+                    <input type="text" id="v-search" list="list-acc" placeholder="Buscar..." oninput="checkAcc()">
+                    <datalist id="list-acc"></datalist>
+                    <div id="v-info" style="margin-top:10px; font-weight:bold; color:var(--primary)"></div>
+                    <button class="btn btn-primary" style="width:100%; margin-top:10px" onclick="addToCart()">Agregar</button>
+                </div>
+                <div class="card">
+                    <h3>Carrito</h3>
+                    <div id="cart-items"></div>
+                    <div style="text-align:right; font-weight:bold; font-size:18px;">Total: $<span id="v-total">0</span></div>
+                    <button class="btn btn-wa" onclick="finishSale()">Finalizar Venta</button>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Historial Detallado</h3>
+                <div id="sales-history"></div>
+            </div>
+        </div>
+
+        <div id="sec-inv" class="section">
+             <div class="card">
                 <h3>Inventario de Repuestos</h3>
                 <div class="grid">
                     <input type="text" id="i-tipo" placeholder="Tipo">
@@ -114,50 +151,12 @@
                 <table class="inv-table"><thead><tr><th>Tipo</th><th>Modelo</th><th>Precio</th><th>Stock</th></tr></thead><tbody id="rep-table"></tbody></table>
             </div>
         </div>
-
-        <div id="sec-acc" class="section">
-            <div class="card">
-                <h3>Inventario de Accesorios</h3>
-                <div class="grid">
-                    <input type="text" id="a-nombre" placeholder="Nombre Accesorio">
-                    <select id="a-cat"><option>Cargadores</option><option>Fundas</option><option>Vidrios</option><option>Audífonos</option></select>
-                    <input type="number" id="a-pv" placeholder="Precio Venta $">
-                    <input type="number" id="a-pc" placeholder="Precio Costo $">
-                    <input type="number" id="a-stock" placeholder="Stock">
-                </div>
-                <button class="btn btn-primary" style="margin-top:10px" onclick="saveInv('accesorios')">Guardar Accesorio</button>
-                <table class="inv-table"><thead><tr><th>Nombre</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Acción</th></tr></thead><tbody id="acc-table"></tbody></table>
-            </div>
-        </div>
-
-        <div id="sec-ventas" class="section">
-            <div class="grid">
-                <div class="card">
-                    <h3>Punto de Venta</h3>
-                    <label>Buscar Accesorio</label>
-                    <input type="text" id="v-search" list="list-acc" placeholder="Escribe nombre..." oninput="checkAcc()">
-                    <datalist id="list-acc"></datalist>
-                    <div id="v-info" style="margin-top:10px; font-size:13px; font-weight:bold; color:var(--primary)"></div>
-                    <button class="btn btn-primary" style="width:100%; margin-top:10px" onclick="addToCart()">Agregar al Carrito</button>
-                </div>
-                <div class="card">
-                    <h3>Carrito</h3>
-                    <div id="cart-items"></div>
-                    <div style="text-align:right; margin-top:15px; font-weight:bold; font-size:18px;">Total: $<span id="v-total">0</span></div>
-                    <button class="btn btn-wa" onclick="finishSale()">Finalizar Venta</button>
-                </div>
-            </div>
-            <div class="card">
-                <h3>Historial de Ventas</h3>
-                <div id="sales-history"></div>
-            </div>
-        </div>
     </div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, arrayUnion, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
@@ -174,21 +173,18 @@
     let localAcc = [];
     let cart = [];
 
-    // --- LOGIN ---
+    // --- SESION ---
     window.handleLogin = () => {
         const u = document.getElementById('log-user').value;
         const p = document.getElementById('log-pass').value;
-        if((u === "Nextcom" && p === "1234") || (u === "Tecnico" && p === "5678")) {
-            localStorage.setItem('user', u);
-            localStorage.setItem('role', u === "Nextcom" ? "admin" : "tec");
-            location.reload();
-        }
+        if(u === "Nextcom" && p === "1234") { localStorage.setItem('user', u); localStorage.setItem('role', 'admin'); location.reload(); }
+        else if(u === "Tecnico" && p === "5678") { localStorage.setItem('user', u); localStorage.setItem('role', 'tec'); location.reload(); }
     };
     if(localStorage.getItem('user')) {
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('main-app').style.display = 'block';
         document.getElementById('user-display').innerText = localStorage.getItem('user');
-        isAdmin = localStorage.getItem('role') === "admin";
+        isAdmin = localStorage.getItem('role') === 'admin';
     }
     window.logout = () => { localStorage.clear(); location.reload(); };
     window.nav = (id) => {
@@ -196,123 +192,119 @@
         document.getElementById('sec-' + id).classList.add('active');
     };
 
-    // --- ÓRDENES ---
-    window.saveOrder = async () => {
-        const o = {
-            cliente: document.getElementById('o-cliente').value,
-            tel: document.getElementById('o-tel').value,
-            modelo: document.getElementById('o-modelo').value,
-            falla: document.getElementById('o-falla').value,
-            costo: document.getElementById('o-costo').value,
-            anticipo: document.getElementById('o-anticipo').value,
-            saldo: document.getElementById('o-costo').value - document.getElementById('o-anticipo').value,
-            estado: 'Recibido',
-            fecha: new Date().toISOString()
-        };
-        await addDoc(collection(db, "ordenes"), o);
-        nav('dash');
+    // --- CORRECCION 1: SALDO PENDIENTE ---
+    window.calcSaldo = () => {
+        const costo = parseFloat(document.getElementById('o-costo').value) || 0;
+        const anticipo = parseFloat(document.getElementById('o-anticipo').value) || 0;
+        const saldo = costo - anticipo;
+        document.getElementById('o-saldo').value = saldo < 0 ? 0 : saldo;
     };
 
-    window.delOrder = async (id) => {
-        if(confirm("¿Eliminar esta orden permanentemente?")) await deleteDoc(doc(db, "ordenes", id));
+    // --- CORRECCION 4: WHATSAPP DINAMICO SIN EMOJIS ---
+    window.enviarWA = (d) => {
+        let msg = `NEXTCOM MULTISERVICIOS\n`;
+        msg += `Hola ${d.cliente}\n`;
+        msg += `Tu equipo ${d.modelo} esta en estado: ${d.estado}\n`;
+        msg += `Saldo pendiente: $${d.saldo}\n`;
+        if(d.estado === "Terminado") msg += `Ya puedes pasar a recogerlo. Garantia: 30 dias.`;
+        
+        window.open(`https://wa.me/${d.tel}?text=${encodeURIComponent(msg)}`, '_blank');
     };
 
-    onSnapshot(query(collection(db, "ordenes"), orderBy("fecha", "desc")), (snap) => {
-        const list = document.getElementById('orders-list');
-        list.innerHTML = "";
-        snap.forEach(documento => {
-            const d = documento.data();
-            const id = documento.id;
-            list.innerHTML += `
-                <div class="card order-item st-${d.estado.replace(/\s+/g, '')}">
-                    <div style="display:flex; justify-content:space-between">
-                        <strong>${d.cliente}</strong>
-                        <span>$${d.saldo}</span>
-                    </div>
-                    <p style="font-size:13px; margin:5px 0;">${d.modelo} | ${d.falla}</p>
-                    <div style="display:flex; gap:10px; margin-top:10px;">
-                        <select onchange="updateStatus('${id}', this.value, '${d.estado}')" style="margin:0">
-                            <option value="Recibido" ${d.estado==='Recibido'?'selected':''}>Recibido</option>
-                            <option value="Terminado" ${d.estado==='Terminado'?'selected':''}>Terminado</option>
-                        </select>
-                        ${isAdmin ? `<button class="btn btn-danger" onclick="delOrder('${id}')">Eliminar</button>` : ''}
-                    </div>
-                </div>`;
-        });
-    });
-
-    // --- INVENTARIOS ---
-    window.saveInv = async (tipo) => {
-        if(tipo === 'repuestos'){
-            await addDoc(collection(db, "inventario"), { tipo: document.getElementById('i-tipo').value, modelo: document.getElementById('i-modelo').value, precio: document.getElementById('i-precio').value, stock: document.getElementById('i-stock').value, ts: new Date() });
-        } else {
-            await addDoc(collection(db, "accesorios"), { nombre: document.getElementById('a-nombre').value, cat: document.getElementById('a-cat').value, pv: document.getElementById('a-pv').value, pc: document.getElementById('a-pc').value, stock: parseInt(document.getElementById('a-stock').value), ts: new Date() });
-        }
-        alert("Guardado correctamente");
+    // --- CORRECCION 3: MODIFICAR STOCK MANUAL ---
+    window.editStock = async (id, current, change) => {
+        const newVal = parseInt(current) + change;
+        if(newVal < 0) return alert("El stock no puede ser negativo");
+        await updateDoc(doc(db, "accesorios", id), { stock: newVal });
     };
 
-    onSnapshot(query(collection(db, "accesorios"), orderBy("ts", "desc")), (snap) => {
-        const table = document.getElementById('acc-table');
-        const datalist = document.getElementById('list-acc');
-        table.innerHTML = ""; datalist.innerHTML = ""; localAcc = [];
-        snap.forEach(d => {
-            const data = d.data(); const id = d.id;
-            localAcc.push({...data, id});
-            table.innerHTML += `<tr><td>${data.nombre}</td><td>${data.cat}</td><td>$${data.pv}</td><td>${data.stock}</td><td>${isAdmin ? `<button onclick="delAcc('${id}')">❌</button>` : ''}</td></tr>`;
-            datalist.innerHTML += `<option value="${data.nombre}">`;
-        });
-    });
-
-    // --- VENTAS (POS) ---
-    window.checkAcc = () => {
-        const val = document.getElementById('v-search').value;
-        const item = localAcc.find(a => a.nombre === val);
-        document.getElementById('v-info').innerText = item ? `Precio: $${item.pv} | Stock: ${item.stock}` : "";
-    };
-
-    window.addToCart = () => {
-        const val = document.getElementById('v-search').value;
-        const item = localAcc.find(a => a.nombre === val);
-        if(!item || item.stock <= 0) return alert("Sin stock o no seleccionado");
-        cart.push(item);
-        renderCart();
-    };
-
-    function renderCart() {
-        const container = document.getElementById('cart-items');
-        container.innerHTML = "";
-        let total = 0;
-        cart.forEach((item, idx) => {
-            total += parseFloat(item.pv);
-            container.innerHTML += `<div class="cart-item"><span>${item.nombre}</span><span>$${item.pv} <button onclick="cart.splice(${idx},1);renderCart()">x</button></span></div>`;
-        });
-        document.getElementById('v-total').innerText = total;
-    }
-
+    // --- CORRECCION 2: HISTORIAL DE VENTAS DETALLADO ---
     window.finishSale = async () => {
         if(cart.length === 0) return;
         const total = document.getElementById('v-total').innerText;
-        const user = localStorage.getItem('user');
-        
-        // Descontar Stock
+        const saleData = {
+            items: cart.map(i => ({ nombre: i.nombre, precio: i.pv, cantidad: 1 })),
+            total: total,
+            user: localStorage.getItem('user'),
+            fecha: new Date().toLocaleString(),
+            ts: new Date()
+        };
+
         for(let item of cart) {
-            const ref = doc(db, "accesorios", item.id);
-            await updateDoc(ref, { stock: item.stock - 1 });
+            await updateDoc(doc(db, "accesorios", item.id), { stock: item.stock - 1 });
         }
 
-        await addDoc(collection(db, "ventas"), { items: cart, total, user, fecha: new Date().toLocaleString(), ts: new Date() });
-        alert("Venta realizada: $" + total);
+        await addDoc(collection(db, "ventas"), saleData);
+        alert("Venta completada");
         cart = []; renderCart();
     };
+
+    // --- RENDERIZADOS ---
+    onSnapshot(query(collection(db, "accesorios"), orderBy("ts", "desc")), (snap) => {
+        const table = document.getElementById('acc-table');
+        const dl = document.getElementById('list-acc');
+        table.innerHTML = ""; dl.innerHTML = ""; localAcc = [];
+        snap.forEach(d => {
+            const data = d.data(); const id = d.id;
+            localAcc.push({...data, id});
+            table.innerHTML += `<tr>
+                <td>${data.nombre}</td>
+                <td><b>${data.stock}</b></td>
+                <td>
+                    <button onclick="editStock('${id}', ${data.stock}, 1)">+</button>
+                    <button onclick="editStock('${id}', ${data.stock}, -1)">-</button>
+                    ${isAdmin ? `<button onclick="deleteDoc(doc(db,'accesorios','${id}'))">🗑️</button>` : ''}
+                </td>
+            </tr>`;
+            dl.innerHTML += `<option value="${data.nombre}">`;
+        });
+    });
 
     onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc")), (snap) => {
         const hist = document.getElementById('sales-history');
         hist.innerHTML = "";
         snap.forEach(d => {
-            const data = d.data();
-            hist.innerHTML += `<div style="font-size:12px; border-bottom:1px solid #ddd; padding:5px;"><b>${data.fecha}</b> - $${data.total} (${data.user})</div>`;
+            const s = d.data();
+            let prodStr = s.items.map(i => `${i.nombre} (x${i.cantidad})`).join(", ");
+            hist.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee; font-size:12px;">
+                <b>${s.fecha}</b> | Total: $${s.total} | Vendido por: ${s.user}<br>
+                <span style="color:var(--primary)">Productos: ${prodStr}</span>
+            </div>`;
         });
     });
+
+    onSnapshot(query(collection(db, "ordenes"), orderBy("fecha", "desc")), (snap) => {
+        const list = document.getElementById('orders-list');
+        list.innerHTML = "";
+        snap.forEach(docSnap => {
+            const d = docSnap.data(); const id = docSnap.id;
+            list.innerHTML += `
+                <div class="card order-item st-${d.estado.replace(/\s+/g, '')}">
+                    <div style="display:flex; justify-content:space-between"><strong>${d.cliente}</strong> <b>$${d.saldo}</b></div>
+                    <p style="font-size:13px; margin:5px 0;">${d.modelo} | ${d.estado}</p>
+                    <select onchange="updateStatus('${id}', this.value, '${d.estado}')">
+                        <option value="Recibido" ${d.estado=='Recibido'?'selected':''}>Recibido</option>
+                        <option value="Terminado" ${d.estado=='Terminado'?'selected':''}>Terminado</option>
+                    </select>
+                    <button class="btn btn-wa" onclick='enviarWA(${JSON.stringify(d)})'>WhatsApp</button>
+                    ${isAdmin ? `<button class="btn btn-danger" style="padding:5px; margin-top:5px;" onclick="deleteDoc(doc(db,'ordenes','${id}'))">Eliminar Orden</button>` : ''}
+                </div>`;
+        });
+    });
+
+    // --- LOGICA AUXILIAR ---
+    window.nav = (id) => { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById('sec-' + id).classList.add('active'); };
+    window.saveOrder = async () => {
+        const o = { cliente: document.getElementById('o-cliente').value, tel: document.getElementById('o-tel').value, modelo: document.getElementById('o-modelo').value, falla: document.getElementById('o-falla').value, costo: document.getElementById('o-costo').value, anticipo: document.getElementById('o-anticipo').value, saldo: document.getElementById('o-saldo').value, estado: 'Recibido', fecha: new Date().toISOString() };
+        await addDoc(collection(db, "ordenes"), o); nav('dash');
+    };
+    window.updateStatus = async (id, n, a) => { await updateDoc(doc(db, "ordenes", id), { estado: n }); };
+    window.saveInv = async (t) => {
+        if(t==='accesorios') await addDoc(collection(db, "accesorios"), { nombre: document.getElementById('a-nombre').value, cat: document.getElementById('a-cat').value, pv: document.getElementById('a-pv').value, pc: document.getElementById('a-pc').value, stock: parseInt(document.getElementById('a-stock').value), ts: new Date() });
+    };
+    window.checkAcc = () => { const val = document.getElementById('v-search').value; const item = localAcc.find(a => a.nombre === val); document.getElementById('v-info').innerText = item ? `Precio: $${item.pv} | Stock: ${item.stock}` : ""; };
+    window.addToCart = () => { const val = document.getElementById('v-search').value; const item = localAcc.find(a => a.nombre === val); if(item && item.stock > 0) { cart.push(item); renderCart(); } };
+    function renderCart() { const c = document.getElementById('cart-items'); c.innerHTML = ""; let t = 0; cart.forEach(i => { t += parseFloat(i.pv); c.innerHTML += `<div class="cart-item"><span>${i.nombre}</span><span>$${i.pv}</span></div>`; }); document.getElementById('v-total').innerText = t; }
 
 </script>
 </body>
