@@ -3,160 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nextcom Multi-Admin Pro | Sistema Integral</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>NEXTCOM_TERMINAL_V1.0.4</title>
     <style>
+        /* --- ESTILO FALLOUT TERMINAL --- */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
         :root {
-            --primary: #1a73e8; --dark: #202124; --bg: #f8f9fa;
-            --white: #ffffff; --border: #dadce0;
-            --st-recibido: #9aa0a6; --st-diagnostico: #1a73e8;
-            --st-reparacion: #f29900; --st-espera: #9333ea;
-            --st-terminado: #1e8e3e; --st-entregado: #202124;
-            --st-cancelado: #d93025;
+            --amber: #ffb000;
+            --amber-dim: #945f00;
+            --bg: #0d0d0d;
+            --scanline: rgba(255, 176, 0, 0.03);
         }
-        * { box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { margin: 0; background: var(--bg); color: var(--dark); overflow-x: hidden; }
-        #login-page { display: flex; justify-content: center; align-items: center; height: 100vh; background: var(--primary); }
-        .login-card { background: white; padding: 40px; border-radius: 12px; width: 100%; max-width: 360px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        #main-app { display: none; }
-        header { background: var(--white); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
-        .sidebar { position: fixed; bottom: 0; width: 100%; background: var(--white); display: flex; justify-content: space-around; padding: 10px; border-top: 1px solid var(--border); z-index: 100; overflow-x: auto; }
-        .container { padding: 20px; max-width: 1000px; margin: 0 auto 80px auto; }
-        .section { display: none; } .section.active { display: block; }
-        .card { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        input, select, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; margin-top: 5px; font-size: 14px; }
-        label { font-size: 11px; font-weight: 700; color: #5f6368; text-transform: uppercase; }
-        .btn { padding: 12px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 13px; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-danger { background: #fce8e6; color: #d93025; border: 1px solid #f28b82; }
-        .btn-wa { background: #25D366; color: white; margin-top: 10px; width: 100%; }
-        .order-item { border-left: 8px solid #ccc; }
-        .st-Recibido { border-color: var(--st-recibido); }
-        .st-Endiagnóstico { border-color: var(--st-diagnostico); }
-        .st-Enreparación { border-color: var(--st-reparacion); }
-        .st-Terminado { border-color: var(--st-terminado); }
-        .inv-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
-        .inv-table th, .inv-table td { border: 1px solid var(--border); padding: 10px; text-align: left; }
-        .inv-table th { background: #f1f3f4; }
-        .cart-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); }
+
+        * { 
+            box-sizing: border-box; 
+            font-family: 'VT323', 'Courier New', monospace; 
+            color: var(--amber);
+            text-transform: uppercase;
+        }
+
+        body { 
+            margin: 0; 
+            background: var(--bg); 
+            overflow-x: hidden;
+            letter-spacing: 1px;
+            font-size: 1.1rem;
+        }
+
+        /* Efecto de líneas de escaneo */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(var(--scanline) 50%, rgba(0, 0, 0, 0) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 3px, 3px 100%;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        header { 
+            border-bottom: 2px solid var(--amber); 
+            padding: 10px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            text-shadow: 0 0 5px var(--amber);
+        }
+
+        .sidebar { 
+            border-bottom: 2px solid var(--amber); 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            padding: 10px;
+        }
+
+        .container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .section { display: none; } 
+        .section.active { display: block; }
+
+        .card { 
+            border: 1px solid var(--amber); 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            background: rgba(255, 176, 0, 0.02);
+        }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; }
+
+        input, select, textarea { 
+            background: transparent; 
+            border: 1px solid var(--amber-dim); 
+            padding: 10px; 
+            width: 100%; 
+            font-size: 1.2rem;
+            outline: none;
+        }
+        input:focus { border: 1px solid var(--amber); box-shadow: 0 0 5px var(--amber); }
+
+        .btn { 
+            background: transparent; 
+            border: none; 
+            padding: 5px 15px; 
+            cursor: pointer; 
+            font-size: 1.2rem;
+            transition: 0.2s;
+        }
+        .btn:hover { background: var(--amber); color: var(--bg); font-weight: bold; }
+        
+        .table-terminal { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-top: 15px; 
+            border: 1px solid var(--amber); 
+        }
+        .table-terminal th, .table-terminal td { 
+            padding: 10px; 
+            text-align: left; 
+            border: 1px solid var(--amber-dim); 
+        }
+
+        .order-item { border: 1px solid var(--amber); margin-bottom: 10px; padding: 10px; }
+        
+        /* Cursor parpadeante */
+        .cursor { display: inline-block; width: 10px; height: 1.2rem; background: var(--amber); animation: blink 1s infinite; vertical-align: middle; }
+        @keyframes blink { 0% { opacity: 0; } 50% { opacity: 1; } 100% { opacity: 0; } }
+
         @media (min-width: 768px) {
-            .sidebar { width: 240px; height: 100vh; flex-direction: column; justify-content: flex-start; top: 60px; left: 0; padding: 15px; }
-            .sidebar .btn { margin-bottom: 5px; text-align: left; background: none; color: var(--dark); }
-            .sidebar .btn:hover { background: #f1f3f4; }
-            .container { margin-left: 260px; }
+            .main-layout { display: flex; }
+            .sidebar { width: 250px; flex-direction: column; border-right: 2px solid var(--amber); border-bottom: none; height: 90vh; }
         }
     </style>
 </head>
 <body>
 
-<div id="login-page">
-    <div class="login-card">
-        <h1 style="color:var(--primary)">NEXTCOM</h1>
-        <input type="text" id="log-user" placeholder="Usuario">
-        <input type="password" id="log-pass" placeholder="Contraseña">
-        <button class="btn btn-primary" style="width:100%; margin-top:15px;" onclick="handleLogin()">ENTRAR</button>
-    </div>
-</div>
+<header>
+    <div>NEXTCOM_OS > V1.0.4</div>
+    <div>TERMINAL_ACTIVA <span class="cursor"></span></div>
+</header>
 
-<div id="main-app">
-    <header>
-        <strong>NEXTCOM PRO</strong>
-        <span id="user-display" style="font-size:12px; color:var(--primary)"></span>
-    </header>
-
+<div class="main-layout">
     <div class="sidebar">
-        <button class="btn" onclick="nav('dash')">📊 Órdenes</button>
-        <button class="btn" onclick="nav('new')">➕ Nueva Orden</button>
-        <button class="btn" onclick="nav('inv')">🔧 Repuestos</button>
-        <button class="btn" onclick="nav('acc')">🎧 Accesorios</button>
-        <button class="btn" onclick="nav('ventas')">💰 Ventas</button>
-        <button class="btn" style="color:red" onclick="logout()">❌ Salir</button>
+        <button class="btn" onclick="nav('dash')">[ PANEL_ORDENES ]</button>
+        <button class="btn" onclick="nav('new')">[ NUEVA_ORDEN ]</button>
+        <button class="btn" onclick="nav('inv')">[ INV_REPUESTOS ]</button>
+        <button class="btn" onclick="nav('acc')">[ INV_ACCESORIOS ]</button>
+        <button class="btn" onclick="nav('ventas')">[ PUNTO_VENTA ]</button>
     </div>
 
     <div class="container">
         <div id="sec-dash" class="section active">
-            <h3>Órdenes de Servicio</h3>
-            <div id="orders-list"></div>
+            <h2>> LISTADO_DE_EQUIPOS</h2>
+            <div id="orders-list">Cargando datos del sector...</div>
         </div>
 
         <div id="sec-new" class="section">
             <div class="card">
-                <h3>Nueva Orden</h3>
+                <h2>> REGISTRO_DE_UNIDAD</h2>
                 <div class="grid">
-                    <input type="text" id="o-cliente" placeholder="Cliente">
-                    <input type="number" id="o-tel" placeholder="WhatsApp">
+                    <div><label>CLIENTE</label><input type="text" id="o-cliente"></div>
+                    <div><label>TEL_CONTACTO</label><input type="number" id="o-tel"></div>
+                    <div><label>MODELO_UNIDAD</label><input type="text" id="o-modelo" list="list-rep" oninput="logicAutoFill()"></div>
+                    <div><label>FALLA_SINTOMA</label><select id="o-falla"><option>PANTALLA_DANIADA</option><option>FALLA_ENERGIA</option><option>CARGA_LENTA</option></select></div>
                 </div>
-                <div class="grid" style="margin-top:10px;">
-                    <input type="text" id="o-modelo" list="list-rep" placeholder="Modelo" oninput="logicAutoFill()">
-                    <datalist id="list-rep"></datalist>
-                    <select id="o-falla"><option>Cambio de Pantalla</option><option>Batería</option><option>Centro Carga</option></select>
+                <div class="grid" style="margin-top:20px">
+                    <div><label>COSTO_EST</label><input type="number" id="o-costo" oninput="calcSaldo()"></div>
+                    <div><label>ANTICIPO</label><input type="number" id="o-anticipo" oninput="calcSaldo()"></div>
+                    <div><label>SALDO</label><input type="number" id="o-saldo" readonly></div>
                 </div>
-                <div class="grid">
-                    <div><label>Costo Total $</label><input type="number" id="o-costo" oninput="calcSaldo()" placeholder="0.00"></div>
-                    <div><label>Anticipo $</label><input type="number" id="o-anticipo" oninput="calcSaldo()" placeholder="0.00"></div>
-                    <div><label>Saldo Pendiente $</label><input type="number" id="o-saldo" readonly value="0"></div>
-                </div>
-                <button class="btn btn-primary" style="width:100%; margin-top:15px" onclick="saveOrder()">GUARDAR ORDEN</button>
+                <button class="btn" style="margin-top:20px" onclick="saveOrder()">[ EJECUTAR_GUARDADO ]</button>
             </div>
         </div>
 
         <div id="sec-acc" class="section">
             <div class="card">
-                <h3>Inventario de Accesorios</h3>
+                <h2>> GESTION_ACCESORIOS</h2>
                 <div class="grid">
-                    <input type="text" id="a-nombre" placeholder="Nombre">
-                    <select id="a-cat"><option>Cargadores</option><option>Fundas</option><option>Vidrios</option><option>Audífonos</option></select>
-                    <input type="number" id="a-pv" placeholder="Venta $">
-                    <input type="number" id="a-pc" placeholder="Costo $">
-                    <input type="number" id="a-stock" placeholder="Stock">
+                    <input type="text" id="a-nombre" placeholder="NOMBRE_ITEM">
+                    <input type="number" id="a-pv" placeholder="PRECIO_VENTA">
+                    <input type="number" id="a-stock" placeholder="CANTIDAD">
                 </div>
-                <button class="btn btn-primary" style="margin-top:10px" onclick="saveInv('accesorios')">Guardar Accesorio</button>
-                <table class="inv-table"><thead><tr><th>Nombre</th><th>Stock Actual</th><th>Acciones</th></tr></thead><tbody id="acc-table"></tbody></table>
+                <button class="btn" style="margin-top:10px" onclick="saveInv('acc')">[ REGISTRAR_ITEM ]</button>
+                <table class="table-terminal">
+                    <thead><tr><th>ID_NOM</th><th>STOCK</th><th>ACCIONES</th></tr></thead>
+                    <tbody id="acc-table"></tbody>
+                </table>
             </div>
         </div>
 
         <div id="sec-ventas" class="section">
             <div class="grid">
                 <div class="card">
-                    <h3>Punto de Venta</h3>
-                    <input type="text" id="v-search" list="list-acc" placeholder="Buscar..." oninput="checkAcc()">
-                    <datalist id="list-acc"></datalist>
-                    <div id="v-info" style="margin-top:10px; font-weight:bold; color:var(--primary)"></div>
-                    <button class="btn btn-primary" style="width:100%; margin-top:10px" onclick="addToCart()">Agregar</button>
+                    <h2>> TERMINAL_VENTA</h2>
+                    <input type="text" id="v-search" list="list-acc" placeholder="BUSCAR_ACCESORIO..." oninput="checkAcc()">
+                    <div id="v-info" style="margin:10px 0"></div>
+                    <button class="btn" onclick="addToCart()">[ AGREGAR_A_LISTA ]</button>
                 </div>
                 <div class="card">
-                    <h3>Carrito</h3>
+                    <h2>> RESUMEN_TRANSACCION</h2>
                     <div id="cart-items"></div>
-                    <div style="text-align:right; font-weight:bold; font-size:18px;">Total: $<span id="v-total">0</span></div>
-                    <button class="btn btn-wa" onclick="finishSale()">Finalizar Venta</button>
+                    <div style="font-size:1.5rem; text-align:right">TOTAL: $<span id="v-total">0</span></div>
+                    <button class="btn" style="width:100%" onclick="finishSale()">[ CONFIRMAR_VENTA ]</button>
                 </div>
-            </div>
-            <div class="card">
-                <h3>Historial Detallado</h3>
-                <div id="sales-history"></div>
             </div>
         </div>
-
+        
         <div id="sec-inv" class="section">
-             <div class="card">
-                <h3>Inventario de Repuestos</h3>
+            <div class="card">
+                <h2>> ALMACEN_REPUESTOS</h2>
                 <div class="grid">
-                    <input type="text" id="i-tipo" placeholder="Tipo">
-                    <input type="text" id="i-modelo" placeholder="Modelo">
-                    <input type="number" id="i-precio" placeholder="Precio $">
-                    <input type="number" id="i-stock" placeholder="Stock">
+                    <input type="text" id="i-tipo" placeholder="CATEGORIA">
+                    <input type="text" id="i-modelo" placeholder="MODELO_COMPATIBLE">
+                    <input type="number" id="i-precio" placeholder="PRECIO">
+                    <input type="number" id="i-stock" placeholder="EXISTENCIA">
                 </div>
-                <button class="btn btn-primary" style="margin-top:10px" onclick="saveInv('repuestos')">Guardar Repuesto</button>
-                <table class="inv-table"><thead><tr><th>Tipo</th><th>Modelo</th><th>Precio</th><th>Stock</th></tr></thead><tbody id="rep-table"></tbody></table>
+                <button class="btn" style="margin-top:10px" onclick="saveInv('rep')">[ AGREGAR_AL_SISTEMA ]</button>
             </div>
         </div>
     </div>
 </div>
 
+<datalist id="list-rep"></datalist>
+<datalist id="list-acc"></datalist>
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
@@ -169,77 +222,82 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    let isAdmin = false;
     let localAcc = [];
     let cart = [];
 
-    // --- SESION ---
-    window.handleLogin = () => {
-        const u = document.getElementById('log-user').value;
-        const p = document.getElementById('log-pass').value;
-        if(u === "Nextcom" && p === "1234") { localStorage.setItem('user', u); localStorage.setItem('role', 'admin'); location.reload(); }
-        else if(u === "Tecnico" && p === "5678") { localStorage.setItem('user', u); localStorage.setItem('role', 'tec'); location.reload(); }
-    };
-    if(localStorage.getItem('user')) {
-        document.getElementById('login-page').style.display = 'none';
-        document.getElementById('main-app').style.display = 'block';
-        document.getElementById('user-display').innerText = localStorage.getItem('user');
-        isAdmin = localStorage.getItem('role') === 'admin';
-    }
-    window.logout = () => { localStorage.clear(); location.reload(); };
+    // --- NAVEGACIÓN ---
     window.nav = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById('sec-' + id).classList.add('active');
     };
 
-    // --- CORRECCION 1: SALDO PENDIENTE ---
-    window.calcSaldo = () => {
-        const costo = parseFloat(document.getElementById('o-costo').value) || 0;
-        const anticipo = parseFloat(document.getElementById('o-anticipo').value) || 0;
-        const saldo = costo - anticipo;
-        document.getElementById('o-saldo').value = saldo < 0 ? 0 : saldo;
-    };
-
-    // --- CORRECCION 4: WHATSAPP DINAMICO SIN EMOJIS ---
-    window.enviarWA = (d) => {
-        let msg = `NEXTCOM MULTISERVICIOS\n`;
-        msg += `Hola ${d.cliente}\n`;
-        msg += `Tu equipo ${d.modelo} esta en estado: ${d.estado}\n`;
-        msg += `Saldo pendiente: $${d.saldo}\n`;
-        if(d.estado === "Terminado") msg += `Ya puedes pasar a recogerlo. Garantia: 30 dias.`;
-        
-        window.open(`https://wa.me/${d.tel}?text=${encodeURIComponent(msg)}`, '_blank');
-    };
-
-    // --- CORRECCION 3: MODIFICAR STOCK MANUAL ---
-    window.editStock = async (id, current, change) => {
-        const newVal = parseInt(current) + change;
-        if(newVal < 0) return alert("El stock no puede ser negativo");
-        await updateDoc(doc(db, "accesorios", id), { stock: newVal });
-    };
-
-    // --- CORRECCION 2: HISTORIAL DE VENTAS DETALLADO ---
-    window.finishSale = async () => {
-        if(cart.length === 0) return;
-        const total = document.getElementById('v-total').innerText;
-        const saleData = {
-            items: cart.map(i => ({ nombre: i.nombre, precio: i.pv, cantidad: 1 })),
-            total: total,
-            user: localStorage.getItem('user'),
-            fecha: new Date().toLocaleString(),
-            ts: new Date()
-        };
-
-        for(let item of cart) {
-            await updateDoc(doc(db, "accesorios", item.id), { stock: item.stock - 1 });
+    // --- CORRECCIÓN ELIMINAR ORDEN ---
+    window.eliminarOrden = async (id) => {
+        if(confirm("¿CONFIRMA PURGADO DE DATOS DE LA ORDEN " + id + "?")) {
+            try {
+                await deleteDoc(doc(db, "ordenes", id));
+                console.log("ORDEN_ELIMINADA_EXITOSAMENTE");
+            } catch (error) {
+                console.error("ERROR_EN_PURGADO: ", error);
+            }
         }
-
-        await addDoc(collection(db, "ventas"), saleData);
-        alert("Venta completada");
-        cart = []; renderCart();
     };
 
-    // --- RENDERIZADOS ---
+    // --- LÓGICA DE ÓRDENES ---
+    onSnapshot(query(collection(db, "ordenes"), orderBy("fecha", "desc")), (snap) => {
+        const list = document.getElementById('orders-list');
+        list.innerHTML = "";
+        snap.forEach(documento => {
+            const d = documento.data();
+            const id = documento.id;
+            list.innerHTML += `
+                <div class="order-item">
+                    <div>ID: ${id.substring(0,6)} | CLIENTE: ${d.cliente}</div>
+                    <div>MODELO: ${d.modelo} | ESTADO: ${d.estado} | SALDO: $${d.saldo}</div>
+                    <div style="margin-top:10px">
+                        <button class="btn" onclick="updateStatus('${id}', 'TERMINADO')">[ TERMINAR ]</button>
+                        <button class="btn" onclick="enviarWA('${id}')">[ WHATSAPP ]</button>
+                        <button class="btn" onclick="eliminarOrden('${id}')">[ ELIMINAR ]</button>
+                    </div>
+                </div>`;
+        });
+    });
+
+    window.saveOrder = async () => {
+        const o = {
+            cliente: document.getElementById('o-cliente').value,
+            tel: document.getElementById('o-tel').value,
+            modelo: document.getElementById('o-modelo').value,
+            falla: document.getElementById('o-falla').value,
+            costo: document.getElementById('o-costo').value,
+            anticipo: document.getElementById('o-anticipo').value,
+            saldo: document.getElementById('o-saldo').value,
+            estado: 'RECIBIDO',
+            fecha: new Date().toISOString()
+        };
+        await addDoc(collection(db, "ordenes"), o);
+        nav('dash');
+    };
+
+    window.calcSaldo = () => {
+        const c = parseFloat(document.getElementById('o-costo').value) || 0;
+        const a = parseFloat(document.getElementById('o-anticipo').value) || 0;
+        document.getElementById('o-saldo').value = c - a;
+    };
+
+    // --- ACCESORIOS Y VENTAS ---
+    window.saveInv = async (tipo) => {
+        if(tipo === 'acc') {
+            await addDoc(collection(db, "accesorios"), {
+                nombre: document.getElementById('a-nombre').value,
+                pv: document.getElementById('a-pv').value,
+                stock: parseInt(document.getElementById('a-stock').value),
+                ts: new Date()
+            });
+        }
+        alert("REGISTRO_COMPLETADO");
+    };
+
     onSnapshot(query(collection(db, "accesorios"), orderBy("ts", "desc")), (snap) => {
         const table = document.getElementById('acc-table');
         const dl = document.getElementById('list-acc');
@@ -249,62 +307,37 @@
             localAcc.push({...data, id});
             table.innerHTML += `<tr>
                 <td>${data.nombre}</td>
-                <td><b>${data.stock}</b></td>
-                <td>
-                    <button onclick="editStock('${id}', ${data.stock}, 1)">+</button>
-                    <button onclick="editStock('${id}', ${data.stock}, -1)">-</button>
-                    ${isAdmin ? `<button onclick="deleteDoc(doc(db,'accesorios','${id}'))">🗑️</button>` : ''}
-                </td>
+                <td>${data.stock}</td>
+                <td><button class="btn" onclick="updateStock('${id}', ${data.stock}, 1)">[ + ]</button></td>
             </tr>`;
             dl.innerHTML += `<option value="${data.nombre}">`;
         });
     });
 
-    onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc")), (snap) => {
-        const hist = document.getElementById('sales-history');
-        hist.innerHTML = "";
-        snap.forEach(d => {
-            const s = d.data();
-            let prodStr = s.items.map(i => `${i.nombre} (x${i.cantidad})`).join(", ");
-            hist.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee; font-size:12px;">
-                <b>${s.fecha}</b> | Total: $${s.total} | Vendido por: ${s.user}<br>
-                <span style="color:var(--primary)">Productos: ${prodStr}</span>
-            </div>`;
-        });
-    });
-
-    onSnapshot(query(collection(db, "ordenes"), orderBy("fecha", "desc")), (snap) => {
-        const list = document.getElementById('orders-list');
-        list.innerHTML = "";
-        snap.forEach(docSnap => {
-            const d = docSnap.data(); const id = docSnap.id;
-            list.innerHTML += `
-                <div class="card order-item st-${d.estado.replace(/\s+/g, '')}">
-                    <div style="display:flex; justify-content:space-between"><strong>${d.cliente}</strong> <b>$${d.saldo}</b></div>
-                    <p style="font-size:13px; margin:5px 0;">${d.modelo} | ${d.estado}</p>
-                    <select onchange="updateStatus('${id}', this.value, '${d.estado}')">
-                        <option value="Recibido" ${d.estado=='Recibido'?'selected':''}>Recibido</option>
-                        <option value="Terminado" ${d.estado=='Terminado'?'selected':''}>Terminado</option>
-                    </select>
-                    <button class="btn btn-wa" onclick='enviarWA(${JSON.stringify(d)})'>WhatsApp</button>
-                    ${isAdmin ? `<button class="btn btn-danger" style="padding:5px; margin-top:5px;" onclick="deleteDoc(doc(db,'ordenes','${id}'))">Eliminar Orden</button>` : ''}
-                </div>`;
-        });
-    });
-
-    // --- LOGICA AUXILIAR ---
-    window.nav = (id) => { document.querySelectorAll('.section').forEach(s => s.classList.remove('active')); document.getElementById('sec-' + id).classList.add('active'); };
-    window.saveOrder = async () => {
-        const o = { cliente: document.getElementById('o-cliente').value, tel: document.getElementById('o-tel').value, modelo: document.getElementById('o-modelo').value, falla: document.getElementById('o-falla').value, costo: document.getElementById('o-costo').value, anticipo: document.getElementById('o-anticipo').value, saldo: document.getElementById('o-saldo').value, estado: 'Recibido', fecha: new Date().toISOString() };
-        await addDoc(collection(db, "ordenes"), o); nav('dash');
+    window.checkAcc = () => {
+        const val = document.getElementById('v-search').value;
+        const item = localAcc.find(a => a.nombre === val);
+        document.getElementById('v-info').innerText = item ? `UNITARIO: $${item.pv} | DISPONIBLE: ${item.stock}` : "NO_ENCONTRADO";
     };
-    window.updateStatus = async (id, n, a) => { await updateDoc(doc(db, "ordenes", id), { estado: n }); };
-    window.saveInv = async (t) => {
-        if(t==='accesorios') await addDoc(collection(db, "accesorios"), { nombre: document.getElementById('a-nombre').value, cat: document.getElementById('a-cat').value, pv: document.getElementById('a-pv').value, pc: document.getElementById('a-pc').value, stock: parseInt(document.getElementById('a-stock').value), ts: new Date() });
+
+    window.addToCart = () => {
+        const val = document.getElementById('v-search').value;
+        const item = localAcc.find(a => a.nombre === val);
+        if(item && item.stock > 0) {
+            cart.push(item);
+            renderCart();
+        }
     };
-    window.checkAcc = () => { const val = document.getElementById('v-search').value; const item = localAcc.find(a => a.nombre === val); document.getElementById('v-info').innerText = item ? `Precio: $${item.pv} | Stock: ${item.stock}` : ""; };
-    window.addToCart = () => { const val = document.getElementById('v-search').value; const item = localAcc.find(a => a.nombre === val); if(item && item.stock > 0) { cart.push(item); renderCart(); } };
-    function renderCart() { const c = document.getElementById('cart-items'); c.innerHTML = ""; let t = 0; cart.forEach(i => { t += parseFloat(i.pv); c.innerHTML += `<div class="cart-item"><span>${i.nombre}</span><span>$${i.pv}</span></div>`; }); document.getElementById('v-total').innerText = t; }
+
+    function renderCart() {
+        const c = document.getElementById('cart-items');
+        c.innerHTML = ""; let t = 0;
+        cart.forEach((i, index) => {
+            t += parseFloat(i.pv);
+            c.innerHTML += `<div>> ${i.nombre} - $${i.pv}</div>`;
+        });
+        document.getElementById('v-total').innerText = t;
+    }
 
 </script>
 </body>
