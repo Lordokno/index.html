@@ -1,252 +1,496 @@
-<!DOCTYPE html>
-<html>
+ <!DOCTYPE html>
+<html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>NEXTCOM OS v2.6 PRO</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXTCOM OS v2.5 PRO</title>
 
-<!-- Firebase -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { 
-    getFirestore, 
-    collection, 
-    getDocs, 
-    doc, 
-    runTransaction, 
-    addDoc, 
-    updateDoc, 
-    query, 
-    where,
-    getDoc
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_AUTH_DOMAIN",
-    projectId: "TU_PROJECT_ID",
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  window.db = db;
-  window.firestore = {
-    collection, getDocs, doc, runTransaction, addDoc, updateDoc, query, where, getDoc
-  };
-</script>
-
-<!-- Chart.js -->
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 body{
-  margin:0;
-  background:black;
-  color:#ff7a00;
-  font-family:"Courier New", monospace;
+    margin:0;
+    background:#000;
+    color:#ff7a00;
+    font-family:'Share Tech Mono', monospace;
+    overflow:hidden;
 }
-header{
-  padding:10px;
-  border-bottom:1px solid #ff7a00;
-}
-button{
-  background:black;
-  color:#ff7a00;
-  border:1px solid #ff7a00;
-  padding:5px 10px;
-  margin:3px;
-  cursor:pointer;
-}
-button:hover{
-  background:#ff7a00;
-  color:black;
-}
-.section{
-  padding:15px;
-}
-.product{
-  border-bottom:1px solid #333;
-  padding:8px;
-}
-.low{ color:yellow; }
-.out{ color:red; }
+
 #boot{
-  position:fixed;
-  inset:0;
-  background:black;
-  padding:20px;
+    position:fixed;
+    inset:0;
+    background:#000;
+    color:#ff7a00;
+    padding:20px;
+    font-size:14px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
 }
-.cart{
-  border-top:1px solid #ff7a00;
-  margin-top:10px;
-  padding-top:10px;
+
+.scanline{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    background:linear-gradient(
+        rgba(255,122,0,0.03) 50%, 
+        transparent 50%
+    );
+    background-size:100% 4px;
+    animation:scan 6s linear infinite;
 }
-canvas{
-  background:black;
+
+@keyframes scan{
+    from{background-position:0 0;}
+    to{background-position:0 100%;}
 }
+
+#app{
+    display:none;
+    height:100vh;
+    display:flex;
+}
+
+.sidebar{
+    width:220px;
+    border-right:1px solid #ff7a00;
+    padding:15px;
+}
+
+.sidebar button{
+    width:100%;
+    margin-bottom:10px;
+    background:none;
+    border:1px solid #ff7a00;
+    color:#ff7a00;
+    padding:8px;
+    cursor:pointer;
+}
+
+.main{
+    flex:1;
+    padding:20px;
+    overflow:auto;
+}
+
+.section{display:none;}
+.section.active{display:block;}
+
+input, select{
+    background:#000;
+    border:1px solid #ff7a00;
+    color:#ff7a00;
+    padding:5px;
+    margin-bottom:5px;
+    width:100%;
+}
+
+button.btn{
+    background:none;
+    border:1px solid #ff7a00;
+    color:#ff7a00;
+    padding:5px 10px;
+    cursor:pointer;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+td, th{
+    border:1px solid #ff7a00;
+    padding:5px;
+    font-size:13px;
+}
+
+.tag-low{color:yellow;}
+.tag-out{color:red;}
+
+.card{
+    border:1px solid #ff7a00;
+    padding:10px;
+    margin-bottom:8px;
+}
+
+.prio-express{
+    border-color:red;
+}
+
+#stats-overlay{
+    position:fixed;
+    inset:0;
+    background:#000;
+    display:none;
+    padding:40px;
+}
+
 </style>
 </head>
-
 <body>
 
-<div id="boot"></div>
-
-<header>
-  NEXTCOM OS v2.6 PRO
-  <button onclick="showSection('inventory')">INVENTARIO</button>
-  <button onclick="showSection('stats')">ESTADISTICAS</button>
-</header>
-
-<div id="inventory" class="section"></div>
-<div id="stats" class="section" style="display:none;">
-  <canvas id="salesChart"></canvas>
+<div id="boot">
+NEXTCOM OS v2.5 PRO<br>
+Inicializando sistema...<br>
+Cargando módulos...<br>
+Conectando base de datos...<br>
+Autenticando núcleo...<br>
+Sistema listo.
 </div>
 
+<div class="scanline"></div>
+
+<div id="app">
+    <div class="sidebar">
+        <button onclick="nav('dash')">01_DASHBOARD</button>
+        <button onclick="nav('inv')">02_INVENTARIO</button>
+        <button onclick="nav('pos')">03_POS</button>
+        <button onclick="nav('orden')">04_ORDENES</button>
+        <button onclick="showStats()">05_STATS</button>
+    </div>
+
+    <div class="main">
+
+        <div id="sec-dash" class="section active">
+            <h2>DASHBOARD</h2>
+            <div id="clock"></div>
+        </div>
+
+        <div id="sec-inv" class="section">
+            <h2>INVENTARIO ACCESORIOS</h2>
+
+            <input id="a-nom" placeholder="Nombre">
+            <input id="a-costo" type="number" placeholder="Costo">
+            <input id="a-pv" type="number" placeholder="Precio Venta">
+            <input id="a-stock" type="number" placeholder="Stock Inicial">
+            <button class="btn" onclick="saveAccesorio()">GUARDAR</button>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Stock</th>
+                        <th>Mov</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="acc-table"></tbody>
+            </table>
+        </div>
+
+        <div id="sec-pos" class="section">
+            <h2>PUNTO DE VENTA</h2>
+            <input id="pos-search" placeholder="Buscar producto">
+            <button class="btn" onclick="posSearch()">BUSCAR</button>
+            <button class="btn" onclick="addToCart()">AGREGAR</button>
+            <button class="btn" onclick="clearCart()">LIMPIAR</button>
+
+            <div id="pos-info"></div>
+            <div id="cart-items"></div>
+            <div>Total: $<span id="cart-total">0</span></div>
+            <button class="btn" onclick="processSale()">FINALIZAR VENTA</button>
+        </div>
+
+        <div id="sec-orden" class="section">
+            <h2>ORDENES</h2>
+            <input id="o-cliente" placeholder="Cliente">
+            <input id="o-eq" placeholder="Modelo">
+            <input id="o-falla" placeholder="Falla">
+            <select id="o-prio">
+                <option>NORMAL</option>
+                <option>EXPRESS</option>
+            </select>
+            <input id="o-pc" type="number" placeholder="Precio">
+            <input id="o-ant" type="number" placeholder="Anticipo" oninput="calcOrder()">
+            <input id="o-sal" placeholder="Saldo" readonly>
+            <button class="btn" onclick="saveOrder()">GUARDAR ORDEN</button>
+            <div id="orders-list"></div>
+        </div>
+
+    </div>
+</div>
+
+<div id="stats-overlay">
+    <h2>ESTADISTICAS</h2>
+    <div id="stats-data"></div>
+    <canvas id="salesChart"></canvas>
+    <button class="btn" onclick="document.getElementById('stats-overlay').style.display='none'">CERRAR</button>
+</div>
 <script type="module">
 
-const { collection, getDocs, doc, runTransaction, addDoc, getDoc } = window.firestore;
-const db = window.db;
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    onSnapshot, 
+    query, 
+    orderBy, 
+    doc, 
+    updateDoc, 
+    deleteDoc, 
+    Timestamp, 
+    getDoc,
+    runTransaction 
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_AUTH_DOMAIN",
+    projectId: "TU_PROJECT_ID",
+    storageBucket: "TU_STORAGE_BUCKET",
+    messagingSenderId: "TU_MSG_ID",
+    appId: "TU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let localAcc = [];
+let localOrders = [];
+let localVtas = [];
 let cart = [];
 
-const bootMessages = [
-"> BOOTING NEXTCOM OS v2.6 PRO...",
-"> Cargando Inventario... OK",
-"> Cargando Facturación... OK",
-"> Sistema listo."
-];
+// --- CLOCK ---
+setInterval(()=>{
+    document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+},1000);
 
-let i=0;
-const bootDiv = document.getElementById("boot");
+// --- NAV ---
+window.nav = (id)=>{
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById('sec-'+id).classList.add('active');
+};
 
-function bootSystem(){
-  if(i<bootMessages.length){
-    bootDiv.innerHTML+=bootMessages[i]+"<br>";
-    i++;
-    setTimeout(bootSystem,500);
-  }else{
-    setTimeout(()=>{
-      bootDiv.style.display="none";
-      loadInventory();
-    },1000);
-  }
-}
-bootSystem();
+// --- INVENTARIO ---
+window.saveAccesorio = async ()=>{
+    const data = {
+        nombre: a-nom.value,
+        costo: parseFloat(a-costo.value),
+        pv: parseFloat(a-pv.value),
+        stock: parseInt(a-stock.value),
+        entradas: parseInt(a-stock.value),
+        salidas: 0,
+        ts: Timestamp.now()
+    };
+    await addDoc(collection(db,"accesorios"), data);
+};
 
-window.showSection=function(id){
-  document.getElementById("inventory").style.display="none";
-  document.getElementById("stats").style.display="none";
-  document.getElementById(id).style.display="block";
-  if(id==="stats") generateChart();
-}
+onSnapshot(collection(db,"accesorios"), snap=>{
+    localAcc = snap.docs.map(d=>({id:d.id,...d.data()}));
+    acc-table.innerHTML="";
+    localAcc.forEach(a=>{
+        let status = a.stock<=0?"<span class='tag-out'>AGOTADO</span>":
+                     a.stock<=2?"<span class='tag-low'>BAJO</span>":"";
+        acc-table.innerHTML+=`
+        <tr>
+        <td>${a.nombre} ${status}</td>
+        <td>${a.stock}</td>
+        <td>E:${a.entradas||0} | S:${a.salidas||0}</td>
+        <td>
+        <button class="btn" onclick="deleteItem('accesorios','${a.id}')">X</button>
+        </td>
+        </tr>`;
+    });
+});
 
-async function loadInventory(){
-  const snapshot = await getDocs(collection(db,"inventario"));
-  const container=document.getElementById("inventory");
-  container.innerHTML="<h3>INVENTARIO</h3>";
+// --- POS ---
+window.posSearch = ()=>{
+    const val = pos-search.value.toLowerCase();
+    const item = localAcc.find(i=>i.nombre.toLowerCase().includes(val));
+    if(item){
+        pos-info.innerText = `STOCK:${item.stock} | PRECIO:$${item.pv}`;
+    }
+};
 
-  snapshot.forEach(docSnap=>{
-    const data=docSnap.data();
-    let status="";
-    let cls="";
-    if(data.stock<=0){status="OUT";cls="out";}
-    else if(data.stock<=data.stockMinimo){status="LOW";cls="low";}
+window.addToCart = ()=>{
+    const val = pos-search.value.toLowerCase();
+    const item = localAcc.find(i=>i.nombre.toLowerCase().includes(val));
+    if(!item) return;
 
-    container.innerHTML+=`
-    <div class="product">
-      ${data.nombre} - Stock: ${data.stock}
-      <span class="${cls}">${status}</span><br>
-      <button onclick="addToCart('${docSnap.id}','${data.nombre}',${data.precio})">+</button>
-      <button onclick="restock('${docSnap.id}')">+STOCK</button>
-      <button onclick="adjust('${docSnap.id}')">-STOCK</button>
-    </div>
-    `;
-  });
+    const count = cart.filter(c=>c.id===item.id).length;
+    if(count>=item.stock){
+        pos-info.innerText="STOCK MAXIMO";
+        return;
+    }
 
-  renderCart();
-}
-
-window.addToCart=function(id,name,price){
-  cart.push({id,name,price});
-  renderCart();
-}
+    cart.push(item);
+    renderCart();
+};
 
 function renderCart(){
-  const container=document.getElementById("inventory");
-  let html="<div class='cart'><h3>CARRITO</h3>";
-  let total=0;
-  cart.forEach((item,i)=>{
-    total+=item.price;
-    html+=`${item.name} - $${item.price} <button onclick="removeItem(${i})">-</button><br>`;
-  });
-  html+=`<br>TOTAL: $${total}<br>
-  <button onclick="processSale()">CONFIRMAR VENTA</button>
-  </div>`;
-  container.innerHTML+=html;
-}
-
-window.removeItem=function(index){
-  cart.splice(index,1);
-  loadInventory();
-}
-
-async function processSale(){
-  if(cart.length===0) return alert("Carrito vacío");
-
-  const cliente=prompt("Nombre del cliente:");
-  if(!cliente) return;
-
-  let total=cart.reduce((a,b)=>a+b.price,0);
-
-  for(const item of cart){
-    const ref=doc(db,"inventario",item.id);
-    await runTransaction(db,async(transaction)=>{
-      const snap=await transaction.get(ref);
-      const data=snap.data();
-      if(data.stock<=0) throw "Stock insuficiente";
-      transaction.update(ref,{stock:data.stock-1});
+    cart-items.innerHTML="";
+    let total=0;
+    cart.forEach((i,index)=>{
+        total+=i.pv;
+        cart-items.innerHTML+=`
+        <div>
+        > ${i.nombre} - $${i.pv}
+        <button onclick="removeCart(${index})"> - </button>
+        </div>`;
     });
-  }
-
-  await addDoc(collection(db,"facturas"),{
-    clienteNombre:cliente,
-    total:total,
-    estado:"ACTIVA",
-    fecha:new Date()
-  });
-
-  alert("VENTA REGISTRADA");
-  cart=[];
-  loadInventory();
+    cart-total.innerText=total;
 }
 
-async function generateChart(){
-  const snapshot=await getDocs(collection(db,"facturas"));
-  let total=0;
-  snapshot.forEach(doc=>{
-    if(doc.data().estado==="ACTIVA"){
-      total+=doc.data().total;
-    }
-  });
+window.removeCart=(i)=>{
+    cart.splice(i,1);
+    renderCart();
+};
 
-  new Chart(document.getElementById("salesChart"),{
-    type:'bar',
-    data:{
-      labels:["Ventas Totales"],
-      datasets:[{
-        label:"$",
-        data:[total],
-        borderColor:"#ff7a00",
-        backgroundColor:"transparent"
-      }]
-    }
-  });
+window.clearCart=()=>{
+    cart=[];
+    renderCart();
+};
+
+window.processSale = async ()=>{
+    if(cart.length===0) return;
+
+    await runTransaction(db, async(transaction)=>{
+        for(let item of cart){
+            const ref=doc(db,"accesorios",item.id);
+            const snap=await transaction.get(ref);
+            const data=snap.data();
+            if(data.stock<=0) throw "Sin stock";
+
+            transaction.update(ref,{
+                stock:data.stock-1,
+                salidas:(data.salidas||0)+1
+            });
+        }
+
+        const total=cart.reduce((a,b)=>a+b.pv,0);
+        const ganancia=cart.reduce((a,b)=>a+(b.pv-b.costo),0);
+
+        transaction.set(doc(collection(db,"ventas")),{
+            total,
+            ganancia,
+            unidades:cart.length,
+            ts:Timestamp.now()
+        });
+    });
+
+    cart=[];
+    renderCart();
+    pos-info.innerText="VENTA REGISTRADA";
+};
+
+// --- VENTAS ---
+onSnapshot(query(collection(db,"ventas"),orderBy("ts","desc")),snap=>{
+    localVtas=snap.docs.map(d=>({...d.data()}));
+});
+
+// --- ORDENES ---
+window.calcOrder=()=>{
+    o-sal.value = (o-pc.value||0)-(o-ant.value||0);
+};
+
+window.saveOrder=async()=>{
+    const data={
+        cliente:o-cliente.value,
+        modelo:o-eq.value,
+        falla:o-falla.value,
+        prio:o-prio.value,
+        saldo:o-sal.value,
+        estado:"RECIBIDO",
+        ts:Timestamp.now()
+    };
+    await addDoc(collection(db,"ordenes"),data);
+};
+
+onSnapshot(query(collection(db,"ordenes"),orderBy("ts","desc")),snap=>{
+    localOrders=snap.docs.map(d=>({...d.data()}));
+    orders-list.innerHTML="";
+    localOrders.forEach(o=>{
+        orders-list.innerHTML+=`
+        <div class="card ${o.prio==='EXPRESS'?'prio-express':''}">
+        [${o.prio}] ${o.cliente} | ${o.modelo} | SALDO:$${o.saldo}
+        </div>`;
+    });
+});
+
+// --- STATS ---
+window.showStats=()=>{
+    const hoy=new Date();
+    hoy.setHours(0,0,0,0);
+
+    const ventasHoy=localVtas.filter(v=>v.ts.toDate()>=hoy);
+    const total=ventasHoy.reduce((a,b)=>a+b.total,0);
+
+    stats-data.innerHTML=`
+    > PRODUCTOS:${localAcc.length}<br>
+    > TOTAL STOCK:${localAcc.reduce((a,b)=>a+b.stock,0)}<br>
+    > VENTAS HOY:$${total}<br>
+    > SERVICIOS:${localOrders.length}
+    `;
+
+    renderChart();
+    stats-overlay.style.display="block";
+};
+
+function renderChart(){
+    const ctx=document.getElementById("salesChart");
+    new Chart(ctx,{
+        type:"line",
+        data:{
+            labels:localVtas.map(v=>v.ts.toDate().toLocaleDateString()),
+            datasets:[{
+                label:"Ventas",
+                data:localVtas.map(v=>v.total),
+                borderColor:"#ff7a00",
+                backgroundColor:"transparent"
+            }]
+        }
+    });
 }
+
+window.deleteItem=async(c,id)=>{
+    await deleteDoc(doc(db,c,id));
+};
 
 </script>
+<script>
 
-</body>
-</html>
+// --- BOOT SCREEN ---
+window.addEventListener("load", ()=>{
+
+    const boot = document.getElementById("boot-screen");
+    const lines = [
+        "NEXTCOM MULTISERVICIOS",
+        "Inicializando sistema...",
+        "Cargando módulos Firebase...",
+        "Verificando inventario...",
+        "Sincronizando ventas...",
+        "Sistema listo ✔"
+    ];
+
+    let i = 0;
+
+    function typeLine(){
+        if(i < lines.length){
+            const p = document.createElement("div");
+            p.textContent = "> " + lines[i];
+            boot.appendChild(p);
+            i++;
+            setTimeout(typeLine, 700);
+        } else {
+            setTimeout(()=>{
+                boot.style.opacity = "0";
+                setTimeout(()=>{
+                    boot.style.display = "none";
+                    document.getElementById("main-system").style.display = "block";
+                },800);
+            },1000);
+        }
+    }
+
+    typeLine();
+});
+
+
+// --- AUTO LOAD DEFAULT SECTION ---
+window.addEventListener("DOMContentLoaded",()=>{
+    nav("pos");
+});
+
+</script>
