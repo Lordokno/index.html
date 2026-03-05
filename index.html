@@ -451,46 +451,28 @@ window.deleteItem=async(c,id)=>{
 </script>
 <script>
 
-// --- BOOT SCREEN ---
+// BOOT REAL PARA TU DISEÑO ACTUAL
 window.addEventListener("load", ()=>{
 
-    const boot = document.getElementById("boot-screen");
-    const lines = [
-        "NEXTCOM MULTISERVICIOS",
-        "Inicializando sistema...",
-        "Cargando módulos Firebase...",
-        "Verificando inventario...",
-        "Sincronizando ventas...",
-        "Sistema listo ✔"
-    ];
+    const boot = document.getElementById("boot");
+    const app = document.getElementById("app");
 
-    let i = 0;
+    setTimeout(()=>{
+        boot.style.transition = "opacity 1s";
+        boot.style.opacity = "0";
 
-    function typeLine(){
-        if(i < lines.length){
-            const p = document.createElement("div");
-            p.textContent = "> " + lines[i];
-            boot.appendChild(p);
-            i++;
-            setTimeout(typeLine, 700);
-        } else {
-            setTimeout(()=>{
-                boot.style.opacity = "0";
-                setTimeout(()=>{
-                    boot.style.display = "none";
-                    document.getElementById("main-system").style.display = "block";
-                },800);
-            },1000);
-        }
-    }
+        setTimeout(()=>{
+            boot.style.display = "none";
+            app.style.display = "flex";
+        },1000);
 
-    typeLine();
+    },2000);
+
 });
 
-
-// --- AUTO LOAD DEFAULT SECTION ---
+// Cargar sección inicial
 window.addEventListener("DOMContentLoaded",()=>{
-    nav("pos");
+    nav("dash");
 });
 
 </script>
