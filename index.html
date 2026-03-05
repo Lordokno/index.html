@@ -15,6 +15,7 @@
             --bg: #050505;
             --crt-glow: rgba(255, 122, 0, 0.05);
             --red: #ff4444;
+            --green: #44ff44;
             --padd-main: clamp(10px, 3vw, 30px);
             --padd-card: clamp(10px, 2vw, 20px);
             --gap-grid: clamp(10px, 2vw, 20px);
@@ -111,6 +112,8 @@
 
         .btn-del { border-color: var(--red); color: var(--red); padding: 5px 12px; height: fit-content; }
         .btn-del:hover { background: var(--red); color: #000; }
+        
+        .btn-status { border-color: var(--amber-dim); font-size: 0.7rem; padding: 4px 8px; }
 
         input {
             background: #0a0a0a; border: 1px solid var(--amber-dim);
@@ -132,7 +135,7 @@
 
         .table-wrap { overflow-x: auto; width: 100%; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; font-size: 0.9rem; }
+        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; font-size: 0.8rem; text-transform: uppercase; }
         td { padding: 12px; border-bottom: 1px solid var(--amber-dim); vertical-align: middle; font-size: 0.9rem; }
 
         .card { border: 1px solid var(--amber-dim); padding: var(--padd-card); margin-bottom: 15px; background: rgba(10,10,10,0.5); position: relative; }
@@ -165,6 +168,8 @@
         .kpi-lab { font-size: clamp(0.6rem, 0.8vw, 0.7rem); opacity: 0.7; text-transform: uppercase;}
         .critico { border-color: var(--red); color: var(--red) !important; }
 
+        .order-item { margin-bottom: 5px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+
         @media (max-width: 900px) {
             #app { flex-direction: column; }
             .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--amber); flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; }
@@ -174,7 +179,6 @@
 
         @media (max-width: 600px) {
             .sidebar .btn { min-width: 45%; }
-            #sec-dash .grid-responsive > div[style*="grid-column: span 2"] { grid-column: span 1 !important; }
         }
     </style>
 </head>
@@ -306,7 +310,23 @@
                 </div>
                 <button class="btn" onclick="saveOrder()" style="width: 100%;">GENERAR ORDEN DE SERVICIO</button>
             </div>
-            <div id="orders-list"></div>
+            
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>RECIBIDOS_EN_TALLER</th>
+                            <th>TRABAJOS_TERMINADOS</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="list-recibidos" style="width: 50%; vertical-align: top;"></td>
+                            <td id="list-terminados" style="width: 50%; vertical-align: top;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -368,7 +388,6 @@
         if(localAcc.length > 0) updateChart();
     }
 
-    // --- LÓGICA DE NEGOCIO (Igual a la original) ---
     let localAcc = [];
     let cart = [];
     let salesChart = null;
@@ -518,7 +537,7 @@
     }
 
     window.deleteItem = async (col, id) => {
-        if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, col, id));
+        if(confirm("¿ELIMINAR DEFINITIVAMENTE?")) await deleteDoc(doc(db, col, id));
     };
 
     window.openReorder = (id, n) => {
@@ -535,23 +554,51 @@
         closeReorder();
     };
 
+    // --- NUEVA LÓGICA DE ÓRDENES ---
     window.saveOrder = async () => {
         const cl = document.getElementById("o-cliente").value;
         if(!cl) return;
         await addDoc(collection(db, "ordenes"), {
-            cliente: cl, modelo: document.getElementById("o-eq").value,
-            saldo: document.getElementById("o-sal-display").innerText, ts: Timestamp.now()
+            cliente: cl, 
+            modelo: document.getElementById("o-eq").value,
+            falla: document.getElementById("o-falla").value,
+            saldo: document.getElementById("o-sal-display").innerText, 
+            estado: "RECIBIDO",
+            ts: Timestamp.now()
         });
         document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
+        document.getElementById("o-sal-display").innerText = "0";
+    };
+
+    window.toggleOrderStatus = async (id, currentStatus) => {
+        const newStatus = currentStatus === "RECIBIDO" ? "TERMINADO" : "RECIBIDO";
+        await updateDoc(doc(db, "ordenes", id), { estado: newStatus });
     };
 
     onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => {
-        const list = document.getElementById("orders-list");
-        if(!list) return;
-        list.innerHTML = "";
+        const colRecibidos = document.getElementById("list-recibidos");
+        const colTerminados = document.getElementById("list-terminados");
+        if(!colRecibidos || !colTerminados) return;
+        
+        colRecibidos.innerHTML = "";
+        colTerminados.innerHTML = "";
+
         snap.forEach(d => {
             const o = d.data();
-            list.innerHTML += `<div class="card flex-row"><div>${o.cliente} | ${o.modelo} | $${o.saldo}</div><button class="btn btn-del" onclick="deleteItem('ordenes','${d.id}')">X</button></div>`;
+            const cardHtml = `
+                <div class="card order-item">
+                    <div style="font-size:0.85rem; color:#fff; margin-bottom:5px;">${o.cliente}</div>
+                    <div style="font-size:0.75rem; opacity:0.8;">${o.modelo} | Pendiente: $${o.saldo}</div>
+                    <div style="margin-top:8px;" class="flex-row">
+                        <button class="btn btn-status" onclick="toggleOrderStatus('${d.id}', '${o.estado}')">
+                            ${o.estado === 'RECIBIDO' ? '>> TERMINAR' : '<< REABRIR'}
+                        </button>
+                        <button class="btn btn-del" style="padding:2px 8px; font-size:0.6rem" onclick="deleteItem('ordenes','${d.id}')">X</button>
+                    </div>
+                </div>`;
+            
+            if(o.estado === "TERMINADO") colTerminados.innerHTML += cardHtml;
+            else colRecibidos.innerHTML += cardHtml;
         });
     });
 
