@@ -7,29 +7,7 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
-    authDomain: "nextcom--multiservicos-server.firebaseapp.com",
-    projectId: "nextcom--multiservicos-server",
-    storageBucket: "nextcom--multiservicos-server.firebasestorage.app",
-    messagingSenderId: "1011344400777",
-    appId: "1:1011344400777:web:e40a1a66d9f77046bd8158",
-    measurementId: "G-YJZYPHRXZ6"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
     <style>
         :root {
             --amber: #ff7a00;
@@ -112,7 +90,6 @@
 
         .section { display: none; }
         .active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
         #stats-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.95);
@@ -160,13 +137,12 @@
                 <div id="clock" style="font-size: 40px;">00:00:00</div>
                 <div id="date-display">YYYY-MM-DD</div>
             </div>
-            <div id="dash-alerts"></div>
         </div>
 
         <div id="sec-inv" class="section">
             <h2>> CONTROL_DE_INVENTARIO</h2>
             <div class="card">
-                <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <input id="a-nom" placeholder="NOMBRE DEL PRODUCTO">
                     <input id="a-stock" type="number" placeholder="STOCK INICIAL">
                     <input id="a-costo" type="number" placeholder="COSTO UNITARIO">
@@ -184,19 +160,17 @@
 
         <div id="sec-pos" class="section">
             <h2>> TERMINAL_PUNTO_DE_VENTA</h2>
-            <div class="grid" style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;">
                 <div>
-                    <input id="pos-search" placeholder="ESCANEAR / BUSCAR PRODUCTO..." oninput="posSearch()">
-                    <div id="pos-info" class="card" style="min-height: 50px; font-size: 1.2rem;">ESPERANDO ENTRADA...</div>
-                    <button class="btn" onclick="addToCart()" style="width: 100%; font-size: 1.2rem;">AGREGAR AL CARRO [ENTER]</button>
+                    <input id="pos-search" placeholder="BUSCAR PRODUCTO..." oninput="posSearch()">
+                    <div id="pos-info" class="card" style="min-height: 50px;">ESPERANDO ENTRADA...</div>
+                    <button class="btn" onclick="addToCart()" style="width: 100%;">AGREGAR AL CARRO</button>
                 </div>
                 <div class="card">
-                    <h3>CARRITO_ACTUAL</h3>
+                    <h3>CARRITO</h3>
                     <div id="cart-items" style="height: 200px; overflow-y: auto;"></div>
-                    <hr border-color="#ff7a00">
-                    <div style="font-size: 24px; text-align: right;">TOTAL: $<span id="cart-total">0</span></div>
-                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 10px; background: #ff7a00; color: #000;">FINALIZAR_TRANSACCION</button>
-                    <button class="btn" onclick="clearCart()" style="width: 100%; margin-top: 5px; border-color: #555;">VACIAR</button>
+                    <div style="font-size: 24px; text-align: right; border-top: 1px solid var(--amber); padding-top: 10px;">TOTAL: $<span id="cart-total">0</span></div>
+                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 10px; background: var(--amber); color: #000;">COBRAR</button>
                 </div>
             </div>
         </div>
@@ -204,19 +178,19 @@
         <div id="sec-orden" class="section">
             <h2>> GESTION_DE_SERVICIOS</h2>
             <div class="card">
-                <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <input id="o-cliente" placeholder="CLIENTE">
-                    <input id="o-eq" placeholder="DISPOSITIVO / MODELO">
-                    <input id="o-falla" placeholder="DIAGNOSTICO INICIAL">
+                    <input id="o-eq" placeholder="DISPOSITIVO">
+                    <input id="o-falla" placeholder="FALLA">
                     <select id="o-prio">
                         <option value="NORMAL">PRIORIDAD: NORMAL</option>
-                        <option value="EXPRESS">PRIORIDAD: EXPRESS [URGENTE]</option>
+                        <option value="EXPRESS">PRIORIDAD: EXPRESS</option>
                     </select>
-                    <input id="o-pc" type="number" placeholder="PRECIO ESTIMADO">
+                    <input id="o-pc" type="number" placeholder="PRECIO">
                     <input id="o-ant" type="number" placeholder="ANTICIPO" oninput="calcOrder()">
                 </div>
-                <div style="font-size: 20px; margin-bottom: 10px;">SALDO PENDIENTE: $<span id="o-sal-display">0</span></div>
-                <button class="btn" onclick="saveOrder()" style="width: 100%;">INGRESAR ORDEN AL SISTEMA</button>
+                <div style="font-size: 20px;">SALDO: $<span id="o-sal-display">0</span></div>
+                <button class="btn" onclick="saveOrder()" style="width: 100%;">GUARDAR ORDEN</button>
             </div>
             <div id="orders-list"></div>
         </div>
@@ -224,29 +198,31 @@
 </div>
 
 <div id="stats-overlay">
-    <h2>=== ANALISIS_DE_DATOS_SISTEMA ===</h2>
-    <div class="grid" style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
-        <div id="stats-data" style="font-size: 1.2rem;"></div>
+    <h2>=== ANALISIS_SISTEMA ===</h2>
+    <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
+        <div id="stats-data"></div>
         <div class="card"><canvas id="salesChart"></canvas></div>
     </div>
-    <button class="btn" onclick="closeStats()" style="margin-top: 20px;">REGRESAR A TERMINAL</button>
+    <button class="btn" onclick="closeStats()" style="margin-top: 20px;">CERRAR</button>
 </div>
 
 <script type="module">
+    // USAMOS UNA SOLA VERSIÓN DEL SDK PARA EVITAR CONFLICTOS
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, collection, addDoc, onSnapshot, query, orderBy, 
         doc, updateDoc, deleteDoc, Timestamp, runTransaction, getDoc 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-    /* CONFIGURACIÓN FIREBASE */
+    // TUS CREDENCIALES REALES
     const firebaseConfig = {
-        apiKey: "TU_API_KEY",
-        authDomain: "TU_AUTH_DOMAIN",
-        projectId: "TU_PROJECT_ID",
-        storageBucket: "TU_STORAGE_BUCKET",
-        messagingSenderId: "TU_MSG_ID",
-        appId: "TU_APP_ID"
+        apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
+        authDomain: "nextcom--multiservicos-server.firebaseapp.com",
+        projectId: "nextcom--multiservicos-server",
+        storageBucket: "nextcom--multiservicos-server.firebasestorage.app",
+        messagingSenderId: "1011344400777",
+        appId: "1:1011344400777:web:e40a1a66d9f77046bd8158",
+        measurementId: "G-YJZYPHRXZ6"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -257,7 +233,7 @@
     let cart = [];
     let myChart = null;
 
-    // --- AUDIO SYSTEM ---
+    // --- AUDIO ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep(freq = 440, duration = 0.1) {
         const osc = audioCtx.createOscillator();
@@ -268,29 +244,32 @@
         osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
-    // --- NAVEGACIÓN ---
+    // --- NAVEGACION ---
     window.nav = (id) => {
         playBeep(600, 0.05);
         document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
         document.getElementById("sec-" + id).classList.add("active");
     };
 
-    // --- INVENTARIO & REABASTECIMIENTO ---
+    // --- INVENTARIO ---
     window.saveAccesorio = async () => {
         const nom = document.getElementById("a-nom").value;
         const stock = parseInt(document.getElementById("a-stock").value);
-        if(!nom || isNaN(stock)) return;
+        if(!nom || isNaN(stock)) return alert("DATOS INVALIDOS");
 
-        await addDoc(collection(db, "accesorios"), {
-            nombre: nom,
-            costo: parseFloat(document.getElementById("a-costo").value) || 0,
-            pv: parseFloat(document.getElementById("a-pv").value) || 0,
-            stock: stock,
-            entradas: stock,
-            salidas: 0,
-            ts: Timestamp.now()
-        });
-        playBeep(880, 0.2);
+        try {
+            await addDoc(collection(db, "accesorios"), {
+                nombre: nom,
+                costo: parseFloat(document.getElementById("a-costo").value) || 0,
+                pv: parseFloat(document.getElementById("a-pv").value) || 0,
+                stock: stock,
+                entradas: stock,
+                salidas: 0,
+                ts: Timestamp.now()
+            });
+            alert("GUARDADO EN NUBE");
+            playBeep(880, 0.2);
+        } catch(e) { console.error(e); }
     };
 
     onSnapshot(collection(db, "accesorios"), snap => {
@@ -299,44 +278,19 @@
         table.innerHTML = "";
         localAcc.forEach(a => {
             let status = a.stock <= 0 ? "<span class='tag-out'>AGOTADO</span>" :
-                         a.stock <= 2 ? "<span class='tag-low'>STOCK_BAJO</span>" : "";
+                         a.stock <= 2 ? "<span class='tag-low'>BAJO</span>" : "";
             table.innerHTML += `
                 <tr>
                     <td>${a.nombre} ${status}</td>
                     <td>${a.stock}</td>
-                    <td style="font-size: 11px; color: #888;">E:${a.entradas} | S:${a.salidas}</td>
+                    <td>E:${a.entradas} | S:${a.salidas}</td>
                     <td>
-                        <button class="btn" onclick="openReorder('${a.id}','${a.nombre}')" style="padding: 2px 5px;">+</button>
-                        <button class="btn" onclick="deleteItem('accesorios','${a.id}')" style="padding: 2px 5px; color: red;">X</button>
+                        <button class="btn" onclick="openReorder('${a.id}','${a.nombre}')">+</button>
+                        <button class="btn" onclick="deleteItem('accesorios','${a.id}')">X</button>
                     </td>
                 </tr>`;
         });
     });
-
-    window.openReorder = (id, nombre) => {
-        document.getElementById("re-nombre").innerText = nombre;
-        window.currentReId = id;
-        document.getElementById("reorder-modal").style.display = "block";
-    };
-
-    window.closeReorder = () => document.getElementById("reorder-modal").style.display = "none";
-
-    window.confirmReorder = async () => {
-        const qty = parseInt(document.getElementById("re-qty").value);
-        if(!qty || qty <= 0) return;
-        
-        const ref = doc(db, "accesorios", window.currentReId);
-        const snap = await getDoc(ref);
-        const data = snap.data();
-
-        await updateDoc(ref, {
-            stock: data.stock + qty,
-            entradas: (data.entradas || 0) + qty
-        });
-        
-        closeReorder();
-        playBeep(1000, 0.3);
-    };
 
     // --- POS ---
     window.posSearch = () => {
@@ -344,24 +298,17 @@
         const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
         const info = document.getElementById("pos-info");
         if(item) {
-            info.innerHTML = `ITEM: ${item.nombre} | PRECIO: $${item.pv} | DISP: ${item.stock}`;
-            if(item.stock <= 0) info.style.color = "red"; else info.style.color = "var(--amber)";
-        } else {
-            info.innerText = "NO ENCONTRADO";
-        }
+            info.innerHTML = `${item.nombre} | $${item.pv} | STOCK: ${item.stock}`;
+            info.style.color = item.stock <= 0 ? "red" : "var(--amber)";
+        } else { info.innerText = "NO ENCONTRADO"; }
     };
 
     window.addToCart = () => {
         const val = document.getElementById("pos-search").value.toLowerCase();
         const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
-        if(!item || item.stock <= 0) { playBeep(200, 0.5); return; }
-
-        const inCart = cart.filter(c => c.id === item.id).length;
-        if(inCart >= item.stock) return;
-
+        if(!item || item.stock <= 0) return playBeep(200, 0.5);
         cart.push(item);
         renderCart();
-        playBeep(900, 0.05);
     };
 
     function renderCart() {
@@ -370,13 +317,10 @@
         let total = 0;
         cart.forEach((i, idx) => {
             total += i.pv;
-            container.innerHTML += `<div>> ${i.nombre} ($${i.pv}) <button onclick="removeFromCart(${idx})" style="background:none; color:red; border:none; cursor:pointer;">[X]</button></div>`;
+            container.innerHTML += `<div>> ${i.nombre} $${i.pv}</div>`;
         });
         document.getElementById("cart-total").innerText = total.toFixed(2);
     }
-
-    window.removeFromCart = (i) => { cart.splice(i, 1); renderCart(); };
-    window.clearCart = () => { cart = []; renderCart(); };
 
     window.processSale = async () => {
         if(cart.length === 0) return;
@@ -385,29 +329,20 @@
                 for(let item of cart) {
                     const ref = doc(db, "accesorios", item.id);
                     const snap = await transaction.get(ref);
-                    const data = snap.data();
-                    if(data.stock <= 0) throw "STOCK_ERROR";
-                    transaction.update(ref, {
-                        stock: data.stock - 1,
-                        salidas: (data.salidas || 0) + 1
+                    transaction.update(ref, { 
+                        stock: snap.data().stock - 1,
+                        salidas: (snap.data().salidas || 0) + 1
                     });
                 }
                 transaction.set(doc(collection(db, "ventas")), {
                     total: cart.reduce((a,b)=>a+b.pv, 0),
-                    ganancia: cart.reduce((a,b)=>a+(b.pv-b.costo),0),
-                    items: cart.map(i => i.nombre),
                     ts: Timestamp.now()
                 });
             });
-            clearCart();
-            playBeep(1200, 0.5);
-            alert("VENTA FINALIZADA - TICKET GENERADO");
-        } catch(e) { alert("ERROR: STOCK INSUFICIENTE"); }
+            cart = []; renderCart();
+            alert("VENTA EXITOSA");
+        } catch(e) { alert("ERROR EN VENTA"); }
     };
-
-    onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc")), snap => {
-        localVtas = snap.docs.map(d => ({ ...d.data() }));
-    });
 
     // --- ORDENES ---
     window.calcOrder = () => {
@@ -420,122 +355,51 @@
         await addDoc(collection(db, "ordenes"), {
             cliente: document.getElementById("o-cliente").value,
             modelo: document.getElementById("o-eq").value,
-            falla: document.getElementById("o-falla").value,
-            prio: document.getElementById("o-prio").value,
             saldo: document.getElementById("o-sal-display").innerText,
-            estado: "RECIBIDO",
             ts: Timestamp.now()
         });
-        playBeep(800, 0.2);
-        alert("ORDEN REGISTRADA CORRECTAMENTE");
+        alert("ORDEN GUARDADA");
     };
 
     onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => {
         const list = document.getElementById("orders-list");
         list.innerHTML = "";
-        snap.forEach(doc => {
-            const o = doc.data();
-            list.innerHTML += `
-                <div class="card ${o.prio === 'EXPRESS' ? 'prio-express' : ''}">
-                    <strong>[${o.estado}] ${o.cliente}</strong> - ${o.modelo}<br>
-                    FALLA: ${o.falla} | SALDO: $${o.saldo} | PRIORIDAD: ${o.prio}
-                </div>`;
+        snap.forEach(d => {
+            const o = d.data();
+            list.innerHTML += `<div class="card">${o.cliente} | ${o.modelo} | SALDO: $${o.saldo}</div>`;
         });
     });
 
-    // --- STATS ---
-    window.showStats = () => {
-        const hoy = new Date(); hoy.setHours(0,0,0,0);
-        const vtasHoy = localVtas.filter(v => v.ts.toDate() >= hoy);
-        const totalV = vtasHoy.reduce((a,b) => a + b.total, 0);
-        const ganancia = vtasHoy.reduce((a,b) => a + b.ganancia, 0);
-
-        document.getElementById("stats-data").innerHTML = `
-            > ITEMS_EN_BASE: ${localAcc.length}<br>
-            > VENTAS_HOY: $${totalV.toFixed(2)}<br>
-            > GANANCIA_NETA: $${ganancia.toFixed(2)}<br>
-            > UNIDADES_DISPONIBLES: ${localAcc.reduce((a,b)=>a+b.stock,0)}
-        `;
-        document.getElementById("stats-overlay").style.display = "block";
-        renderChart();
+    // --- REABASTECER ---
+    window.openReorder = (id, nombre) => {
+        window.currentReId = id;
+        document.getElementById("re-nombre").innerText = nombre;
+        document.getElementById("reorder-modal").style.display = "block";
+    };
+    window.closeReorder = () => document.getElementById("reorder-modal").style.display = "none";
+    window.confirmReorder = async () => {
+        const qty = parseInt(document.getElementById("re-qty").value);
+        const ref = doc(db, "accesorios", window.currentReId);
+        const snap = await getDoc(ref);
+        await updateDoc(ref, { stock: snap.data().stock + qty, entradas: snap.data().entradas + qty });
+        closeReorder();
     };
 
-    window.closeStats = () => document.getElementById("stats-overlay").style.display = "none";
+    window.deleteItem = async (c, id) => { if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, c, id)); };
 
-    function renderChart() {
-        const ctx = document.getElementById("salesChart").getContext('2d');
-        if(myChart) myChart.destroy();
-        
-        // Agrupar ventas por fecha
-        const summary = {};
-        localVtas.forEach(v => {
-            const d = v.ts.toDate().toLocaleDateString();
-            summary[d] = (summary[d] || 0) + v.total;
-        });
-
-        myChart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels: Object.keys(summary).reverse(),
-                datasets: [{
-                    label: "FLUJO_DE_CAJA ($)",
-                    data: Object.values(summary).reverse(),
-                    borderColor: "#ff7a00",
-                    borderWidth: 2,
-                    backgroundColor: "rgba(255,122,0,0.1)",
-                    fill: true,
-                    tension: 0.4
-                }]
-            },
-            options: {
-                plugins: { legend: { labels: { color: '#ff7a00', font: { family: 'Share Tech Mono' } } } },
-                scales: {
-                    y: { ticks: { color: '#ff7a00' }, grid: { color: '#333' } },
-                    x: { ticks: { color: '#ff7a00' }, grid: { color: '#333' } }
-                }
-            }
-        });
-    }
-
-    window.deleteItem = async (c, id) => { if(confirm("CONFIRMAR ELIMINACIÓN")) await deleteDoc(doc(db, c, id)); };
-
-    // --- BOOT PROCESS ---
+    // --- BOOT ---
     window.addEventListener("load", async () => {
         const log = document.getElementById("boot-log");
-        const messages = [
-            "NEXTCOM OS v3.0 PRO...",
-            "KERNEL_INIT... OK",
-            "SCANNING_HARDWARE... CRT_EMULATION_LOADED",
-            "CONNECTING_FIREBASE_SERVICE... ESTABLISHED",
-            "LOADING_INVENTORY_CACHE... 100%",
-            "AUTHORIZING_TERMINAL... NXT-ADM-99",
-            "SYSTEM_READY_FOR_OPERATIONS."
-        ];
-
-        for(let msg of messages) {
-            const line = document.createElement("div");
-            log.appendChild(line);
-            for(let char of msg) {
-                line.textContent += char;
-                await new Promise(r => setTimeout(r, 20));
-            }
-            playBeep(400, 0.02);
-            await new Promise(r => setTimeout(r, 400));
+        const msgs = ["SISTEMA INICIANDO...", "CONECTANDO A FIREBASE... OK", "CARGANDO DATOS... 100%", "BIENVENIDO ADM."];
+        for(let m of msgs) {
+            const d = document.createElement("div"); d.innerText = m;
+            log.appendChild(d);
+            await new Promise(r => setTimeout(r, 600));
         }
-
-        setTimeout(() => {
-            document.getElementById("boot").style.display = "none";
-            document.getElementById("app").style.display = "flex";
-        }, 1000);
+        document.getElementById("boot").style.display = "none";
+        document.getElementById("app").style.display = "flex";
     });
 
-    setInterval(() => {
-        const now = new Date();
-        document.getElementById("clock").innerText = now.toLocaleTimeString();
-        document.getElementById("date-display").innerText = now.toISOString().split('T')[0];
-    }, 1000);
-
 </script>
-
 </body>
 </html>
