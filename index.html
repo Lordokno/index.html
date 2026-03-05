@@ -14,6 +14,7 @@
             --amber-dim: #944a00;
             --bg: #050505;
             --crt-glow: rgba(255, 122, 0, 0.05);
+            --red: #ff4444;
         }
 
         body {
@@ -71,8 +72,8 @@
         }
         .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 10px var(--amber); }
 
-        .btn-del { border-color: #ff4444; color: #ff4444; padding: 5px 12px; height: fit-content; }
-        .btn-del:hover { background: #ff4444; color: #000; }
+        .btn-del { border-color: var(--red); color: var(--red); padding: 5px 12px; height: fit-content; }
+        .btn-del:hover { background: var(--red); color: #000; }
 
         input {
             background: #0a0a0a; border: 1px solid var(--amber-dim);
@@ -99,7 +100,7 @@
         th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; }
         td { padding: 12px; border-bottom: 1px solid var(--amber-dim); vertical-align: middle; }
 
-        .card { border: 1px solid var(--amber-dim); padding: 20px; margin-bottom: 15px; background: rgba(10,10,10,0.5); }
+        .card { border: 1px solid var(--amber-dim); padding: 20px; margin-bottom: 15px; background: rgba(10,10,10,0.5); position: relative; }
         .flex-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         
         .history-container {
@@ -129,6 +130,23 @@
         }
 
         canvas { max-height: 280px !important; width: 100% !important; margin-top: 10px; }
+
+        /* Estilos KPI */
+        .kpi-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            border: 1px solid var(--amber-dim);
+            padding: 15px;
+            text-align: center;
+            background: rgba(255, 122, 0, 0.05);
+        }
+        .kpi-val { font-size: 1.8rem; color: #fff; display: block; }
+        .kpi-lab { font-size: 0.7rem; opacity: 0.7; letter-spacing: 1px; }
+        .critico { border-color: var(--red); color: var(--red) !important; }
     </style>
 </head>
 <body>
@@ -157,15 +175,37 @@
 
     <div class="main">
         <div id="sec-dash" class="section active">
-            <h2>> SYSTEM_STATUS</h2>
+            <h2>> SYSTEM_DASHBOARD</h2>
+            
+            <div class="kpi-container">
+                <div class="kpi-card">
+                    <span class="kpi-lab">VENTAS_HOY_($)</span>
+                    <span id="kpi-ventas" class="kpi-val">0.00</span>
+                </div>
+                <div class="kpi-card">
+                    <span class="kpi-lab">ORDENES_ACT_</span>
+                    <span id="kpi-ordenes" class="kpi-val">0</span>
+                </div>
+                <div id="kpi-stock-card" class="kpi-card">
+                    <span class="kpi-lab">STOCK_CRITICO</span>
+                    <span id="kpi-stock" class="kpi-val">0</span>
+                </div>
+            </div>
+
             <div class="grid-responsive">
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
                     <div id="clock" style="font-size: 50px; margin-bottom: 5px;">00:00:00</div>
                     <div id="date-display" style="letter-spacing: 3px; opacity: 0.7;">YYYY-MM-DD</div>
                 </div>
                 <div class="card">
-                    <h3 style="margin-top:0">ANÁLISIS DE RENDIMIENTO</h3>
+                    <h3 style="margin-top:0">RENDIMIENTO_DE_INVENTARIO</h3>
                     <canvas id="mainChart"></canvas>
+                </div>
+                <div class="card" style="grid-column: span 2;">
+                    <h3 style="margin-top:0">> SYSTEM_LOG (ACTIVIDAD_RECIENTE)</h3>
+                    <div id="sys-log" class="history-container" style="height: 150px; font-family: 'Share Tech Mono';">
+                        <div>[SYSTEM] KERNEL_READY...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -245,7 +285,7 @@
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
-        getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit,
+        getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, where,
         doc, updateDoc, deleteDoc, Timestamp, runTransaction, getDoc 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -264,6 +304,15 @@
     let localAcc = [];
     let cart = [];
     let salesChart = null;
+
+    // --- LOG DE SISTEMA ---
+    function logSys(msg) {
+        const log = document.getElementById("sys-log");
+        const time = new Date().toLocaleTimeString();
+        const entry = document.createElement("div");
+        entry.innerHTML = `[${time}] ${msg}`;
+        log.prepend(entry);
+    }
 
     window.nav = (id) => {
         document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
@@ -296,6 +345,31 @@
         });
     }
 
+    // --- DASHBOARD REAL-TIME COUNTERS ---
+    function updateKPIs() {
+        // Stock Crítico (Menos de 3)
+        const criticoCount = localAcc.filter(a => a.stock <= 3).length;
+        document.getElementById("kpi-stock").innerText = criticoCount;
+        const card = document.getElementById("kpi-stock-card");
+        if(criticoCount > 0) card.classList.add("critico");
+        else card.classList.remove("critico");
+
+        // Ventas de Hoy
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const qVentas = query(collection(db, "ventas"), where("ts", ">=", Timestamp.fromDate(today)));
+        onSnapshot(qVentas, snap => {
+            let totalHoy = 0;
+            snap.forEach(d => totalHoy += d.data().total);
+            document.getElementById("kpi-ventas").innerText = totalHoy.toFixed(2);
+        });
+
+        // Ordenes Activas
+        onSnapshot(collection(db, "ordenes"), snap => {
+            document.getElementById("kpi-ordenes").innerText = snap.size;
+        });
+    }
+
     onSnapshot(collection(db, "accesorios"), snap => {
         localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         const table = document.getElementById("acc-table");
@@ -303,7 +377,7 @@
         localAcc.forEach(a => {
             table.innerHTML += `<tr>
                 <td>${a.nombre}</td>
-                <td style="font-weight:bold; color:#fff">${a.stock}</td>
+                <td style="font-weight:bold; color:${a.stock <= 3 ? '#ff4444' : '#fff'}">${a.stock}</td>
                 <td style="font-size:0.8rem">ENT: ${a.entradas} | SAL: ${a.salidas}</td>
                 <td style="text-align:right">
                     <button class="btn" onclick="openReorder('${a.id}','${a.nombre}')" style="padding: 5px 10px;">+</button>
@@ -312,6 +386,7 @@
             </tr>`;
         });
         updateChart();
+        updateKPIs();
     });
 
     onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc"), limit(15)), snap => {
@@ -327,7 +402,7 @@
     window.processSale = async () => {
         if(cart.length === 0) return;
         const totalVenta = cart.reduce((acc, i) => acc + i.pv, 0);
-        const numItems = cart.length;
+        const itemsNames = cart.map(i => i.nombre).join(", ");
         try {
             await runTransaction(db, async(t) => {
                 for(let item of cart) {
@@ -335,8 +410,9 @@
                     const snap = await t.get(ref);
                     t.update(ref, { stock: snap.data().stock - 1, salidas: (snap.data().salidas || 0) + 1 });
                 }
-                await addDoc(collection(db, "ventas"), { total: totalVenta, items: numItems, ts: Timestamp.now() });
+                await addDoc(collection(db, "ventas"), { total: totalVenta, items: cart.length, ts: Timestamp.now() });
             });
+            logSys(`VENTA: $${totalVenta} (${itemsNames})`);
             cart = []; renderCart(); alert("TRANSACCIÓN EXITOSA");
         } catch (e) { alert("ERROR DE COMUNICACIÓN"); }
     };
@@ -351,6 +427,7 @@
             pv: parseFloat(document.getElementById("a-pv").value) || 0,
             entradas: stock, salidas: 0, ts: Timestamp.now()
         });
+        logSys(`NUEVO ITEM: ${nom} (${stock} UNIDADES)`);
         document.querySelectorAll("#sec-inv input").forEach(i => i.value = "");
     };
 
@@ -373,7 +450,7 @@
         const container = document.getElementById("cart-items");
         container.innerHTML = "";
         let total = 0;
-        cart.forEach((i, idx) => { 
+        cart.forEach((i) => { 
             total += i.pv; 
             container.innerHTML += `<div class="flex-row" style="margin-bottom:8px;"><span>> ${i.nombre}</span><span>$${i.pv}</span></div>`; 
         });
@@ -381,7 +458,10 @@
     }
 
     window.deleteItem = async (col, id) => {
-        if(confirm("¿CONFIRMAR ELIMINACIÓN PERMANENTE?")) await deleteDoc(doc(db, col, id));
+        if(confirm("¿CONFIRMAR ELIMINACIÓN PERMANENTE?")) {
+            await deleteDoc(doc(db, col, id));
+            logSys(`ELIMINADO: ID_${id.substring(0,5)} DE ${col.toUpperCase()}`);
+        }
     };
 
     window.openReorder = (id, n) => {
@@ -396,18 +476,21 @@
         const ref = doc(db, "accesorios", window.currentReId);
         const snap = await getDoc(ref);
         await updateDoc(ref, { stock: snap.data().stock + q, entradas: snap.data().entradas + q });
+        logSys(`REABASTECIDO: ${snap.data().nombre} (+${q})`);
         closeReorder();
     };
 
     window.saveOrder = async () => {
         const cliente = document.getElementById("o-cliente").value;
+        const modelo = document.getElementById("o-eq").value;
         if(!cliente) return;
         await addDoc(collection(db, "ordenes"), {
             cliente: cliente,
-            modelo: document.getElementById("o-eq").value,
+            modelo: modelo,
             saldo: document.getElementById("o-sal-display").innerText,
             ts: Timestamp.now()
         });
+        logSys(`ORDEN_SERVICIO: ${cliente} | ${modelo}`);
         document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
         document.getElementById("o-sal-display").innerText = "0";
     };
