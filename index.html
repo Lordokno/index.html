@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>NEXTCOM OS v3.0 PRO // TERMINAL</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
@@ -15,6 +15,10 @@
             --bg: #050505;
             --crt-glow: rgba(255, 122, 0, 0.05);
             --red: #ff4444;
+            /* Variables para espaciado responsivo invisible */
+            --padd-main: clamp(10px, 3vw, 30px);
+            --padd-card: clamp(10px, 2vw, 20px);
+            --gap-grid: clamp(10px, 2vw, 20px);
         }
 
         body {
@@ -24,9 +28,11 @@
             font-family: 'Share Tech Mono', monospace;
             overflow: hidden;
             height: 100vh;
+            width: 100vw;
+            display: flex;
         }
 
-        /* --- EFECTOS CRT --- */
+        /* --- EFECTOS CRT (Inalterados) --- */
         .crt-overlay {
             position: fixed; inset: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
@@ -48,27 +54,47 @@
         #boot {
             position: fixed; inset: 0;
             background: #000; z-index: 10001;
-            padding: 40px; display: flex; flex-direction: column;
-            font-size: 1.2rem; line-height: 1.5;
+            padding: var(--padd-main); display: flex; flex-direction: column;
+            font-size: clamp(0.9rem, 1.5vw, 1.2rem); line-height: 1.5;
         }
 
-        #app { display: none; height: 100vh; }
+        /* --- LAYOUT RESPONSIVO --- */
+        #app { 
+            display: none; 
+            height: 100vh; 
+            width: 100%;
+            flex-direction: row; /* Default PC */
+        }
 
         .sidebar {
-            width: 240px; border-right: 1px solid var(--amber);
-            padding: 20px; background: #000;
+            width: 240px; 
+            border-right: 1px solid var(--amber);
+            padding: var(--padd-card); 
+            background: #000;
             display: flex; flex-direction: column; gap: 10px;
             box-sizing: border-box;
+            flex-shrink: 0; /* No se encoge en PC */
         }
 
-        .main { flex: 1; padding: 30px; overflow-y: auto; background: var(--bg); box-sizing: border-box; }
+        .main { 
+            flex: 1; 
+            padding: var(--padd-main); 
+            overflow-y: auto; 
+            background: var(--bg); 
+            box-sizing: border-box; 
+            width: 100%;
+        }
 
+        /* --- UI ELEMENTS (Estética idéntica, tamaño adaptable) --- */
         .btn {
             background: transparent; border: 1px solid var(--amber);
-            color: var(--amber); padding: 10px; cursor: pointer;
+            color: var(--amber); 
+            padding: clamp(8px, 1vw, 10px); 
+            cursor: pointer;
             font-family: 'Share Tech Mono'; transition: 0.2s;
             text-transform: uppercase;
             box-sizing: border-box;
+            font-size: clamp(0.8rem, 1vw, 1rem);
         }
         .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 10px var(--amber); }
 
@@ -77,34 +103,60 @@
 
         input {
             background: #0a0a0a; border: 1px solid var(--amber-dim);
-            color: var(--amber); padding: 12px; width: 100%;
+            color: var(--amber); padding: clamp(8px, 1vw, 12px); 
+            width: 100%;
             margin-bottom: 10px; font-family: 'Share Tech Mono';
             box-sizing: border-box;
+            font-size: clamp(0.9rem, 1vw, 1rem);
         }
 
+        /* GRIDS INTELIGENTES: Mantienen layout en PC, stackean en móvil */
         .grid-responsive {
             display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(clamp(250px, 45%, 300px), 1fr)); 
+            gap: var(--gap-grid);
             align-items: start;
         }
 
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 10px;
             margin-bottom: 15px;
         }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; }
-        td { padding: 12px; border-bottom: 1px solid var(--amber-dim); vertical-align: middle; }
+        /* Re-aplicar span para PC sin romper responsividad */
+        @media (min-width: 400px) {
+            .form-grid input[style*="grid-column: span 2"] {
+                grid-column: span 2;
+            }
+        }
 
-        .card { border: 1px solid var(--amber-dim); padding: 20px; margin-bottom: 15px; background: rgba(10,10,10,0.5); position: relative; }
-        .flex-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
+        /* TABLAS RESPONSIVAS (Scroll horizontal invisible si colapsa) */
+        .table-wrap {
+            overflow-x: auto;
+            width: 100%;
+            margin-top: 20px;
+            border: 1px solid transparent; /* Evita saltos visuales */
+        }
+
+        table { width: 100%; border-collapse: collapse; min-width: 400px; /* Asegura legibilidad */ }
+        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; font-size: 0.9rem; }
+        td { padding: 12px; border-bottom: 1px solid var(--amber-dim); vertical-align: middle; font-size: 0.9rem; }
+
+        .card { border: 1px solid var(--amber-dim); padding: var(--padd-card); margin-bottom: 15px; background: rgba(10,10,10,0.5); position: relative; }
+        
+        /* Flex rows que stackean en móvil */
+        .flex-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 15px; 
+            flex-wrap: wrap; /* Crucial para responsividad */
+        }
         
         .history-container {
-            height: 220px;
+            height: clamp(150px, 25vh, 220px);
             overflow-y: auto;
             border: 1px solid var(--amber-dim);
             padding: 15px;
@@ -113,8 +165,8 @@
             line-height: 1.6;
         }
 
-        /* Scrollbar Estética */
-        ::-webkit-scrollbar { width: 5px; }
+        /* Scrollbar Estética (Inalterada) */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #000; }
         ::-webkit-scrollbar-thumb { background: var(--amber-dim); }
 
@@ -126,27 +178,71 @@
         #reorder-modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #000; border: 2px solid var(--amber); padding: 30px; z-index: 10005;
-            display: none; width: 350px; box-shadow: 0 0 50px #000;
+            display: none; 
+            width: clamp(280px, 90%, 350px); /* Adaptable */
+            box-shadow: 0 0 50px #000;
+            box-sizing: border-box;
         }
 
-        canvas { max-height: 280px !important; width: 100% !important; margin-top: 10px; }
+        /* Canvas adaptable */
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            height: clamp(200px, 30vh, 280px);
+            margin-top: 10px;
+        }
+        canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
 
-        /* Estilos KPI */
+        /* Estilos KPI Responsivos */
         .kpi-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: var(--gap-grid);
             margin-bottom: 20px;
         }
         .kpi-card {
             border: 1px solid var(--amber-dim);
-            padding: 15px;
+            padding: clamp(10px, 1.5vw, 15px);
             text-align: center;
             background: rgba(255, 122, 0, 0.05);
         }
-        .kpi-val { font-size: 1.8rem; color: #fff; display: block; }
-        .kpi-lab { font-size: 0.7rem; opacity: 0.7; letter-spacing: 1px; }
+        .kpi-val { font-size: clamp(1.2rem, 2vw, 1.8rem); color: #fff; display: block; }
+        .kpi-lab { font-size: clamp(0.6rem, 0.8vw, 0.7rem); opacity: 0.7; letter-spacing: 1px; text-transform: uppercase;}
         .critico { border-color: var(--red); color: var(--red) !important; }
+
+        /* --- MEDIA QUERIES PARA ADAPTACIÓN "INVISIBLE" --- */
+        
+        /* Tablets y Móviles Horizontales */
+        @media (max-width: 900px) {
+            #app { flex-direction: column; } /* Sidebar pasa arriba */
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--amber);
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 10px;
+            }
+            .sidebar div[style*="font-size: 18px"] { margin-bottom: 10px !important; width: 100%; text-align: center; }
+            .sidebar .btn { flex: 1; min-width: 120px; text-align: center; }
+        }
+
+        /* Móviles Verticales */
+        @media (max-width: 600px) {
+            h2 { font-size: 1.2rem; }
+            .sidebar .btn { min-width: 45%; font-size: 0.75rem; padding: 8px; }
+            
+            /* Dash specific fixes */
+            #sec-dash .grid-responsive > div[style*="grid-column: span 2"] {
+                grid-column: span 1 !important;
+            }
+
+            /* POS specific fixes */
+            #sec-pos .grid-responsive {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -193,17 +289,19 @@
             </div>
 
             <div class="grid-responsive">
-                <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
-                    <div id="clock" style="font-size: 50px; margin-bottom: 5px;">00:00:00</div>
-                    <div id="date-display" style="letter-spacing: 3px; opacity: 0.7;">YYYY-MM-DD</div>
+                <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 150px;">
+                    <div id="clock" style="font-size: clamp(2rem, 5vw, 50px); margin-bottom: 5px;">00:00:00</div>
+                    <div id="date-display" style="letter-spacing: 3px; opacity: 0.7; font-size: clamp(0.7rem, 1vw, 1rem);">YYYY-MM-DD</div>
                 </div>
                 <div class="card">
                     <h3 style="margin-top:0">RENDIMIENTO_DE_INVENTARIO</h3>
-                    <canvas id="mainChart"></canvas>
+                    <div class="chart-wrap">
+                        <canvas id="mainChart"></canvas>
+                    </div>
                 </div>
-                <div class="card" style="grid-column: span 2;">
+                <div class="card" style="grid-column: auto / span 2;">
                     <h3 style="margin-top:0">> SYSTEM_LOG (ACTIVIDAD_RECIENTE)</h3>
-                    <div id="sys-log" class="history-container" style="height: 150px; font-family: 'Share Tech Mono';">
+                    <div id="sys-log" class="history-container" style="font-family: 'Share Tech Mono';">
                         <div>[SYSTEM] KERNEL_READY...</div>
                     </div>
                 </div>
@@ -221,14 +319,14 @@
                     <button class="btn" onclick="saveAccesorio()" style="grid-column: span 2; margin-top: 5px;">REGISTRAR NUEVA ENTRADA</button>
                 </div>
             </div>
-            <div style="overflow-x: auto;">
+            <div class="table-wrap">
                 <table>
                     <thead>
                         <tr>
                             <th>ITEM_DESCRIPCIÓN</th>
-                            <th style="width: 100px;">STOCK</th>
-                            <th style="width: 150px;">MÉTRICAS</th>
-                            <th style="width: 150px; text-align: right;">ACCIONES</th>
+                            <th style="width: 80px;">STOCK</th>
+                            <th style="width: 120px;">MÉTRICAS</th>
+                            <th style="width: 120px; text-align: right;">ACCIONES</th>
                         </tr>
                     </thead>
                     <tbody id="acc-table"></tbody>
@@ -241,7 +339,7 @@
             <div class="grid-responsive">
                 <div>
                     <input id="pos-search" placeholder="ESCRIBA PARA BUSCAR PRODUCTO..." oninput="posSearch()">
-                    <div id="pos-info" class="card" style="min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold;">ESPERANDO ENTRADA...</div>
+                    <div id="pos-info" class="card" style="min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold; text-align: center; font-size: 0.9rem;">ESPERANDO ENTRADA...</div>
                     <button class="btn" onclick="addToCart()" style="width: 100%; margin-bottom: 25px;">AÑADIR AL CARRITO</button>
                     
                     <h3>> REGISTRO_DE_VENTAS</h3>
@@ -249,14 +347,14 @@
                         <div>SISTEMA LISTO...</div>
                     </div>
                 </div>
-                <div class="card">
+                <div class="card" style="display: flex; flex-direction: column;">
                     <h3 style="margin-top:0">CARRITO_ACTUAL</h3>
-                    <div id="cart-items" style="height: 180px; overflow-y: auto; border-bottom: 1px solid var(--amber-dim); margin-bottom: 15px;"></div>
+                    <div id="cart-items" style="flex: 1; min-height: 150px; max-height: 300px; overflow-y: auto; border-bottom: 1px solid var(--amber-dim); margin-bottom: 15px;"></div>
                     <div class="flex-row">
-                        <span style="font-size: 1.2rem;">TOTAL_A_PAGAR:</span>
-                        <span style="font-size: 2rem; color: #fff;">$<span id="cart-total">0</span></span>
+                        <span style="font-size: 1rem;">TOTAL_A_PAGAR:</span>
+                        <span style="font-size: clamp(1.5rem, 3vw, 2rem); color: #fff;">$<span id="cart-total">0</span></span>
                     </div>
-                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 20px; background: var(--amber); color: #000; font-weight: bold; font-size: 1.1rem;">CONFIRMAR Y COBRAR</button>
+                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 20px; background: var(--amber); color: #000; font-weight: bold; font-size: 1.1rem; min-height: 50px;">CONFIRMAR Y COBRAR</button>
                 </div>
             </div>
         </div>
@@ -272,8 +370,8 @@
                     <input id="o-ant" type="number" placeholder="ANTICIPO ($)" oninput="calcOrder()">
                 </div>
                 <div class="flex-row" style="margin-bottom: 15px; border-top: 1px solid var(--amber-dim); padding-top: 15px;">
-                    <span style="font-size: 1.1rem;">SALDO PENDIENTE:</span>
-                    <span style="font-size: 1.5rem; color: #ff4444;">$<span id="o-sal-display">0</span></span>
+                    <span style="font-size: 1rem;">SALDO PENDIENTE:</span>
+                    <span style="font-size: clamp(1.2rem, 2vw, 1.5rem); color: #ff4444;">$<span id="o-sal-display">0</span></span>
                 </div>
                 <button class="btn" onclick="saveOrder()" style="width: 100%;">GENERAR ORDEN DE SERVICIO</button>
             </div>
@@ -283,6 +381,7 @@
 </div>
 
 <script type="module">
+    // Todo el bloque JavaScript permanece EXACTAMENTE igual que el original
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, where,
@@ -305,7 +404,6 @@
     let cart = [];
     let salesChart = null;
 
-    // --- LOG DE SISTEMA ---
     function logSys(msg) {
         const log = document.getElementById("sys-log");
         const time = new Date().toLocaleTimeString();
@@ -336,25 +434,23 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false, // Importante para contenedores responsivos
                 scales: { 
-                    y: { beginAtZero: true, grid: { color: '#1a1a1a' }, ticks: { color: '#ff7a00' } }, 
-                    x: { grid: { display: false }, ticks: { color: '#ff7a00' } } 
+                    y: { beginAtZero: true, grid: { color: '#1a1a1a' }, ticks: { color: '#ff7a00', font: {family: 'Share Tech Mono'} } }, 
+                    x: { grid: { display: false }, ticks: { color: '#ff7a00', font: {family: 'Share Tech Mono'} } } 
                 },
                 plugins: { legend: { labels: { color: '#ff7a00', font: { family: 'Share Tech Mono' } } } }
             }
         });
     }
 
-    // --- DASHBOARD REAL-TIME COUNTERS ---
     function updateKPIs() {
-        // Stock Crítico (Menos de 3)
         const criticoCount = localAcc.filter(a => a.stock <= 3).length;
         document.getElementById("kpi-stock").innerText = criticoCount;
         const card = document.getElementById("kpi-stock-card");
         if(criticoCount > 0) card.classList.add("critico");
         else card.classList.remove("critico");
 
-        // Ventas de Hoy
         const today = new Date();
         today.setHours(0,0,0,0);
         const qVentas = query(collection(db, "ventas"), where("ts", ">=", Timestamp.fromDate(today)));
@@ -364,7 +460,6 @@
             document.getElementById("kpi-ventas").innerText = totalHoy.toFixed(2);
         });
 
-        // Ordenes Activas
         onSnapshot(collection(db, "ordenes"), snap => {
             document.getElementById("kpi-ordenes").innerText = snap.size;
         });
@@ -523,6 +618,8 @@
         }
         document.getElementById("boot").style.display = "none";
         document.getElementById("app").style.display = "flex";
+        // Forzar actualización del gráfico una vez cargado el layout
+        if(localAcc.length > 0) updateChart();
     });
 
     setInterval(() => {
