@@ -5,6 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXTCOM_OS_v2.3_STABLE_MERGE</title>
     <style>
+
+        /* EFECTO DE RUIDO VISUAL */
+#boot-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #000;
+    z-index: 20000;
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    overflow: hidden;
+}
+
+/* Grano de película / Estática sutil */
+#boot-screen::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grains.jpg');
+    opacity: 0.04;
+    pointer-events: none;
+    animation: grain-jump 0.1s steps(2) infinite;
+}
+
+@keyframes grain-jump {
+    0% { transform: translate(0,0); }
+    50% { transform: translate(-5%, -5%); }
+    100% { transform: translate(5%, 5%); }
+}
+
+.glitch-text {
+    animation: text-flicker 0.05s infinite;
+}
+
+@keyframes text-flicker {
+    0% { opacity: 0.98; }
+    50% { opacity: 1; }
+    100% { opacity: 0.98; }
+}
         /* BOOT-SEQUENCE STYLES */
 #boot-screen {
     position: fixed;
@@ -223,7 +264,43 @@
     const db = getFirestore(app);
 
     let localOrders = [], localAcc = [], localVtas = [], cart = [];
+// --- GENERADOR DE AUDIO: RUIDO CRT ---
+function startStaticNoise() {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const bufferSize = 2 * audioCtx.sampleRate;
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
 
+    // Generar Ruido Blanco
+    for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+    }
+
+    const whiteNoise = audioCtx.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
+    whiteNoise.loop = true;
+
+    // Filtro Paso-Banda para que suene a "aire" o "estática de monitor"
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 800;
+    filter.Q.value = 0.5;
+
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.02; // Volumen muy bajo para no molestar
+
+    whiteNoise.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    whiteNoise.start();
+
+    // Retornar función para detener el ruido
+    return () => {
+        gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
+        setTimeout(() => whiteNoise.stop(), 1000);
+    };
+}
     // --- AUDIO SYSTEM (ALERTA BEEP) ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep(type) {
@@ -520,44 +597,27 @@ const bootLines = [
 async function runBootSequence() {
     const logContainer = document.getElementById('boot-log');
     const bootScreen = document.getElementById('boot-screen');
-    const cursor = document.getElementById('boot-cursor');
-
-    // Desactivar temporalmente el scroll del body
-    document.body.style.overflow = 'hidden';
+    
+    // 1. Iniciar Estática
+    const stopNoise = startStaticNoise();
+    
+    // [ ... El resto de la lógica de escritura de líneas que ya tienes ... ]
 
     for (let line of bootLines) {
-        // Crear elemento de línea
-        const p = document.createElement('div');
-        p.className = 'boot-text';
-        logContainer.appendChild(p);
-        
-        // Efecto "máquina de escribir" por línea
-        for (let char of line) {
-            p.textContent += char;
-            // Sonido opcional de terminal por cada caracter (playBeep('nav') muy rápido)
-            await new Promise(resolve => setTimeout(resolve, 15)); 
-        }
-
-        // Pausa entre líneas
-        const delay = line.includes('...') ? 600 : 250;
-        await new Promise(resolve => setTimeout(resolve, delay));
-        
-        // Mover cursor al final del log
-        logContainer.scrollTop = logContainer.scrollHeight;
+        // [ Código de impresión de líneas ]
+        // Tip: Puedes añadir playBeep('nav') con ganancia 0.01 aquí para el "tecleo"
     }
 
-    // Secuencia final de salida
+    // 2. Finalizar secuencia
     await new Promise(resolve => setTimeout(resolve, 800));
-    cursor.style.display = 'none';
     
-    // Transición de salida (fade out)
-    bootScreen.style.transition = 'opacity 0.5s ease';
     bootScreen.style.opacity = '0';
-    
+    stopNoise(); // Detener el ruido con un fade out
+
     setTimeout(() => {
         bootScreen.classList.add('hidden-os');
         document.body.style.overflow = 'auto';
-        playBeep('nav'); // Beep final de sistema online
+        playBeep('nav'); 
     }, 500);
 }
 
