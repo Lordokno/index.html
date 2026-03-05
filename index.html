@@ -130,6 +130,12 @@
                     </div>
                     <button class="btn" style="width:100%; margin-top:10px" onclick="processSale()">[ COMPLETAR_VENTA ]</button>
                 </div>
+                <div class="card">
+                <h2>=== HISTORIAL_DE_VENTAS_LOG ===</h2>
+                <div id="vta-list" style="max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid var(--amber-dim);">
+                    CARGANDO_LOGS...
+                </div>
+</div>
             </div>
         </div>
     </div>
@@ -149,12 +155,7 @@
     <div id="stats-data"></div>
     <button class="btn" onclick="this.parentElement.style.display='none'" style="margin-top:20px">[ SALIR ]</button>
 </div>
-<div class="card">
-    <h2>=== HISTORIAL_DE_VENTAS_LOG ===</h2>
-    <div id="vta-list" style="max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid var(--amber-dim);">
-        CARGANDO_LOGS...
-    </div>
-</div>
+
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
