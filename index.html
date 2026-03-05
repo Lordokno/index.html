@@ -1,9 +1,9 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXTCOM OS v2.5 PRO</title>
+<title>NEXTCOM OS v3.0 PRO</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -14,7 +14,6 @@ body{
     background:#000;
     color:#ff7a00;
     font-family:'Share Tech Mono', monospace;
-    overflow:hidden;
 }
 
 #boot{
@@ -23,20 +22,17 @@ body{
     background:#000;
     color:#ff7a00;
     padding:20px;
-    font-size:14px;
     display:flex;
     flex-direction:column;
     justify-content:center;
+    font-size:14px;
 }
 
 .scanline{
     position:fixed;
     inset:0;
     pointer-events:none;
-    background:linear-gradient(
-        rgba(255,122,0,0.03) 50%, 
-        transparent 50%
-    );
+    background:linear-gradient(rgba(255,122,0,0.03) 50%, transparent 50%);
     background-size:100% 4px;
     animation:scan 6s linear infinite;
 }
@@ -107,16 +103,8 @@ td, th{
 
 .tag-low{color:yellow;}
 .tag-out{color:red;}
-
-.card{
-    border:1px solid #ff7a00;
-    padding:10px;
-    margin-bottom:8px;
-}
-
-.prio-express{
-    border-color:red;
-}
+.card{border:1px solid #ff7a00;padding:10px;margin-bottom:8px;}
+.prio-express{border-color:red;}
 
 #stats-overlay{
     position:fixed;
@@ -125,13 +113,12 @@ td, th{
     display:none;
     padding:40px;
 }
-
 </style>
 </head>
 <body>
 
 <div id="boot">
-NEXTCOM OS v2.5 PRO<br>
+NEXTCOM OS v3.0 PRO<br>
 Inicializando sistema...<br>
 Cargando módulos...<br>
 Conectando base de datos...<br>
@@ -158,14 +145,12 @@ Sistema listo.
         </div>
 
         <div id="sec-inv" class="section">
-            <h2>INVENTARIO ACCESORIOS</h2>
-
+            <h2>INVENTARIO</h2>
             <input id="a-nom" placeholder="Nombre">
             <input id="a-costo" type="number" placeholder="Costo">
             <input id="a-pv" type="number" placeholder="Precio Venta">
             <input id="a-stock" type="number" placeholder="Stock Inicial">
             <button class="btn" onclick="saveAccesorio()">GUARDAR</button>
-
             <table>
                 <thead>
                     <tr>
@@ -185,7 +170,6 @@ Sistema listo.
             <button class="btn" onclick="posSearch()">BUSCAR</button>
             <button class="btn" onclick="addToCart()">AGREGAR</button>
             <button class="btn" onclick="clearCart()">LIMPIAR</button>
-
             <div id="pos-info"></div>
             <div id="cart-items"></div>
             <div>Total: $<span id="cart-total">0</span></div>
@@ -215,7 +199,7 @@ Sistema listo.
     <h2>ESTADISTICAS</h2>
     <div id="stats-data"></div>
     <canvas id="salesChart"></canvas>
-    <button class="btn" onclick="document.getElementById('stats-overlay').style.display='none'">CERRAR</button>
+    <button class="btn" onclick="closeStats()">CERRAR</button>
 </div>
 <script type="module">
 
@@ -228,13 +212,12 @@ import {
     query, 
     orderBy, 
     doc, 
-    updateDoc, 
     deleteDoc, 
-    Timestamp, 
-    getDoc,
+    Timestamp,
     runTransaction 
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+/* 🔥 PON AQUÍ TUS DATOS REALES DE FIREBASE */
 const firebaseConfig = {
     apiKey: "TU_API_KEY",
     authDomain: "TU_AUTH_DOMAIN",
@@ -252,25 +235,25 @@ let localOrders = [];
 let localVtas = [];
 let cart = [];
 
-// --- CLOCK ---
+/* ================= CLOCK ================= */
 setInterval(()=>{
-    document.getElementById('clock').innerText = new Date().toLocaleTimeString();
+    document.getElementById("clock").innerText = new Date().toLocaleTimeString();
 },1000);
 
-// --- NAV ---
+/* ================= NAVEGACIÓN ================= */
 window.nav = (id)=>{
-    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-    document.getElementById('sec-'+id).classList.add('active');
+    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+    document.getElementById("sec-"+id).classList.add("active");
 };
 
-// --- INVENTARIO ---
+/* ================= INVENTARIO ================= */
 window.saveAccesorio = async ()=>{
     const data = {
-        nombre: a-nom.value,
-        costo: parseFloat(a-costo.value),
-        pv: parseFloat(a-pv.value),
-        stock: parseInt(a-stock.value),
-        entradas: parseInt(a-stock.value),
+        nombre: document.getElementById("a-nom").value,
+        costo: parseFloat(document.getElementById("a-costo").value),
+        pv: parseFloat(document.getElementById("a-pv").value),
+        stock: parseInt(document.getElementById("a-stock").value),
+        entradas: parseInt(document.getElementById("a-stock").value),
         salidas: 0,
         ts: Timestamp.now()
     };
@@ -279,39 +262,41 @@ window.saveAccesorio = async ()=>{
 
 onSnapshot(collection(db,"accesorios"), snap=>{
     localAcc = snap.docs.map(d=>({id:d.id,...d.data()}));
-    acc-table.innerHTML="";
+    const table = document.getElementById("acc-table");
+    table.innerHTML="";
+
     localAcc.forEach(a=>{
         let status = a.stock<=0?"<span class='tag-out'>AGOTADO</span>":
                      a.stock<=2?"<span class='tag-low'>BAJO</span>":"";
-        acc-table.innerHTML+=`
+
+        table.innerHTML+=`
         <tr>
-        <td>${a.nombre} ${status}</td>
-        <td>${a.stock}</td>
-        <td>E:${a.entradas||0} | S:${a.salidas||0}</td>
-        <td>
-        <button class="btn" onclick="deleteItem('accesorios','${a.id}')">X</button>
-        </td>
+            <td>${a.nombre} ${status}</td>
+            <td>${a.stock}</td>
+            <td>E:${a.entradas||0} | S:${a.salidas||0}</td>
+            <td><button class="btn" onclick="deleteItem('accesorios','${a.id}')">X</button></td>
         </tr>`;
     });
 });
 
-// --- POS ---
+/* ================= POS ================= */
 window.posSearch = ()=>{
-    const val = pos-search.value.toLowerCase();
+    const val = document.getElementById("pos-search").value.toLowerCase();
     const item = localAcc.find(i=>i.nombre.toLowerCase().includes(val));
     if(item){
-        pos-info.innerText = `STOCK:${item.stock} | PRECIO:$${item.pv}`;
+        document.getElementById("pos-info").innerText =
+            `STOCK:${item.stock} | PRECIO:$${item.pv}`;
     }
 };
 
 window.addToCart = ()=>{
-    const val = pos-search.value.toLowerCase();
+    const val = document.getElementById("pos-search").value.toLowerCase();
     const item = localAcc.find(i=>i.nombre.toLowerCase().includes(val));
     if(!item) return;
 
     const count = cart.filter(c=>c.id===item.id).length;
     if(count>=item.stock){
-        pos-info.innerText="STOCK MAXIMO";
+        document.getElementById("pos-info").innerText="STOCK MAXIMO";
         return;
     }
 
@@ -320,17 +305,20 @@ window.addToCart = ()=>{
 };
 
 function renderCart(){
-    cart-items.innerHTML="";
+    const container = document.getElementById("cart-items");
+    container.innerHTML="";
     let total=0;
+
     cart.forEach((i,index)=>{
         total+=i.pv;
-        cart-items.innerHTML+=`
+        container.innerHTML+=`
         <div>
-        > ${i.nombre} - $${i.pv}
-        <button onclick="removeCart(${index})"> - </button>
+            > ${i.nombre} - $${i.pv}
+            <button onclick="removeCart(${index})"> - </button>
         </div>`;
     });
-    cart-total.innerText=total;
+
+    document.getElementById("cart-total").innerText=total;
 }
 
 window.removeCart=(i)=>{
@@ -372,26 +360,28 @@ window.processSale = async ()=>{
 
     cart=[];
     renderCart();
-    pos-info.innerText="VENTA REGISTRADA";
+    document.getElementById("pos-info").innerText="VENTA REGISTRADA";
 };
 
-// --- VENTAS ---
+/* ================= VENTAS ================= */
 onSnapshot(query(collection(db,"ventas"),orderBy("ts","desc")),snap=>{
     localVtas=snap.docs.map(d=>({...d.data()}));
 });
 
-// --- ORDENES ---
+/* ================= ORDENES ================= */
 window.calcOrder=()=>{
-    o-sal.value = (o-pc.value||0)-(o-ant.value||0);
+    const pc = parseFloat(document.getElementById("o-pc").value)||0;
+    const ant = parseFloat(document.getElementById("o-ant").value)||0;
+    document.getElementById("o-sal").value = pc-ant;
 };
 
 window.saveOrder=async()=>{
     const data={
-        cliente:o-cliente.value,
-        modelo:o-eq.value,
-        falla:o-falla.value,
-        prio:o-prio.value,
-        saldo:o-sal.value,
+        cliente:document.getElementById("o-cliente").value,
+        modelo:document.getElementById("o-eq").value,
+        falla:document.getElementById("o-falla").value,
+        prio:document.getElementById("o-prio").value,
+        saldo:document.getElementById("o-sal").value,
         estado:"RECIBIDO",
         ts:Timestamp.now()
     };
@@ -400,16 +390,18 @@ window.saveOrder=async()=>{
 
 onSnapshot(query(collection(db,"ordenes"),orderBy("ts","desc")),snap=>{
     localOrders=snap.docs.map(d=>({...d.data()}));
-    orders-list.innerHTML="";
+    const list = document.getElementById("orders-list");
+    list.innerHTML="";
+
     localOrders.forEach(o=>{
-        orders-list.innerHTML+=`
+        list.innerHTML+=`
         <div class="card ${o.prio==='EXPRESS'?'prio-express':''}">
-        [${o.prio}] ${o.cliente} | ${o.modelo} | SALDO:$${o.saldo}
+            [${o.prio}] ${o.cliente} | ${o.modelo} | SALDO:$${o.saldo}
         </div>`;
     });
 });
 
-// --- STATS ---
+/* ================= STATS ================= */
 window.showStats=()=>{
     const hoy=new Date();
     hoy.setHours(0,0,0,0);
@@ -417,15 +409,19 @@ window.showStats=()=>{
     const ventasHoy=localVtas.filter(v=>v.ts.toDate()>=hoy);
     const total=ventasHoy.reduce((a,b)=>a+b.total,0);
 
-    stats-data.innerHTML=`
-    > PRODUCTOS:${localAcc.length}<br>
-    > TOTAL STOCK:${localAcc.reduce((a,b)=>a+b.stock,0)}<br>
-    > VENTAS HOY:$${total}<br>
-    > SERVICIOS:${localOrders.length}
+    document.getElementById("stats-data").innerHTML=`
+        > PRODUCTOS:${localAcc.length}<br>
+        > TOTAL STOCK:${localAcc.reduce((a,b)=>a+b.stock,0)}<br>
+        > VENTAS HOY:$${total}<br>
+        > SERVICIOS:${localOrders.length}
     `;
 
     renderChart();
-    stats-overlay.style.display="block";
+    document.getElementById("stats-overlay").style.display="block";
+};
+
+window.closeStats=()=>{
+    document.getElementById("stats-overlay").style.display="none";
 };
 
 function renderChart(){
@@ -451,7 +447,7 @@ window.deleteItem=async(c,id)=>{
 </script>
 <script>
 
-// BOOT REAL PARA TU DISEÑO ACTUAL
+/* ================= BOOT SYSTEM ================= */
 window.addEventListener("load", ()=>{
 
     const boot = document.getElementById("boot");
@@ -470,11 +466,12 @@ window.addEventListener("load", ()=>{
 
 });
 
-// Cargar sección inicial
+/* ================= SECCIÓN INICIAL ================= */
 window.addEventListener("DOMContentLoaded",()=>{
     nav("dash");
 });
 
 </script>
+
 </body>
 </html>
