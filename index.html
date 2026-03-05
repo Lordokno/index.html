@@ -1,475 +1,517 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEXTCOM OS v3.0 PRO</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXTCOM OS v3.0 PRO // TERMINAL</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-body{
-    margin:0;
-    background:#000;
-    color:#ff7a00;
-    font-family:'Share Tech Mono', monospace;
-}
+    <style>
+        :root {
+            --amber: #ff7a00;
+            --amber-dim: #944a00;
+            --bg: #050505;
+            --crt-glow: rgba(255, 122, 0, 0.05);
+        }
 
-#boot{
-    position:fixed;
-    inset:0;
-    background:#000;
-    color:#ff7a00;
-    padding:20px;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    font-size:14px;
-}
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--amber);
+            font-family: 'Share Tech Mono', monospace;
+            overflow: hidden;
+            height: 100vh;
+        }
 
-.scanline{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    background:linear-gradient(rgba(255,122,0,0.03) 50%, transparent 50%);
-    background-size:100% 4px;
-    animation:scan 6s linear infinite;
-}
+        /* --- EFECTOS CRT --- */
+        .crt-overlay {
+            position: fixed; inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 3px, 3px 100%;
+            pointer-events: none; z-index: 9999;
+        }
 
-@keyframes scan{
-    from{background-position:0 0;}
-    to{background-position:0 100%;}
-}
+        .scanline {
+            position: fixed; inset: 0;
+            background: linear-gradient(to bottom, transparent, var(--crt-glow) 50%, transparent);
+            background-size: 100% 8px;
+            animation: scan 10s linear infinite;
+            pointer-events: none; z-index: 10000;
+        }
 
-#app{
-    display:none;
-    height:100vh;
-    display:flex;
-}
+        @keyframes scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
 
-.sidebar{
-    width:220px;
-    border-right:1px solid #ff7a00;
-    padding:15px;
-}
+        /* --- PANTALLA DE CARGA --- */
+        #boot {
+            position: fixed; inset: 0;
+            background: #000; z-index: 10001;
+            padding: 40px; display: flex; flex-direction: column;
+            font-size: 1.2rem; line-height: 1.5;
+        }
 
-.sidebar button{
-    width:100%;
-    margin-bottom:10px;
-    background:none;
-    border:1px solid #ff7a00;
-    color:#ff7a00;
-    padding:8px;
-    cursor:pointer;
-}
+        /* --- LAYOUT --- */
+        #app {
+            display: none; height: 100vh;
+        }
 
-.main{
-    flex:1;
-    padding:20px;
-    overflow:auto;
-}
+        .sidebar {
+            width: 240px; border-right: 1px solid var(--amber);
+            padding: 20px; background: #000;
+            display: flex; flex-direction: column; gap: 10px;
+        }
 
-.section{display:none;}
-.section.active{display:block;}
+        .main { flex: 1; padding: 30px; overflow-y: auto; background: var(--bg); }
 
-input, select{
-    background:#000;
-    border:1px solid #ff7a00;
-    color:#ff7a00;
-    padding:5px;
-    margin-bottom:5px;
-    width:100%;
-}
+        /* --- UI ELEMENTS --- */
+        .btn {
+            background: transparent; border: 1px solid var(--amber);
+            color: var(--amber); padding: 10px; cursor: pointer;
+            font-family: 'Share Tech Mono'; transition: 0.2s;
+            text-transform: uppercase;
+        }
+        .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 10px var(--amber); }
 
-button.btn{
-    background:none;
-    border:1px solid #ff7a00;
-    color:#ff7a00;
-    padding:5px 10px;
-    cursor:pointer;
-}
+        input, select {
+            background: #0a0a0a; border: 1px solid var(--amber-dim);
+            color: var(--amber); padding: 10px; width: 100%;
+            margin-bottom: 15px; font-family: 'Share Tech Mono';
+        }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-}
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 10px; color: #fff; }
+        td { padding: 10px; border-bottom: 1px solid var(--amber-dim); }
 
-td, th{
-    border:1px solid #ff7a00;
-    padding:5px;
-    font-size:13px;
-}
+        .card { border: 1px solid var(--amber-dim); padding: 15px; margin-bottom: 15px; position: relative; }
+        .tag-low { color: #000; background: #ffcc00; padding: 2px 5px; font-weight: bold; }
+        .tag-out { color: #fff; background: #ff0000; padding: 2px 5px; font-weight: bold; }
 
-.tag-low{color:yellow;}
-.tag-out{color:red;}
-.card{border:1px solid #ff7a00;padding:10px;margin-bottom:8px;}
-.prio-express{border-color:red;}
+        .section { display: none; }
+        .active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-#stats-overlay{
-    position:fixed;
-    inset:0;
-    background:#000;
-    display:none;
-    padding:40px;
-}
-</style>
+        #stats-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+            z-index: 10002; padding: 50px; display: none;
+        }
+
+        .reorder-modal {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #000; border: 2px solid var(--amber); padding: 25px; z-index: 10005;
+            display: none; width: 350px; box-shadow: 0 0 30px #000;
+        }
+    </style>
 </head>
 <body>
 
+<div class="crt-overlay"></div>
+<div class="scanline"></div>
+
 <div id="boot">
-NEXTCOM OS v3.0 PRO<br>
-Inicializando sistema...<br>
-Cargando módulos...<br>
-Conectando base de datos...<br>
-Autenticando núcleo...<br>
-Sistema listo.
+    <div id="boot-log"></div>
 </div>
 
-<div class="scanline"></div>
+<div id="reorder-modal" class="reorder-modal">
+    <h3>[ REABASTECER_PRODUCTO ]</h3>
+    <p id="re-nombre">---</p>
+    <input type="number" id="re-qty" placeholder="CANTIDAD A AGREGAR">
+    <button class="btn" onclick="confirmReorder()" style="width: 100%;">EJECUTAR CARGA</button><br><br>
+    <button class="btn" onclick="closeReorder()" style="width: 100%; border-color: gray;">ABORTAR</button>
+</div>
 
 <div id="app">
     <div class="sidebar">
-        <button onclick="nav('dash')">01_DASHBOARD</button>
-        <button onclick="nav('inv')">02_INVENTARIO</button>
-        <button onclick="nav('pos')">03_POS</button>
-        <button onclick="nav('orden')">04_ORDENES</button>
-        <button onclick="showStats()">05_STATS</button>
+        <div style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">NEXTCOM OS v3.0</div>
+        <button class="btn" onclick="nav('dash')">01_DASHBOARD</button>
+        <button class="btn" onclick="nav('inv')">02_INVENTARIO</button>
+        <button class="btn" onclick="nav('pos')">03_POS_VENTA</button>
+        <button class="btn" onclick="nav('orden')">04_ORDENES</button>
+        <button class="btn" onclick="showStats()" style="margin-top: auto;">05_SYSTEM_STATS</button>
     </div>
 
     <div class="main">
-
         <div id="sec-dash" class="section active">
-            <h2>DASHBOARD</h2>
-            <div id="clock"></div>
+            <h2>> SYSTEM_STATUS</h2>
+            <div class="card">
+                <div id="clock" style="font-size: 40px;">00:00:00</div>
+                <div id="date-display">YYYY-MM-DD</div>
+            </div>
+            <div id="dash-alerts"></div>
         </div>
 
         <div id="sec-inv" class="section">
-            <h2>INVENTARIO</h2>
-            <input id="a-nom" placeholder="Nombre">
-            <input id="a-costo" type="number" placeholder="Costo">
-            <input id="a-pv" type="number" placeholder="Precio Venta">
-            <input id="a-stock" type="number" placeholder="Stock Inicial">
-            <button class="btn" onclick="saveAccesorio()">GUARDAR</button>
+            <h2>> CONTROL_DE_INVENTARIO</h2>
+            <div class="card">
+                <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input id="a-nom" placeholder="NOMBRE DEL PRODUCTO">
+                    <input id="a-stock" type="number" placeholder="STOCK INICIAL">
+                    <input id="a-costo" type="number" placeholder="COSTO UNITARIO">
+                    <input id="a-pv" type="number" placeholder="PRECIO AL PUBLICO">
+                </div>
+                <button class="btn" onclick="saveAccesorio()" style="width: 100%;">REGISTRAR NUEVO ITEM</button>
+            </div>
             <table>
                 <thead>
-                    <tr>
-                        <th>Producto</th>
-                        <th>Stock</th>
-                        <th>Mov</th>
-                        <th>Acción</th>
-                    </tr>
+                    <tr><th>PRODUCTO</th><th>STOCK</th><th>HISTORIAL</th><th>ACCIONES</th></tr>
                 </thead>
                 <tbody id="acc-table"></tbody>
             </table>
         </div>
 
         <div id="sec-pos" class="section">
-            <h2>PUNTO DE VENTA</h2>
-            <input id="pos-search" placeholder="Buscar producto">
-            <button class="btn" onclick="posSearch()">BUSCAR</button>
-            <button class="btn" onclick="addToCart()">AGREGAR</button>
-            <button class="btn" onclick="clearCart()">LIMPIAR</button>
-            <div id="pos-info"></div>
-            <div id="cart-items"></div>
-            <div>Total: $<span id="cart-total">0</span></div>
-            <button class="btn" onclick="processSale()">FINALIZAR VENTA</button>
+            <h2>> TERMINAL_PUNTO_DE_VENTA</h2>
+            <div class="grid" style="display: grid; grid-template-columns: 1fr 350px; gap: 20px;">
+                <div>
+                    <input id="pos-search" placeholder="ESCANEAR / BUSCAR PRODUCTO..." oninput="posSearch()">
+                    <div id="pos-info" class="card" style="min-height: 50px; font-size: 1.2rem;">ESPERANDO ENTRADA...</div>
+                    <button class="btn" onclick="addToCart()" style="width: 100%; font-size: 1.2rem;">AGREGAR AL CARRO [ENTER]</button>
+                </div>
+                <div class="card">
+                    <h3>CARRITO_ACTUAL</h3>
+                    <div id="cart-items" style="height: 200px; overflow-y: auto;"></div>
+                    <hr border-color="#ff7a00">
+                    <div style="font-size: 24px; text-align: right;">TOTAL: $<span id="cart-total">0</span></div>
+                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 10px; background: #ff7a00; color: #000;">FINALIZAR_TRANSACCION</button>
+                    <button class="btn" onclick="clearCart()" style="width: 100%; margin-top: 5px; border-color: #555;">VACIAR</button>
+                </div>
+            </div>
         </div>
 
         <div id="sec-orden" class="section">
-            <h2>ORDENES</h2>
-            <input id="o-cliente" placeholder="Cliente">
-            <input id="o-eq" placeholder="Modelo">
-            <input id="o-falla" placeholder="Falla">
-            <select id="o-prio">
-                <option>NORMAL</option>
-                <option>EXPRESS</option>
-            </select>
-            <input id="o-pc" type="number" placeholder="Precio">
-            <input id="o-ant" type="number" placeholder="Anticipo" oninput="calcOrder()">
-            <input id="o-sal" placeholder="Saldo" readonly>
-            <button class="btn" onclick="saveOrder()">GUARDAR ORDEN</button>
+            <h2>> GESTION_DE_SERVICIOS</h2>
+            <div class="card">
+                <div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <input id="o-cliente" placeholder="CLIENTE">
+                    <input id="o-eq" placeholder="DISPOSITIVO / MODELO">
+                    <input id="o-falla" placeholder="DIAGNOSTICO INICIAL">
+                    <select id="o-prio">
+                        <option value="NORMAL">PRIORIDAD: NORMAL</option>
+                        <option value="EXPRESS">PRIORIDAD: EXPRESS [URGENTE]</option>
+                    </select>
+                    <input id="o-pc" type="number" placeholder="PRECIO ESTIMADO">
+                    <input id="o-ant" type="number" placeholder="ANTICIPO" oninput="calcOrder()">
+                </div>
+                <div style="font-size: 20px; margin-bottom: 10px;">SALDO PENDIENTE: $<span id="o-sal-display">0</span></div>
+                <button class="btn" onclick="saveOrder()" style="width: 100%;">INGRESAR ORDEN AL SISTEMA</button>
+            </div>
             <div id="orders-list"></div>
         </div>
-
     </div>
 </div>
 
 <div id="stats-overlay">
-    <h2>ESTADISTICAS</h2>
-    <div id="stats-data"></div>
-    <canvas id="salesChart"></canvas>
-    <button class="btn" onclick="closeStats()">CERRAR</button>
+    <h2>=== ANALISIS_DE_DATOS_SISTEMA ===</h2>
+    <div class="grid" style="display: grid; grid-template-columns: 1fr 2fr; gap: 30px;">
+        <div id="stats-data" style="font-size: 1.2rem;"></div>
+        <div class="card"><canvas id="salesChart"></canvas></div>
+    </div>
+    <button class="btn" onclick="closeStats()" style="margin-top: 20px;">REGRESAR A TERMINAL</button>
 </div>
+
 <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { 
+        getFirestore, collection, addDoc, onSnapshot, query, orderBy, 
+        doc, updateDoc, deleteDoc, Timestamp, runTransaction, getDoc 
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-    getFirestore, 
-    collection, 
-    addDoc, 
-    onSnapshot, 
-    query, 
-    orderBy, 
-    doc, 
-    deleteDoc, 
-    Timestamp,
-    runTransaction 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-/* 🔥 PON AQUÍ TUS DATOS REALES DE FIREBASE */
-const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_AUTH_DOMAIN",
-    projectId: "TU_PROJECT_ID",
-    storageBucket: "TU_STORAGE_BUCKET",
-    messagingSenderId: "TU_MSG_ID",
-    appId: "TU_APP_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let localAcc = [];
-let localOrders = [];
-let localVtas = [];
-let cart = [];
-
-/* ================= CLOCK ================= */
-setInterval(()=>{
-    document.getElementById("clock").innerText = new Date().toLocaleTimeString();
-},1000);
-
-/* ================= NAVEGACIÓN ================= */
-window.nav = (id)=>{
-    document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
-    document.getElementById("sec-"+id).classList.add("active");
-};
-
-/* ================= INVENTARIO ================= */
-window.saveAccesorio = async ()=>{
-    const data = {
-        nombre: document.getElementById("a-nom").value,
-        costo: parseFloat(document.getElementById("a-costo").value),
-        pv: parseFloat(document.getElementById("a-pv").value),
-        stock: parseInt(document.getElementById("a-stock").value),
-        entradas: parseInt(document.getElementById("a-stock").value),
-        salidas: 0,
-        ts: Timestamp.now()
+    /* CONFIGURACIÓN FIREBASE */
+    const firebaseConfig = {
+        apiKey: "TU_API_KEY",
+        authDomain: "TU_AUTH_DOMAIN",
+        projectId: "TU_PROJECT_ID",
+        storageBucket: "TU_STORAGE_BUCKET",
+        messagingSenderId: "TU_MSG_ID",
+        appId: "TU_APP_ID"
     };
-    await addDoc(collection(db,"accesorios"), data);
-};
 
-onSnapshot(collection(db,"accesorios"), snap=>{
-    localAcc = snap.docs.map(d=>({id:d.id,...d.data()}));
-    const table = document.getElementById("acc-table");
-    table.innerHTML="";
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    localAcc.forEach(a=>{
-        let status = a.stock<=0?"<span class='tag-out'>AGOTADO</span>":
-                     a.stock<=2?"<span class='tag-low'>BAJO</span>":"";
+    let localAcc = [];
+    let localVtas = [];
+    let cart = [];
+    let myChart = null;
 
-        table.innerHTML+=`
-        <tr>
-            <td>${a.nombre} ${status}</td>
-            <td>${a.stock}</td>
-            <td>E:${a.entradas||0} | S:${a.salidas||0}</td>
-            <td><button class="btn" onclick="deleteItem('accesorios','${a.id}')">X</button></td>
-        </tr>`;
-    });
-});
-
-/* ================= POS ================= */
-window.posSearch = ()=>{
-    const val = document.getElementById("pos-search").value.toLowerCase();
-    const item = localAcc.find(i=>i.nombre.toLowerCase().includes(val));
-    if(item){
-        document.getElementById("pos-info").innerText =
-            `STOCK:${item.stock} | PRECIO:$${item.pv}`;
-    }
-};
-
-window.addToCart = ()=>{
-    const val = document.getElementById("pos-search").value.toLowerCase();
-    const item = localAcc.find(i=>i.nombre.toLowerCase().includes(val));
-    if(!item) return;
-
-    const count = cart.filter(c=>c.id===item.id).length;
-    if(count>=item.stock){
-        document.getElementById("pos-info").innerText="STOCK MAXIMO";
-        return;
+    // --- AUDIO SYSTEM ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq = 440, duration = 0.1) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
-    cart.push(item);
-    renderCart();
-};
+    // --- NAVEGACIÓN ---
+    window.nav = (id) => {
+        playBeep(600, 0.05);
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+        document.getElementById("sec-" + id).classList.add("active");
+    };
 
-function renderCart(){
-    const container = document.getElementById("cart-items");
-    container.innerHTML="";
-    let total=0;
+    // --- INVENTARIO & REABASTECIMIENTO ---
+    window.saveAccesorio = async () => {
+        const nom = document.getElementById("a-nom").value;
+        const stock = parseInt(document.getElementById("a-stock").value);
+        if(!nom || isNaN(stock)) return;
 
-    cart.forEach((i,index)=>{
-        total+=i.pv;
-        container.innerHTML+=`
-        <div>
-            > ${i.nombre} - $${i.pv}
-            <button onclick="removeCart(${index})"> - </button>
-        </div>`;
-    });
+        await addDoc(collection(db, "accesorios"), {
+            nombre: nom,
+            costo: parseFloat(document.getElementById("a-costo").value) || 0,
+            pv: parseFloat(document.getElementById("a-pv").value) || 0,
+            stock: stock,
+            entradas: stock,
+            salidas: 0,
+            ts: Timestamp.now()
+        });
+        playBeep(880, 0.2);
+    };
 
-    document.getElementById("cart-total").innerText=total;
-}
-
-window.removeCart=(i)=>{
-    cart.splice(i,1);
-    renderCart();
-};
-
-window.clearCart=()=>{
-    cart=[];
-    renderCart();
-};
-
-window.processSale = async ()=>{
-    if(cart.length===0) return;
-
-    await runTransaction(db, async(transaction)=>{
-        for(let item of cart){
-            const ref=doc(db,"accesorios",item.id);
-            const snap=await transaction.get(ref);
-            const data=snap.data();
-            if(data.stock<=0) throw "Sin stock";
-
-            transaction.update(ref,{
-                stock:data.stock-1,
-                salidas:(data.salidas||0)+1
-            });
-        }
-
-        const total=cart.reduce((a,b)=>a+b.pv,0);
-        const ganancia=cart.reduce((a,b)=>a+(b.pv-b.costo),0);
-
-        transaction.set(doc(collection(db,"ventas")),{
-            total,
-            ganancia,
-            unidades:cart.length,
-            ts:Timestamp.now()
+    onSnapshot(collection(db, "accesorios"), snap => {
+        localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const table = document.getElementById("acc-table");
+        table.innerHTML = "";
+        localAcc.forEach(a => {
+            let status = a.stock <= 0 ? "<span class='tag-out'>AGOTADO</span>" :
+                         a.stock <= 2 ? "<span class='tag-low'>STOCK_BAJO</span>" : "";
+            table.innerHTML += `
+                <tr>
+                    <td>${a.nombre} ${status}</td>
+                    <td>${a.stock}</td>
+                    <td style="font-size: 11px; color: #888;">E:${a.entradas} | S:${a.salidas}</td>
+                    <td>
+                        <button class="btn" onclick="openReorder('${a.id}','${a.nombre}')" style="padding: 2px 5px;">+</button>
+                        <button class="btn" onclick="deleteItem('accesorios','${a.id}')" style="padding: 2px 5px; color: red;">X</button>
+                    </td>
+                </tr>`;
         });
     });
 
-    cart=[];
-    renderCart();
-    document.getElementById("pos-info").innerText="VENTA REGISTRADA";
-};
-
-/* ================= VENTAS ================= */
-onSnapshot(query(collection(db,"ventas"),orderBy("ts","desc")),snap=>{
-    localVtas=snap.docs.map(d=>({...d.data()}));
-});
-
-/* ================= ORDENES ================= */
-window.calcOrder=()=>{
-    const pc = parseFloat(document.getElementById("o-pc").value)||0;
-    const ant = parseFloat(document.getElementById("o-ant").value)||0;
-    document.getElementById("o-sal").value = pc-ant;
-};
-
-window.saveOrder=async()=>{
-    const data={
-        cliente:document.getElementById("o-cliente").value,
-        modelo:document.getElementById("o-eq").value,
-        falla:document.getElementById("o-falla").value,
-        prio:document.getElementById("o-prio").value,
-        saldo:document.getElementById("o-sal").value,
-        estado:"RECIBIDO",
-        ts:Timestamp.now()
+    window.openReorder = (id, nombre) => {
+        document.getElementById("re-nombre").innerText = nombre;
+        window.currentReId = id;
+        document.getElementById("reorder-modal").style.display = "block";
     };
-    await addDoc(collection(db,"ordenes"),data);
-};
 
-onSnapshot(query(collection(db,"ordenes"),orderBy("ts","desc")),snap=>{
-    localOrders=snap.docs.map(d=>({...d.data()}));
-    const list = document.getElementById("orders-list");
-    list.innerHTML="";
+    window.closeReorder = () => document.getElementById("reorder-modal").style.display = "none";
 
-    localOrders.forEach(o=>{
-        list.innerHTML+=`
-        <div class="card ${o.prio==='EXPRESS'?'prio-express':''}">
-            [${o.prio}] ${o.cliente} | ${o.modelo} | SALDO:$${o.saldo}
-        </div>`;
-    });
-});
+    window.confirmReorder = async () => {
+        const qty = parseInt(document.getElementById("re-qty").value);
+        if(!qty || qty <= 0) return;
+        
+        const ref = doc(db, "accesorios", window.currentReId);
+        const snap = await getDoc(ref);
+        const data = snap.data();
 
-/* ================= STATS ================= */
-window.showStats=()=>{
-    const hoy=new Date();
-    hoy.setHours(0,0,0,0);
+        await updateDoc(ref, {
+            stock: data.stock + qty,
+            entradas: (data.entradas || 0) + qty
+        });
+        
+        closeReorder();
+        playBeep(1000, 0.3);
+    };
 
-    const ventasHoy=localVtas.filter(v=>v.ts.toDate()>=hoy);
-    const total=ventasHoy.reduce((a,b)=>a+b.total,0);
-
-    document.getElementById("stats-data").innerHTML=`
-        > PRODUCTOS:${localAcc.length}<br>
-        > TOTAL STOCK:${localAcc.reduce((a,b)=>a+b.stock,0)}<br>
-        > VENTAS HOY:$${total}<br>
-        > SERVICIOS:${localOrders.length}
-    `;
-
-    renderChart();
-    document.getElementById("stats-overlay").style.display="block";
-};
-
-window.closeStats=()=>{
-    document.getElementById("stats-overlay").style.display="none";
-};
-
-function renderChart(){
-    const ctx=document.getElementById("salesChart");
-    new Chart(ctx,{
-        type:"line",
-        data:{
-            labels:localVtas.map(v=>v.ts.toDate().toLocaleDateString()),
-            datasets:[{
-                label:"Ventas",
-                data:localVtas.map(v=>v.total),
-                borderColor:"#ff7a00",
-                backgroundColor:"transparent"
-            }]
+    // --- POS ---
+    window.posSearch = () => {
+        const val = document.getElementById("pos-search").value.toLowerCase();
+        const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
+        const info = document.getElementById("pos-info");
+        if(item) {
+            info.innerHTML = `ITEM: ${item.nombre} | PRECIO: $${item.pv} | DISP: ${item.stock}`;
+            if(item.stock <= 0) info.style.color = "red"; else info.style.color = "var(--amber)";
+        } else {
+            info.innerText = "NO ENCONTRADO";
         }
+    };
+
+    window.addToCart = () => {
+        const val = document.getElementById("pos-search").value.toLowerCase();
+        const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
+        if(!item || item.stock <= 0) { playBeep(200, 0.5); return; }
+
+        const inCart = cart.filter(c => c.id === item.id).length;
+        if(inCart >= item.stock) return;
+
+        cart.push(item);
+        renderCart();
+        playBeep(900, 0.05);
+    };
+
+    function renderCart() {
+        const container = document.getElementById("cart-items");
+        container.innerHTML = "";
+        let total = 0;
+        cart.forEach((i, idx) => {
+            total += i.pv;
+            container.innerHTML += `<div>> ${i.nombre} ($${i.pv}) <button onclick="removeFromCart(${idx})" style="background:none; color:red; border:none; cursor:pointer;">[X]</button></div>`;
+        });
+        document.getElementById("cart-total").innerText = total.toFixed(2);
+    }
+
+    window.removeFromCart = (i) => { cart.splice(i, 1); renderCart(); };
+    window.clearCart = () => { cart = []; renderCart(); };
+
+    window.processSale = async () => {
+        if(cart.length === 0) return;
+        try {
+            await runTransaction(db, async(transaction) => {
+                for(let item of cart) {
+                    const ref = doc(db, "accesorios", item.id);
+                    const snap = await transaction.get(ref);
+                    const data = snap.data();
+                    if(data.stock <= 0) throw "STOCK_ERROR";
+                    transaction.update(ref, {
+                        stock: data.stock - 1,
+                        salidas: (data.salidas || 0) + 1
+                    });
+                }
+                transaction.set(doc(collection(db, "ventas")), {
+                    total: cart.reduce((a,b)=>a+b.pv, 0),
+                    ganancia: cart.reduce((a,b)=>a+(b.pv-b.costo),0),
+                    items: cart.map(i => i.nombre),
+                    ts: Timestamp.now()
+                });
+            });
+            clearCart();
+            playBeep(1200, 0.5);
+            alert("VENTA FINALIZADA - TICKET GENERADO");
+        } catch(e) { alert("ERROR: STOCK INSUFICIENTE"); }
+    };
+
+    onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc")), snap => {
+        localVtas = snap.docs.map(d => ({ ...d.data() }));
     });
-}
 
-window.deleteItem=async(c,id)=>{
-    await deleteDoc(doc(db,c,id));
-};
+    // --- ORDENES ---
+    window.calcOrder = () => {
+        const pc = parseFloat(document.getElementById("o-pc").value) || 0;
+        const ant = parseFloat(document.getElementById("o-ant").value) || 0;
+        document.getElementById("o-sal-display").innerText = (pc - ant).toFixed(2);
+    };
 
-</script>
-<script>
+    window.saveOrder = async () => {
+        await addDoc(collection(db, "ordenes"), {
+            cliente: document.getElementById("o-cliente").value,
+            modelo: document.getElementById("o-eq").value,
+            falla: document.getElementById("o-falla").value,
+            prio: document.getElementById("o-prio").value,
+            saldo: document.getElementById("o-sal-display").innerText,
+            estado: "RECIBIDO",
+            ts: Timestamp.now()
+        });
+        playBeep(800, 0.2);
+        alert("ORDEN REGISTRADA CORRECTAMENTE");
+    };
 
-/* ================= BOOT SYSTEM ================= */
-window.addEventListener("load", ()=>{
+    onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => {
+        const list = document.getElementById("orders-list");
+        list.innerHTML = "";
+        snap.forEach(doc => {
+            const o = doc.data();
+            list.innerHTML += `
+                <div class="card ${o.prio === 'EXPRESS' ? 'prio-express' : ''}">
+                    <strong>[${o.estado}] ${o.cliente}</strong> - ${o.modelo}<br>
+                    FALLA: ${o.falla} | SALDO: $${o.saldo} | PRIORIDAD: ${o.prio}
+                </div>`;
+        });
+    });
 
-    const boot = document.getElementById("boot");
-    const app = document.getElementById("app");
+    // --- STATS ---
+    window.showStats = () => {
+        const hoy = new Date(); hoy.setHours(0,0,0,0);
+        const vtasHoy = localVtas.filter(v => v.ts.toDate() >= hoy);
+        const totalV = vtasHoy.reduce((a,b) => a + b.total, 0);
+        const ganancia = vtasHoy.reduce((a,b) => a + b.ganancia, 0);
 
-    setTimeout(()=>{
-        boot.style.transition = "opacity 1s";
-        boot.style.opacity = "0";
+        document.getElementById("stats-data").innerHTML = `
+            > ITEMS_EN_BASE: ${localAcc.length}<br>
+            > VENTAS_HOY: $${totalV.toFixed(2)}<br>
+            > GANANCIA_NETA: $${ganancia.toFixed(2)}<br>
+            > UNIDADES_DISPONIBLES: ${localAcc.reduce((a,b)=>a+b.stock,0)}
+        `;
+        document.getElementById("stats-overlay").style.display = "block";
+        renderChart();
+    };
 
-        setTimeout(()=>{
-            boot.style.display = "none";
-            app.style.display = "flex";
-        },1000);
+    window.closeStats = () => document.getElementById("stats-overlay").style.display = "none";
 
-    },2000);
+    function renderChart() {
+        const ctx = document.getElementById("salesChart").getContext('2d');
+        if(myChart) myChart.destroy();
+        
+        // Agrupar ventas por fecha
+        const summary = {};
+        localVtas.forEach(v => {
+            const d = v.ts.toDate().toLocaleDateString();
+            summary[d] = (summary[d] || 0) + v.total;
+        });
 
-});
+        myChart = new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: Object.keys(summary).reverse(),
+                datasets: [{
+                    label: "FLUJO_DE_CAJA ($)",
+                    data: Object.values(summary).reverse(),
+                    borderColor: "#ff7a00",
+                    borderWidth: 2,
+                    backgroundColor: "rgba(255,122,0,0.1)",
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                plugins: { legend: { labels: { color: '#ff7a00', font: { family: 'Share Tech Mono' } } } },
+                scales: {
+                    y: { ticks: { color: '#ff7a00' }, grid: { color: '#333' } },
+                    x: { ticks: { color: '#ff7a00' }, grid: { color: '#333' } }
+                }
+            }
+        });
+    }
 
-/* ================= SECCIÓN INICIAL ================= */
-window.addEventListener("DOMContentLoaded",()=>{
-    nav("dash");
-});
+    window.deleteItem = async (c, id) => { if(confirm("CONFIRMAR ELIMINACIÓN")) await deleteDoc(doc(db, c, id)); };
+
+    // --- BOOT PROCESS ---
+    window.addEventListener("load", async () => {
+        const log = document.getElementById("boot-log");
+        const messages = [
+            "NEXTCOM OS v3.0 PRO...",
+            "KERNEL_INIT... OK",
+            "SCANNING_HARDWARE... CRT_EMULATION_LOADED",
+            "CONNECTING_FIREBASE_SERVICE... ESTABLISHED",
+            "LOADING_INVENTORY_CACHE... 100%",
+            "AUTHORIZING_TERMINAL... NXT-ADM-99",
+            "SYSTEM_READY_FOR_OPERATIONS."
+        ];
+
+        for(let msg of messages) {
+            const line = document.createElement("div");
+            log.appendChild(line);
+            for(let char of msg) {
+                line.textContent += char;
+                await new Promise(r => setTimeout(r, 20));
+            }
+            playBeep(400, 0.02);
+            await new Promise(r => setTimeout(r, 400));
+        }
+
+        setTimeout(() => {
+            document.getElementById("boot").style.display = "none";
+            document.getElementById("app").style.display = "flex";
+        }, 1000);
+    });
+
+    setInterval(() => {
+        const now = new Date();
+        document.getElementById("clock").innerText = now.toLocaleTimeString();
+        document.getElementById("date-display").innerText = now.toISOString().split('T')[0];
+    }, 1000);
 
 </script>
 
