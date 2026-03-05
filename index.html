@@ -586,45 +586,102 @@ function updateSalesTotals(sales) {
 
         // --- BOOT-SEQUENCE.JS: SIMULACIÓN DE ARRANQUE ---
 
+// --- SISTEMA DE ARRANQUE NEXTCOM OS v2.4 ---
+
 const bootLines = [
-    "NEXTCOM OS v2.3.5_STABLE",
-    "INITIALIZING SYSTEM KERNEL...",
-    "LOADING CORE MODULES: [OK]",
+    "NEXTCOM OS [Version 2.4.2026]",
+    "(C) 2026 NEXTCOM MULTISERVICIOS CORP.",
+    "--------------------------------------",
+    "BIOS CHECKING RAM... 640KB OK",
+    "INITIALIZING KERNEL MODULES...",
+    "LOADING FIREBASE_DB_DRIVER: [DONE]",
+    "CONNECTING TO CLOUD_SERVER... SUCCESS",
+    "SCANNING LOCAL_STORAGE... 128 BYTES FOUND",
+    "LOADING INVENTORY_INDEX... OK",
+    "VERIFYING POS_TERMINAL_01... READY",
+    "SETTING UP CRT_EMULATION_LAYER...",
+    "--------------------------------------",
     "ACCESS GRANTED.",
     "WELCOME, TECHNICIAN."
 ];
 
+// Generador de Ruido CRT (Audio)
+function startStaticNoise(audioCtx) {
+    const bufferSize = 2 * audioCtx.sampleRate;
+    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+
+    for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+    }
+
+    const whiteNoise = audioCtx.createBufferSource();
+    whiteNoise.buffer = noiseBuffer;
+    whiteNoise.loop = true;
+
+    const filter = audioCtx.createBiquadFilter();
+    filter.type = "bandpass";
+    filter.frequency.value = 850;
+    filter.Q.value = 0.5;
+
+    const gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.015; // Volumen sutil de fondo
+
+    whiteNoise.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    whiteNoise.start();
+    return gainNode;
+}
+
+// Función Principal de Arranque
 async function runBootSequence() {
     const logContainer = document.getElementById('boot-log');
     const bootScreen = document.getElementById('boot-screen');
+    const cursor = document.getElementById('boot-cursor');
     
-    // 1. Iniciar Estática
-    const stopNoise = startStaticNoise();
-    
-    // [ ... El resto de la lógica de escritura de líneas que ya tienes ... ]
+    // Iniciar contexto de audio al interactuar o cargar
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const noiseGain = startStaticNoise(audioCtx);
+
+    document.body.style.overflow = 'hidden';
 
     for (let line of bootLines) {
-        // [ Código de impresión de líneas ]
-        // Tip: Puedes añadir playBeep('nav') con ganancia 0.01 aquí para el "tecleo"
+        const div = document.createElement('div');
+        div.className = 'boot-text';
+        logContainer.appendChild(div);
+
+        // Efecto escritura por cada caracter
+        for (let char of line) {
+            div.textContent += char;
+            await new Promise(r => setTimeout(r, 15));
+        }
+
+        // Pausa lógica entre líneas
+        const wait = line.includes('...') ? 500 : 150;
+        await new Promise(r => setTimeout(r, wait));
+        logContainer.scrollTop = logContainer.scrollHeight;
     }
 
-    // 2. Finalizar secuencia
-    await new Promise(resolve => setTimeout(resolve, 800));
+    // Finalización
+    await new Promise(r => setTimeout(r, 1000));
     
+    // Desvanecer ruido y pantalla
+    noiseGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.4);
+    bootScreen.style.transition = 'opacity 0.8s ease';
     bootScreen.style.opacity = '0';
-    stopNoise(); // Detener el ruido con un fade out
-
+    
     setTimeout(() => {
         bootScreen.classList.add('hidden-os');
         document.body.style.overflow = 'auto';
-        playBeep('nav'); 
-    }, 500);
+        // Beep de sistema listo (asumiendo que tienes playBeep)
+        if (typeof playBeep === 'function') playBeep('nav');
+    }, 800);
 }
 
-// EJECUCIÓN AL CARGAR EL DOM
-window.addEventListener('DOMContentLoaded', () => {
-    runBootSequence();
-});
+// Disparador
+window.addEventListener('DOMContentLoaded', runBootSequence);
 </script>
 </body>
 </html>
