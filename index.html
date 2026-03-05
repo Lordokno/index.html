@@ -46,45 +46,50 @@
     50% { opacity: 1; }
     100% { opacity: 0.98; }
 }
-        /* BOOT-SEQUENCE STYLES */
 #boot-screen {
     position: fixed;
     top: 0; left: 0;
     width: 100vw; height: 100vh;
     background: #000;
-    z-index: 20000; /* Por encima de todo */
+    z-index: 20000;
     display: flex;
     flex-direction: column;
     padding: 40px;
     overflow: hidden;
 }
 
+#boot-screen::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grains.jpg');
+    opacity: 0.04;
+    pointer-events: none;
+    animation: grain-jump 0.1s steps(2) infinite;
+}
+
+@keyframes grain-jump {
+    0% { transform: translate(0,0); }
+    50% { transform: translate(-5%, -5%); }
+    100% { transform: translate(5%, 5%); }
+}
+
 .boot-text {
     color: var(--amber);
-    font-family: 'VT323', monospace;
-    font-size: 1.5rem;
-    margin-bottom: 5px;
-    white-space: pre-wrap;
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+    text-shadow: 0 0 5px var(--amber-dim);
 }
 
 .cursor {
     display: inline-block;
-    width: 10px;
-    height: 1.5rem;
+    width: 10px; height: 1.4rem;
     background: var(--amber);
-    margin-left: 5px;
     animation: blink 0.8s infinite;
-    vertical-align: middle;
 }
 
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0; }
-}
-
-.hidden-os {
-    display: none !important;
-}
+.hidden-os { display: none !important; }
 
 
         
@@ -583,8 +588,6 @@ function updateSalesTotals(sales) {
         showStats(); // Refrescar stats si el modal está abierto
     }
 }
-
-        // --- BOOT-SEQUENCE.JS: SIMULACIÓN DE ARRANQUE ---
 
 // --- SISTEMA DE ARRANQUE NEXTCOM OS v2.4 ---
 
