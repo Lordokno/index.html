@@ -57,59 +57,78 @@
             width: 240px; border-right: 1px solid var(--amber);
             padding: 20px; background: #000;
             display: flex; flex-direction: column; gap: 10px;
+            box-sizing: border-box;
         }
 
-        .main { flex: 1; padding: 30px; overflow-y: auto; background: var(--bg); }
+        .main { flex: 1; padding: 30px; overflow-y: auto; background: var(--bg); box-sizing: border-box; }
 
         .btn {
             background: transparent; border: 1px solid var(--amber);
             color: var(--amber); padding: 10px; cursor: pointer;
             font-family: 'Share Tech Mono'; transition: 0.2s;
             text-transform: uppercase;
+            box-sizing: border-box;
         }
         .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 10px var(--amber); }
 
-        .btn-del { border-color: #ff4444; color: #ff4444; margin-left: 10px; padding: 2px 8px; }
+        .btn-del { border-color: #ff4444; color: #ff4444; padding: 5px 12px; height: fit-content; }
+        .btn-del:hover { background: #ff4444; color: #000; }
 
-        input, select {
+        input {
             background: #0a0a0a; border: 1px solid var(--amber-dim);
-            color: var(--amber); padding: 10px; width: 100%;
-            margin-bottom: 15px; font-family: 'Share Tech Mono';
+            color: var(--amber); padding: 12px; width: 100%;
+            margin-bottom: 10px; font-family: 'Share Tech Mono';
             box-sizing: border-box;
         }
 
         .grid-responsive {
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
-            gap: 15px;
+            gap: 20px;
+            align-items: start;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 10px; color: #fff; }
-        td { padding: 10px; border-bottom: 1px solid var(--amber-dim); }
+        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; }
+        td { padding: 12px; border-bottom: 1px solid var(--amber-dim); vertical-align: middle; }
 
-        .card { border: 1px solid var(--amber-dim); padding: 15px; margin-bottom: 15px; position: relative; }
+        .card { border: 1px solid var(--amber-dim); padding: 20px; margin-bottom: 15px; background: rgba(10,10,10,0.5); }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; }
         
-        /* Contenedor de Historial con scroll */
         .history-container {
-            height: 200px;
-            overflow-y: scroll;
+            height: 220px;
+            overflow-y: auto;
             border: 1px solid var(--amber-dim);
-            padding: 10px;
+            padding: 15px;
             background: rgba(255, 122, 0, 0.02);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            line-height: 1.6;
         }
+
+        /* Scrollbar Estética */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--amber-dim); }
 
         .section { display: none; }
         .active { display: block; animation: fadeIn 0.3s; }
 
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         #reorder-modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: #000; border: 2px solid var(--amber); padding: 25px; z-index: 10005;
-            display: none; width: 350px; box-shadow: 0 0 30px #000;
+            background: #000; border: 2px solid var(--amber); padding: 30px; z-index: 10005;
+            display: none; width: 350px; box-shadow: 0 0 50px #000;
         }
 
-        canvas { max-height: 300px !important; width: 100% !important; }
+        canvas { max-height: 280px !important; width: 100% !important; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -120,16 +139,16 @@
 <div id="boot"><div id="boot-log"></div></div>
 
 <div id="reorder-modal">
-    <h3>[ REABASTECER_PRODUCTO ]</h3>
-    <p id="re-nombre">---</p>
-    <input type="number" id="re-qty" placeholder="CANTIDAD">
-    <button class="btn" onclick="confirmReorder()" style="width: 100%;">EJECUTAR</button><br><br>
-    <button class="btn" onclick="closeReorder()" style="width: 100%; border-color: gray;">ABORTAR</button>
+    <h3 style="margin-top:0">[ REABASTECER_STOCK ]</h3>
+    <p id="re-nombre" style="color:#fff">---</p>
+    <input type="number" id="re-qty" placeholder="CANTIDAD A SUMAR">
+    <button class="btn" onclick="confirmReorder()" style="width: 100%;">EJECUTAR INCREMENTO</button>
+    <button class="btn" onclick="closeReorder()" style="width: 100%; border-color: #555; margin-top: 10px; color: #555;">CANCELAR</button>
 </div>
 
 <div id="app">
     <div class="sidebar">
-        <div style="font-size: 20px; font-weight: bold; margin-bottom: 20px;">NEXTCOM OS v3.0</div>
+        <div style="font-size: 18px; font-weight: bold; margin-bottom: 25px; color:#fff; letter-spacing: 1px;">NEXTCOM_OS_v3.0</div>
         <button class="btn" onclick="nav('dash')">01_DASHBOARD</button>
         <button class="btn" onclick="nav('inv')">02_INVENTARIO</button>
         <button class="btn" onclick="nav('pos')">03_POS_VENTA</button>
@@ -140,12 +159,12 @@
         <div id="sec-dash" class="section active">
             <h2>> SYSTEM_STATUS</h2>
             <div class="grid-responsive">
-                <div class="card">
-                    <div id="clock" style="font-size: 40px;">00:00:00</div>
-                    <div id="date-display">YYYY-MM-DD</div>
+                <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+                    <div id="clock" style="font-size: 50px; margin-bottom: 5px;">00:00:00</div>
+                    <div id="date-display" style="letter-spacing: 3px; opacity: 0.7;">YYYY-MM-DD</div>
                 </div>
                 <div class="card">
-                    <h3>ANÁLISIS DE STOCK Y VENTAS</h3>
+                    <h3 style="margin-top:0">ANÁLISIS DE RENDIMIENTO</h3>
                     <canvas id="mainChart"></canvas>
                 </div>
             </div>
@@ -154,17 +173,24 @@
         <div id="sec-inv" class="section">
             <h2>> CONTROL_DE_INVENTARIO</h2>
             <div class="card">
-                <div class="grid-responsive">
-                    <input id="a-nom" placeholder="NOMBRE DEL PRODUCTO">
+                <input id="a-nom" placeholder="NOMBRE DEL PRODUCTO / MODELO">
+                <div class="form-grid">
                     <input id="a-stock" type="number" placeholder="STOCK INICIAL">
-                    <input id="a-costo" type="number" placeholder="COSTO UNITARIO">
-                    <input id="a-pv" type="number" placeholder="PRECIO AL PUBLICO">
+                    <input id="a-costo" type="number" placeholder="COSTO UNITARIO ($)">
+                    <input id="a-pv" type="number" placeholder="PRECIO VENTA ($)">
+                    <button class="btn" onclick="saveAccesorio()" style="grid-column: span 2; margin-top: 5px;">REGISTRAR NUEVA ENTRADA</button>
                 </div>
-                <button class="btn" onclick="saveAccesorio()" style="width: 100%;">REGISTRAR ITEM</button>
             </div>
             <div style="overflow-x: auto;">
                 <table>
-                    <thead><tr><th>PRODUCTO</th><th>STOCK</th><th>DATA</th><th>ACCIONES</th></tr></thead>
+                    <thead>
+                        <tr>
+                            <th>ITEM_DESCRIPCIÓN</th>
+                            <th style="width: 100px;">STOCK</th>
+                            <th style="width: 150px;">MÉTRICAS</th>
+                            <th style="width: 150px; text-align: right;">ACCIONES</th>
+                        </tr>
+                    </thead>
                     <tbody id="acc-table"></tbody>
                 </table>
             </div>
@@ -174,20 +200,23 @@
             <h2>> PUNTO_DE_VENTA</h2>
             <div class="grid-responsive">
                 <div>
-                    <input id="pos-search" placeholder="BUSCAR..." oninput="posSearch()">
-                    <div id="pos-info" class="card" style="min-height: 50px;">ESPERANDO...</div>
-                    <button class="btn" onclick="addToCart()" style="width: 100%;">AÑADIR</button>
+                    <input id="pos-search" placeholder="ESCRIBA PARA BUSCAR PRODUCTO..." oninput="posSearch()">
+                    <div id="pos-info" class="card" style="min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold;">ESPERANDO ENTRADA...</div>
+                    <button class="btn" onclick="addToCart()" style="width: 100%; margin-bottom: 25px;">AÑADIR AL CARRITO</button>
                     
-                    <h3 style="margin-top: 20px;">> HISTORIAL_RECIENTE</h3>
+                    <h3>> REGISTRO_DE_VENTAS</h3>
                     <div id="pos-history" class="history-container">
-                        <div>CARGANDO LOGS...</div>
+                        <div>SISTEMA LISTO...</div>
                     </div>
                 </div>
                 <div class="card">
-                    <h3>CARRITO</h3>
-                    <div id="cart-items" style="height: 150px; overflow-y: auto;"></div>
-                    <div style="font-size: 24px; text-align: right; border-top: 1px solid var(--amber); padding-top: 10px;">TOTAL: $<span id="cart-total">0</span></div>
-                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 10px; background: var(--amber); color: #000;">COBRAR</button>
+                    <h3 style="margin-top:0">CARRITO_ACTUAL</h3>
+                    <div id="cart-items" style="height: 180px; overflow-y: auto; border-bottom: 1px solid var(--amber-dim); margin-bottom: 15px;"></div>
+                    <div class="flex-row">
+                        <span style="font-size: 1.2rem;">TOTAL_A_PAGAR:</span>
+                        <span style="font-size: 2rem; color: #fff;">$<span id="cart-total">0</span></span>
+                    </div>
+                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 20px; background: var(--amber); color: #000; font-weight: bold; font-size: 1.1rem;">CONFIRMAR Y COBRAR</button>
                 </div>
             </div>
         </div>
@@ -195,15 +224,18 @@
         <div id="sec-orden" class="section">
             <h2>> SERVICIOS_TECNICOS</h2>
             <div class="card">
-                <div class="grid-responsive">
-                    <input id="o-cliente" placeholder="CLIENTE">
-                    <input id="o-eq" placeholder="DISPOSITIVO">
-                    <input id="o-falla" placeholder="FALLA">
-                    <input id="o-pc" type="number" placeholder="PRECIO TOTAL">
-                    <input id="o-ant" type="number" placeholder="ANTICIPO" oninput="calcOrder()">
+                <div class="form-grid">
+                    <input id="o-cliente" placeholder="NOMBRE DEL CLIENTE" style="grid-column: span 2;">
+                    <input id="o-eq" placeholder="EQUIPO / MODELO">
+                    <input id="o-falla" placeholder="FALLA REPORTADA">
+                    <input id="o-pc" type="number" placeholder="PRECIO TOTAL ($)">
+                    <input id="o-ant" type="number" placeholder="ANTICIPO ($)" oninput="calcOrder()">
                 </div>
-                <div style="font-size: 20px; margin-bottom: 10px;">SALDO PENDIENTE: $<span id="o-sal-display">0</span></div>
-                <button class="btn" onclick="saveOrder()" style="width: 100%;">CREAR ORDEN</button>
+                <div class="flex-row" style="margin-bottom: 15px; border-top: 1px solid var(--amber-dim); padding-top: 15px;">
+                    <span style="font-size: 1.1rem;">SALDO PENDIENTE:</span>
+                    <span style="font-size: 1.5rem; color: #ff4444;">$<span id="o-sal-display">0</span></span>
+                </div>
+                <button class="btn" onclick="saveOrder()" style="width: 100%;">GENERAR ORDEN DE SERVICIO</button>
             </div>
             <div id="orders-list"></div>
         </div>
@@ -233,39 +265,37 @@
     let cart = [];
     let salesChart = null;
 
-    // --- NAVEGACION ---
     window.nav = (id) => {
         document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
         document.getElementById("sec-" + id).classList.add("active");
     };
 
-    // --- GRÁFICO ---
     function updateChart() {
         const ctx = document.getElementById('mainChart').getContext('2d');
-        const labels = localAcc.map(a => a.nombre);
+        const labels = localAcc.map(a => a.nombre.substring(0,10));
         const stocks = localAcc.map(a => a.stock);
         const sales = localAcc.map(a => a.salidas || 0);
-
         if (salesChart) salesChart.destroy();
-
         salesChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [
                     { label: 'STOCK', data: stocks, backgroundColor: '#ff7a00' },
-                    { label: 'SALIDAS', data: sales, backgroundColor: '#944a00' }
+                    { label: 'VENTAS', data: sales, backgroundColor: '#444' }
                 ]
             },
             options: {
                 responsive: true,
-                scales: { y: { beginAtZero: true, grid: { color: '#222' } }, x: { grid: { display: false } } },
+                scales: { 
+                    y: { beginAtZero: true, grid: { color: '#1a1a1a' }, ticks: { color: '#ff7a00' } }, 
+                    x: { grid: { display: false }, ticks: { color: '#ff7a00' } } 
+                },
                 plugins: { legend: { labels: { color: '#ff7a00', font: { family: 'Share Tech Mono' } } } }
             }
         });
     }
 
-    // --- INVENTARIO ---
     onSnapshot(collection(db, "accesorios"), snap => {
         localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         const table = document.getElementById("acc-table");
@@ -273,10 +303,10 @@
         localAcc.forEach(a => {
             table.innerHTML += `<tr>
                 <td>${a.nombre}</td>
-                <td>${a.stock}</td>
-                <td>E:${a.entradas} S:${a.salidas}</td>
-                <td>
-                    <button class="btn" onclick="openReorder('${a.id}','${a.nombre}')">+</button>
+                <td style="font-weight:bold; color:#fff">${a.stock}</td>
+                <td style="font-size:0.8rem">ENT: ${a.entradas} | SAL: ${a.salidas}</td>
+                <td style="text-align:right">
+                    <button class="btn" onclick="openReorder('${a.id}','${a.nombre}')" style="padding: 5px 10px;">+</button>
                     <button class="btn btn-del" onclick="deleteItem('accesorios','${a.id}')">X</button>
                 </td>
             </tr>`;
@@ -284,14 +314,13 @@
         updateChart();
     });
 
-    // --- POS & HISTORIAL ---
     onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc"), limit(15)), snap => {
         const history = document.getElementById("pos-history");
         history.innerHTML = "";
         snap.forEach(d => {
             const v = d.data();
             const date = v.ts ? v.ts.toDate().toLocaleTimeString() : '...';
-            history.innerHTML += `<div>[${date}] VENTA: $${v.total} (${v.items} items)</div>`;
+            history.innerHTML += `<div style="border-bottom: 1px solid #222; margin-bottom:5px;">> [${date}] TOTAL: $${v.total} <span style="opacity:0.6">(${v.items} items)</span></div>`;
         });
     });
 
@@ -299,33 +328,19 @@
         if(cart.length === 0) return;
         const totalVenta = cart.reduce((acc, i) => acc + i.pv, 0);
         const numItems = cart.length;
-
         try {
             await runTransaction(db, async(t) => {
                 for(let item of cart) {
                     const ref = doc(db, "accesorios", item.id);
                     const snap = await t.get(ref);
-                    t.update(ref, { 
-                        stock: snap.data().stock - 1, 
-                        salidas: (snap.data().salidas || 0) + 1 
-                    });
+                    t.update(ref, { stock: snap.data().stock - 1, salidas: (snap.data().salidas || 0) + 1 });
                 }
-                // Guardar registro de la venta
-                const saleRef = collection(db, "ventas");
-                await addDoc(saleRef, {
-                    total: totalVenta,
-                    items: numItems,
-                    ts: Timestamp.now()
-                });
+                await addDoc(collection(db, "ventas"), { total: totalVenta, items: numItems, ts: Timestamp.now() });
             });
-            cart = []; renderCart(); alert("VENTA COMPLETADA");
-        } catch (e) {
-            console.error(e);
-            alert("ERROR AL PROCESAR");
-        }
+            cart = []; renderCart(); alert("TRANSACCIÓN EXITOSA");
+        } catch (e) { alert("ERROR DE COMUNICACIÓN"); }
     };
 
-    // --- FUNCIONES EXISTENTES ---
     window.saveAccesorio = async () => {
         const nom = document.getElementById("a-nom").value;
         const stock = parseInt(document.getElementById("a-stock").value);
@@ -336,32 +351,37 @@
             pv: parseFloat(document.getElementById("a-pv").value) || 0,
             entradas: stock, salidas: 0, ts: Timestamp.now()
         });
+        document.querySelectorAll("#sec-inv input").forEach(i => i.value = "");
     };
 
     window.posSearch = () => {
         const val = document.getElementById("pos-search").value.toLowerCase();
         const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
         const info = document.getElementById("pos-info");
-        if(item) info.innerHTML = `${item.nombre} | $${item.pv} | STOCK: ${item.stock}`;
-        else info.innerText = "NO ENCONTRADO";
+        if(item) info.innerHTML = `<span style="color:#fff">${item.nombre}</span> &nbsp; | &nbsp; $${item.pv} &nbsp; | &nbsp; STOCK: ${item.stock}`;
+        else info.innerText = "SISTEMA: ITEM NO LOCALIZADO";
     };
 
     window.addToCart = () => {
         const val = document.getElementById("pos-search").value.toLowerCase();
         const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
         if(item && item.stock > 0) { cart.push(item); renderCart(); }
+        else if(item) { alert("ERROR: STOCK INSUFICIENTE"); }
     };
 
     function renderCart() {
         const container = document.getElementById("cart-items");
         container.innerHTML = "";
         let total = 0;
-        cart.forEach(i => { total += i.pv; container.innerHTML += `<div>> ${i.nombre} $${i.pv}</div>`; });
+        cart.forEach((i, idx) => { 
+            total += i.pv; 
+            container.innerHTML += `<div class="flex-row" style="margin-bottom:8px;"><span>> ${i.nombre}</span><span>$${i.pv}</span></div>`; 
+        });
         document.getElementById("cart-total").innerText = total.toFixed(2);
     }
 
     window.deleteItem = async (col, id) => {
-        if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, col, id));
+        if(confirm("¿CONFIRMAR ELIMINACIÓN PERMANENTE?")) await deleteDoc(doc(db, col, id));
     };
 
     window.openReorder = (id, n) => {
@@ -372,6 +392,7 @@
     window.closeReorder = () => document.getElementById("reorder-modal").style.display = "none";
     window.confirmReorder = async () => {
         const q = parseInt(document.getElementById("re-qty").value);
+        if(isNaN(q)) return;
         const ref = doc(db, "accesorios", window.currentReId);
         const snap = await getDoc(ref);
         await updateDoc(ref, { stock: snap.data().stock + q, entradas: snap.data().entradas + q });
@@ -379,12 +400,16 @@
     };
 
     window.saveOrder = async () => {
+        const cliente = document.getElementById("o-cliente").value;
+        if(!cliente) return;
         await addDoc(collection(db, "ordenes"), {
-            cliente: document.getElementById("o-cliente").value,
+            cliente: cliente,
             modelo: document.getElementById("o-eq").value,
             saldo: document.getElementById("o-sal-display").innerText,
             ts: Timestamp.now()
         });
+        document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
+        document.getElementById("o-sal-display").innerText = "0";
     };
 
     onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => {
@@ -392,7 +417,10 @@
         list.innerHTML = "";
         snap.forEach(d => {
             const o = d.data();
-            list.innerHTML += `<div class="card flex-between"><div><strong>${o.cliente}</strong> | ${o.modelo}<br><small>SALDO: $${o.saldo}</small></div><button class="btn btn-del" onclick="deleteItem('ordenes','${d.id}')">X</button></div>`;
+            list.innerHTML += `<div class="card flex-row">
+                <div><strong style="color:#fff; font-size:1.1rem">${o.cliente}</strong><br>${o.modelo} | <span style="color:#ff4444">DEUDA: $${o.saldo}</span></div>
+                <button class="btn btn-del" onclick="deleteItem('ordenes','${d.id}')">FINALIZAR</button>
+            </div>`;
         });
     });
 
@@ -404,11 +432,11 @@
 
     window.addEventListener("load", async () => {
         const log = document.getElementById("boot-log");
-        const msgs = ["CONNECTING TO NEXTCOM_SERVER...", "LOADING DATABASE...", "SYSTEM ONLINE."];
+        const msgs = ["> INICIANDO KERNEL...", "> CARGANDO COMPONENTES FIREBASE...", "> ENLACE ESTABLECIDO.", "> BIENVENIDO, OPERADOR."];
         for(let m of msgs) {
             const d = document.createElement("div"); d.innerText = m;
             log.appendChild(d);
-            await new Promise(r => setTimeout(r, 400));
+            await new Promise(r => setTimeout(r, 300));
         }
         document.getElementById("boot").style.display = "none";
         document.getElementById("app").style.display = "flex";
