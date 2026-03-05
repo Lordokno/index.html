@@ -5,8 +5,35 @@
 <title>NEXTCOM OS v2.6 PRO</title>
 
 <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { 
+    getFirestore, 
+    collection, 
+    getDocs, 
+    doc, 
+    runTransaction, 
+    addDoc, 
+    updateDoc, 
+    query, 
+    where,
+    getDoc
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "TU_API_KEY",
+    authDomain: "TU_AUTH_DOMAIN",
+    projectId: "TU_PROJECT_ID",
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  window.db = db;
+  window.firestore = {
+    collection, getDocs, doc, runTransaction, addDoc, updateDoc, query, where, getDoc
+  };
+</script>
 
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,20 +42,17 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
-body {
+body{
   margin:0;
   background:black;
   color:#ff7a00;
-  font-family: "Courier New", monospace;
-  overflow-x:hidden;
+  font-family:"Courier New", monospace;
 }
-
-header {
+header{
   padding:10px;
   border-bottom:1px solid #ff7a00;
 }
-
-button {
+button{
   background:black;
   color:#ff7a00;
   border:1px solid #ff7a00;
@@ -36,38 +60,36 @@ button {
   margin:3px;
   cursor:pointer;
 }
-
-button:hover {
+button:hover{
   background:#ff7a00;
   color:black;
 }
-
-.section {
+.section{
   padding:15px;
 }
-
-.product {
+.product{
   border-bottom:1px solid #333;
   padding:8px;
 }
-
-.low { color: yellow; }
-.out { color: red; }
-
-#boot {
+.low{ color:yellow; }
+.out{ color:red; }
+#boot{
   position:fixed;
   inset:0;
   background:black;
-  color:#ff7a00;
   padding:20px;
-  font-size:14px;
 }
-
-canvas {
+.cart{
+  border-top:1px solid #ff7a00;
+  margin-top:10px;
+  padding-top:10px;
+}
+canvas{
   background:black;
 }
 </style>
 </head>
+
 <body>
 
 <div id="boot"></div>
@@ -85,134 +107,138 @@ canvas {
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, runTransaction, addDoc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+const { collection, getDocs, doc, runTransaction, addDoc, getDoc } = window.firestore;
+const db = window.db;
 
-const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_DOMINIO",
-  projectId: "TU_PROJECT_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+let cart = [];
 
 const bootMessages = [
 "> BOOTING NEXTCOM OS v2.6 PRO...",
 "> Cargando Inventario... OK",
-"> Cargando Ventas... OK",
 "> Cargando Facturación... OK",
 "> Sistema listo."
 ];
 
-let bootDiv = document.getElementById("boot");
-let i = 0;
+let i=0;
+const bootDiv = document.getElementById("boot");
 
 function bootSystem(){
-  if(i < bootMessages.length){
-    bootDiv.innerHTML += bootMessages[i] + "<br>";
+  if(i<bootMessages.length){
+    bootDiv.innerHTML+=bootMessages[i]+"<br>";
     i++;
     setTimeout(bootSystem,500);
-  } else {
-    setTimeout(()=> bootDiv.style.display="none",1000);
-    loadInventory();
+  }else{
+    setTimeout(()=>{
+      bootDiv.style.display="none";
+      loadInventory();
+    },1000);
   }
 }
 bootSystem();
 
-function showSection(id){
+window.showSection=function(id){
   document.getElementById("inventory").style.display="none";
   document.getElementById("stats").style.display="none";
   document.getElementById(id).style.display="block";
+  if(id==="stats") generateChart();
 }
 
 async function loadInventory(){
   const snapshot = await getDocs(collection(db,"inventario"));
-  const container = document.getElementById("inventory");
-  container.innerHTML = "";
+  const container=document.getElementById("inventory");
+  container.innerHTML="<h3>INVENTARIO</h3>";
 
   snapshot.forEach(docSnap=>{
-    const data = docSnap.data();
-    let status = "";
-    let classStatus = "";
+    const data=docSnap.data();
+    let status="";
+    let cls="";
+    if(data.stock<=0){status="OUT";cls="out";}
+    else if(data.stock<=data.stockMinimo){status="LOW";cls="low";}
 
-    if(data.stock <= 0){
-      status="OUT";
-      classStatus="out";
-    } else if(data.stock <= data.stockMinimo){
-      status="LOW";
-      classStatus="low";
-    }
-
-    container.innerHTML += `
-      <div class="product">
-        ${data.nombre} - Stock: ${data.stock}
-        <span class="${classStatus}">${status}</span><br>
-        <button onclick="addToCart('${docSnap.id}')">+</button>
-        <button onclick="restock('${docSnap.id}')">+STOCK</button>
-        <button onclick="adjust('${docSnap.id}')">-STOCK</button>
-      </div>
+    container.innerHTML+=`
+    <div class="product">
+      ${data.nombre} - Stock: ${data.stock}
+      <span class="${cls}">${status}</span><br>
+      <button onclick="addToCart('${docSnap.id}','${data.nombre}',${data.precio})">+</button>
+      <button onclick="restock('${docSnap.id}')">+STOCK</button>
+      <button onclick="adjust('${docSnap.id}')">-STOCK</button>
+    </div>
     `;
   });
+
+  renderCart();
 }
 
-async function restock(id){
-  let qty = parseInt(prompt("Cantidad a agregar:"));
-  if(!qty || qty<=0) return alert("Cantidad inválida");
+window.addToCart=function(id,name,price){
+  cart.push({id,name,price});
+  renderCart();
+}
 
-  const ref = doc(db,"inventario",id);
-
-  await runTransaction(db, async (transaction)=>{
-    const snap = await transaction.get(ref);
-    const data = snap.data();
-    transaction.update(ref,{
-      stock: data.stock + qty,
-      totalEntradas: (data.totalEntradas||0)+qty
-    });
+function renderCart(){
+  const container=document.getElementById("inventory");
+  let html="<div class='cart'><h3>CARRITO</h3>";
+  let total=0;
+  cart.forEach((item,i)=>{
+    total+=item.price;
+    html+=`${item.name} - $${item.price} <button onclick="removeItem(${i})">-</button><br>`;
   });
+  html+=`<br>TOTAL: $${total}<br>
+  <button onclick="processSale()">CONFIRMAR VENTA</button>
+  </div>`;
+  container.innerHTML+=html;
+}
 
+window.removeItem=function(index){
+  cart.splice(index,1);
   loadInventory();
 }
 
-async function adjust(id){
-  let qty = parseInt(prompt("Cantidad a descontar:"));
-  if(!qty || qty<=0) return alert("Cantidad inválida");
+async function processSale(){
+  if(cart.length===0) return alert("Carrito vacío");
 
-  const ref = doc(db,"inventario",id);
+  const cliente=prompt("Nombre del cliente:");
+  if(!cliente) return;
 
-  await runTransaction(db, async (transaction)=>{
-    const snap = await transaction.get(ref);
-    const data = snap.data();
-    if(data.stock < qty) throw "Stock insuficiente";
-    transaction.update(ref,{
-      stock: data.stock - qty
+  let total=cart.reduce((a,b)=>a+b.price,0);
+
+  for(const item of cart){
+    const ref=doc(db,"inventario",item.id);
+    await runTransaction(db,async(transaction)=>{
+      const snap=await transaction.get(ref);
+      const data=snap.data();
+      if(data.stock<=0) throw "Stock insuficiente";
+      transaction.update(ref,{stock:data.stock-1});
     });
+  }
+
+  await addDoc(collection(db,"facturas"),{
+    clienteNombre:cliente,
+    total:total,
+    estado:"ACTIVA",
+    fecha:new Date()
   });
 
+  alert("VENTA REGISTRADA");
+  cart=[];
   loadInventory();
 }
 
 async function generateChart(){
-  const snapshot = await getDocs(collection(db,"facturas"));
-  let daily = {};
-
+  const snapshot=await getDocs(collection(db,"facturas"));
+  let total=0;
   snapshot.forEach(doc=>{
-    const data = doc.data();
-    if(data.estado !== "ACTIVA") return;
-    let day = new Date(data.fecha.seconds*1000).getDate();
-    daily[day] = (daily[day]||0) + data.total;
+    if(doc.data().estado==="ACTIVA"){
+      total+=doc.data().total;
+    }
   });
 
-  const labels = Object.keys(daily);
-  const values = Object.values(daily);
-
   new Chart(document.getElementById("salesChart"),{
-    type:'line',
+    type:'bar',
     data:{
-      labels:labels,
+      labels:["Ventas Totales"],
       datasets:[{
-        label:"Ventas",
-        data:values,
+        label:"$",
+        data:[total],
         borderColor:"#ff7a00",
         backgroundColor:"transparent"
       }]
@@ -220,8 +246,7 @@ async function generateChart(){
   });
 }
 
-showSection("inventory");
-
 </script>
+
 </body>
 </html>
