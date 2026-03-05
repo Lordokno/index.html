@@ -5,6 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXTCOM_OS_v2.3_STABLE_MERGE</title>
     <style>
+        /* BOOT-SEQUENCE STYLES */
+#boot-screen {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background: #000;
+    z-index: 20000; /* Por encima de todo */
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    overflow: hidden;
+}
+
+.boot-text {
+    color: var(--amber);
+    font-family: 'VT323', monospace;
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    white-space: pre-wrap;
+}
+
+.cursor {
+    display: inline-block;
+    width: 10px;
+    height: 1.5rem;
+    background: var(--amber);
+    margin-left: 5px;
+    animation: blink 0.8s infinite;
+    vertical-align: middle;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+.hidden-os {
+    display: none !important;
+}
+
+
+        
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
         :root { --amber: #ffb000; --amber-dim: #945f00; --bg: #0d0d0d; --scanline: rgba(255, 176, 0, 0.03); }
         * { box-sizing: border-box; font-family: 'VT323', monospace; color: var(--amber); text-transform: uppercase; }
@@ -461,6 +503,74 @@ function updateSalesTotals(sales) {
         showStats(); // Refrescar stats si el modal está abierto
     }
 }
+
+        // --- BOOT-SEQUENCE.JS: SIMULACIÓN DE ARRANQUE ---
+
+const bootLines = [
+    "NEXTCOM OS v2.3.5_STABLE",
+    "REPAIR & TECH CONTROL SYSTEM - MIL-SPEC",
+    "----------------------------------------",
+    "INITIALIZING SYSTEM KERNEL...",
+    "LOADING CORE MODULES: [OK]",
+    "CHECKING INVENTORY DATABASE...",
+    "DATABASE STATUS: SYNCHRONIZED",
+    "LOADING SALES HISTORY FROM LOCAL STORAGE...",
+    "VERIFYING STOCK LEVELS AND ALERTS...",
+    "ESTABLISHING FIREBASE HANDSHAKE...",
+    "STARTING TERMINAL INTERFACE...",
+    "----------------------------------------",
+    "ACCESS GRANTED.",
+    "WELCOME, TECHNICIAN."
+];
+
+async function runBootSequence() {
+    const logContainer = document.getElementById('boot-log');
+    const bootScreen = document.getElementById('boot-screen');
+    const cursor = document.getElementById('boot-cursor');
+
+    // Desactivar temporalmente el scroll del body
+    document.body.style.overflow = 'hidden';
+
+    for (let line of bootLines) {
+        // Crear elemento de línea
+        const p = document.createElement('div');
+        p.className = 'boot-text';
+        logContainer.appendChild(p);
+        
+        // Efecto "máquina de escribir" por línea
+        for (let char of line) {
+            p.textContent += char;
+            // Sonido opcional de terminal por cada caracter (playBeep('nav') muy rápido)
+            await new Promise(resolve => setTimeout(resolve, 15)); 
+        }
+
+        // Pausa entre líneas
+        const delay = line.includes('...') ? 600 : 250;
+        await new Promise(resolve => setTimeout(resolve, delay));
+        
+        // Mover cursor al final del log
+        logContainer.scrollTop = logContainer.scrollHeight;
+    }
+
+    // Secuencia final de salida
+    await new Promise(resolve => setTimeout(resolve, 800));
+    cursor.style.display = 'none';
+    
+    // Transición de salida (fade out)
+    bootScreen.style.transition = 'opacity 0.5s ease';
+    bootScreen.style.opacity = '0';
+    
+    setTimeout(() => {
+        bootScreen.classList.add('hidden-os');
+        document.body.style.overflow = 'auto';
+        playBeep('nav'); // Beep final de sistema online
+    }, 500);
+}
+
+// EJECUCIÓN AL CARGAR EL DOM
+window.addEventListener('DOMContentLoaded', () => {
+    runBootSequence();
+});
 </script>
 </body>
 </html>
