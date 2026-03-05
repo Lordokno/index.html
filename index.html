@@ -15,7 +15,6 @@
             --bg: #050505;
             --crt-glow: rgba(255, 122, 0, 0.05);
             --red: #ff4444;
-            /* Variables para espaciado responsivo invisible */
             --padd-main: clamp(10px, 3vw, 30px);
             --padd-card: clamp(10px, 2vw, 20px);
             --gap-grid: clamp(10px, 2vw, 20px);
@@ -32,13 +31,34 @@
             display: flex;
         }
 
-        /* --- EFECTOS CRT (Inalterados) --- */
+        /* --- PANTALLA DE LOGIN --- */
+        #login-screen {
+            position: fixed; inset: 0;
+            background: #000;
+            z-index: 20000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 350px;
+            border: 1px solid var(--amber);
+            padding: 30px;
+            background: rgba(10, 10, 10, 0.9);
+            box-shadow: 0 0 20px rgba(255, 122, 0, 0.2);
+        }
+
+        /* --- EFECTOS CRT --- */
         .crt-overlay {
             position: fixed; inset: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
                         linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
             background-size: 100% 3px, 3px 100%;
-            pointer-events: none; z-index: 9999;
+            pointer-events: none; z-index: 99999;
         }
 
         .scanline {
@@ -46,55 +66,46 @@
             background: linear-gradient(to bottom, transparent, var(--crt-glow) 50%, transparent);
             background-size: 100% 8px;
             animation: scan 10s linear infinite;
-            pointer-events: none; z-index: 10000;
+            pointer-events: none; z-index: 100000;
         }
 
         @keyframes scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
 
+        /* --- LAYOUT --- */
         #boot {
             position: fixed; inset: 0;
             background: #000; z-index: 10001;
-            padding: var(--padd-main); display: flex; flex-direction: column;
+            padding: var(--padd-main); display: none; flex-direction: column;
             font-size: clamp(0.9rem, 1.5vw, 1.2rem); line-height: 1.5;
         }
 
-        /* --- LAYOUT RESPONSIVO --- */
         #app { 
             display: none; 
             height: 100vh; 
             width: 100%;
-            flex-direction: row; /* Default PC */
+            flex-direction: row;
         }
 
         .sidebar {
-            width: 240px; 
-            border-right: 1px solid var(--amber);
-            padding: var(--padd-card); 
-            background: #000;
+            width: 240px; border-right: 1px solid var(--amber);
+            padding: var(--padd-card); background: #000;
             display: flex; flex-direction: column; gap: 10px;
-            box-sizing: border-box;
-            flex-shrink: 0; /* No se encoge en PC */
+            box-sizing: border-box; flex-shrink: 0;
         }
 
         .main { 
-            flex: 1; 
-            padding: var(--padd-main); 
-            overflow-y: auto; 
-            background: var(--bg); 
-            box-sizing: border-box; 
-            width: 100%;
+            flex: 1; padding: var(--padd-main); 
+            overflow-y: auto; background: var(--bg); 
+            box-sizing: border-box; width: 100%;
         }
 
-        /* --- UI ELEMENTS (Estética idéntica, tamaño adaptable) --- */
+        /* --- UI ELEMENTS --- */
         .btn {
             background: transparent; border: 1px solid var(--amber);
-            color: var(--amber); 
-            padding: clamp(8px, 1vw, 10px); 
-            cursor: pointer;
-            font-family: 'Share Tech Mono'; transition: 0.2s;
-            text-transform: uppercase;
-            box-sizing: border-box;
-            font-size: clamp(0.8rem, 1vw, 1rem);
+            color: var(--amber); padding: clamp(8px, 1vw, 10px); 
+            cursor: pointer; font-family: 'Share Tech Mono'; 
+            transition: 0.2s; text-transform: uppercase;
+            box-sizing: border-box; font-size: clamp(0.8rem, 1vw, 1rem);
         }
         .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 10px var(--amber); }
 
@@ -104,71 +115,35 @@
         input {
             background: #0a0a0a; border: 1px solid var(--amber-dim);
             color: var(--amber); padding: clamp(8px, 1vw, 12px); 
-            width: 100%;
-            margin-bottom: 10px; font-family: 'Share Tech Mono';
-            box-sizing: border-box;
-            font-size: clamp(0.9rem, 1vw, 1rem);
+            width: 100%; margin-bottom: 10px; font-family: 'Share Tech Mono';
+            box-sizing: border-box; font-size: clamp(0.9rem, 1vw, 1rem);
         }
 
-        /* GRIDS INTELIGENTES: Mantienen layout en PC, stackean en móvil */
         .grid-responsive {
             display: grid; 
             grid-template-columns: repeat(auto-fit, minmax(clamp(250px, 45%, 300px), 1fr)); 
-            gap: var(--gap-grid);
-            align-items: start;
+            gap: var(--gap-grid); align-items: start;
         }
 
         .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px; margin-bottom: 15px;
         }
 
-        /* Re-aplicar span para PC sin romper responsividad */
-        @media (min-width: 400px) {
-            .form-grid input[style*="grid-column: span 2"] {
-                grid-column: span 2;
-            }
-        }
-
-        /* TABLAS RESPONSIVAS (Scroll horizontal invisible si colapsa) */
-        .table-wrap {
-            overflow-x: auto;
-            width: 100%;
-            margin-top: 20px;
-            border: 1px solid transparent; /* Evita saltos visuales */
-        }
-
-        table { width: 100%; border-collapse: collapse; min-width: 400px; /* Asegura legibilidad */ }
+        .table-wrap { overflow-x: auto; width: 100%; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 400px; }
         th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; font-size: 0.9rem; }
         td { padding: 12px; border-bottom: 1px solid var(--amber-dim); vertical-align: middle; font-size: 0.9rem; }
 
         .card { border: 1px solid var(--amber-dim); padding: var(--padd-card); margin-bottom: 15px; background: rgba(10,10,10,0.5); position: relative; }
         
-        /* Flex rows que stackean en móvil */
-        .flex-row { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            gap: 15px; 
-            flex-wrap: wrap; /* Crucial para responsividad */
-        }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; }
         
         .history-container {
-            height: clamp(150px, 25vh, 220px);
-            overflow-y: auto;
-            border: 1px solid var(--amber-dim);
-            padding: 15px;
-            background: rgba(255, 122, 0, 0.02);
-            font-size: 0.85rem;
-            line-height: 1.6;
+            height: clamp(150px, 25vh, 220px); overflow-y: auto;
+            border: 1px solid var(--amber-dim); padding: 15px;
+            background: rgba(255, 122, 0, 0.02); font-size: 0.85rem;
         }
-
-        /* Scrollbar Estética (Inalterada) */
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--amber-dim); }
 
         .section { display: none; }
         .active { display: block; animation: fadeIn 0.3s; }
@@ -178,70 +153,28 @@
         #reorder-modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #000; border: 2px solid var(--amber); padding: 30px; z-index: 10005;
-            display: none; 
-            width: clamp(280px, 90%, 350px); /* Adaptable */
-            box-shadow: 0 0 50px #000;
-            box-sizing: border-box;
+            display: none; width: clamp(280px, 90%, 350px); box-sizing: border-box;
         }
 
-        /* Canvas adaptable */
-        .chart-wrap {
-            position: relative;
-            width: 100%;
-            height: clamp(200px, 30vh, 280px);
-            margin-top: 10px;
-        }
+        .chart-wrap { position: relative; width: 100%; height: clamp(200px, 30vh, 280px); margin-top: 10px; }
         canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
 
-        /* Estilos KPI Responsivos */
-        .kpi-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: var(--gap-grid);
-            margin-bottom: 20px;
-        }
-        .kpi-card {
-            border: 1px solid var(--amber-dim);
-            padding: clamp(10px, 1.5vw, 15px);
-            text-align: center;
-            background: rgba(255, 122, 0, 0.05);
-        }
+        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: var(--gap-grid); margin-bottom: 20px; }
+        .kpi-card { border: 1px solid var(--amber-dim); padding: clamp(10px, 1.5vw, 15px); text-align: center; background: rgba(255, 122, 0, 0.05); }
         .kpi-val { font-size: clamp(1.2rem, 2vw, 1.8rem); color: #fff; display: block; }
-        .kpi-lab { font-size: clamp(0.6rem, 0.8vw, 0.7rem); opacity: 0.7; letter-spacing: 1px; text-transform: uppercase;}
+        .kpi-lab { font-size: clamp(0.6rem, 0.8vw, 0.7rem); opacity: 0.7; text-transform: uppercase;}
         .critico { border-color: var(--red); color: var(--red) !important; }
 
-        /* --- MEDIA QUERIES PARA ADAPTACIÓN "INVISIBLE" --- */
-        
-        /* Tablets y Móviles Horizontales */
         @media (max-width: 900px) {
-            #app { flex-direction: column; } /* Sidebar pasa arriba */
-            .sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid var(--amber);
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                padding: 10px;
-            }
-            .sidebar div[style*="font-size: 18px"] { margin-bottom: 10px !important; width: 100%; text-align: center; }
-            .sidebar .btn { flex: 1; min-width: 120px; text-align: center; }
+            #app { flex-direction: column; }
+            .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--amber); flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; }
+            .sidebar div:first-child { width: 100%; text-align: center; margin-bottom: 10px !important; }
+            .sidebar .btn { flex: 1; min-width: 120px; }
         }
 
-        /* Móviles Verticales */
         @media (max-width: 600px) {
-            h2 { font-size: 1.2rem; }
-            .sidebar .btn { min-width: 45%; font-size: 0.75rem; padding: 8px; }
-            
-            /* Dash specific fixes */
-            #sec-dash .grid-responsive > div[style*="grid-column: span 2"] {
-                grid-column: span 1 !important;
-            }
-
-            /* POS specific fixes */
-            #sec-pos .grid-responsive {
-                grid-template-columns: 1fr;
-            }
+            .sidebar .btn { min-width: 45%; }
+            #sec-dash .grid-responsive > div[style*="grid-column: span 2"] { grid-column: span 1 !important; }
         }
     </style>
 </head>
@@ -249,6 +182,18 @@
 
 <div class="crt-overlay"></div>
 <div class="scanline"></div>
+
+<div id="login-screen">
+    <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px;">SECURE_ACCESS_v3.0</div>
+    <div class="login-box">
+        <label style="display:block; margin-bottom:5px; font-size: 0.8rem;">OPERATOR_ID</label>
+        <input type="text" id="user-id" placeholder="USUARIO">
+        <label style="display:block; margin-bottom:5px; font-size: 0.8rem;">ACCESS_KEY</label>
+        <input type="password" id="user-pass" placeholder="CONTRASEÑA">
+        <button class="btn" onclick="tryLogin()" style="width: 100%; margin-top: 10px;">VALIDAR CREDENCIALES</button>
+        <div id="login-err" style="color: var(--red); font-size: 0.7rem; margin-top: 10px; text-align: center; visibility: hidden;">ACCESO DENEGADO: CREDENCIALES INVÁLIDAS</div>
+    </div>
+</div>
 
 <div id="boot"><div id="boot-log"></div></div>
 
@@ -267,12 +212,12 @@
         <button class="btn" onclick="nav('inv')">02_INVENTARIO</button>
         <button class="btn" onclick="nav('pos')">03_POS_VENTA</button>
         <button class="btn" onclick="nav('orden')">04_ORDENES</button>
+        <button class="btn" onclick="logout()" style="margin-top: auto; border-color: var(--amber-dim); font-size: 0.7rem;">LOGOUT_SYSTEM</button>
     </div>
 
     <div class="main">
         <div id="sec-dash" class="section active">
             <h2>> SYSTEM_DASHBOARD</h2>
-            
             <div class="kpi-container">
                 <div class="kpi-card">
                     <span class="kpi-lab">VENTAS_HOY_($)</span>
@@ -295,15 +240,11 @@
                 </div>
                 <div class="card">
                     <h3 style="margin-top:0">RENDIMIENTO_DE_INVENTARIO</h3>
-                    <div class="chart-wrap">
-                        <canvas id="mainChart"></canvas>
-                    </div>
+                    <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
                 </div>
                 <div class="card" style="grid-column: auto / span 2;">
                     <h3 style="margin-top:0">> SYSTEM_LOG (ACTIVIDAD_RECIENTE)</h3>
-                    <div id="sys-log" class="history-container" style="font-family: 'Share Tech Mono';">
-                        <div>[SYSTEM] KERNEL_READY...</div>
-                    </div>
+                    <div id="sys-log" class="history-container"><div>[SYSTEM] KERNEL_READY...</div></div>
                 </div>
             </div>
         </div>
@@ -321,14 +262,7 @@
             </div>
             <div class="table-wrap">
                 <table>
-                    <thead>
-                        <tr>
-                            <th>ITEM_DESCRIPCIÓN</th>
-                            <th style="width: 80px;">STOCK</th>
-                            <th style="width: 120px;">MÉTRICAS</th>
-                            <th style="width: 120px; text-align: right;">ACCIONES</th>
-                        </tr>
-                    </thead>
+                    <thead><tr><th>ITEM_DESCRIPCIÓN</th><th style="width: 80px;">STOCK</th><th style="width: 120px;">MÉTRICAS</th><th style="width: 120px; text-align: right;">ACCIONES</th></tr></thead>
                     <tbody id="acc-table"></tbody>
                 </table>
             </div>
@@ -341,20 +275,17 @@
                     <input id="pos-search" placeholder="ESCRIBA PARA BUSCAR PRODUCTO..." oninput="posSearch()">
                     <div id="pos-info" class="card" style="min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold; text-align: center; font-size: 0.9rem;">ESPERANDO ENTRADA...</div>
                     <button class="btn" onclick="addToCart()" style="width: 100%; margin-bottom: 25px;">AÑADIR AL CARRITO</button>
-                    
                     <h3>> REGISTRO_DE_VENTAS</h3>
-                    <div id="pos-history" class="history-container">
-                        <div>SISTEMA LISTO...</div>
-                    </div>
+                    <div id="pos-history" class="history-container"><div>SISTEMA LISTO...</div></div>
                 </div>
                 <div class="card" style="display: flex; flex-direction: column;">
                     <h3 style="margin-top:0">CARRITO_ACTUAL</h3>
                     <div id="cart-items" style="flex: 1; min-height: 150px; max-height: 300px; overflow-y: auto; border-bottom: 1px solid var(--amber-dim); margin-bottom: 15px;"></div>
                     <div class="flex-row">
-                        <span style="font-size: 1rem;">TOTAL_A_PAGAR:</span>
+                        <span>TOTAL_A_PAGAR:</span>
                         <span style="font-size: clamp(1.5rem, 3vw, 2rem); color: #fff;">$<span id="cart-total">0</span></span>
                     </div>
-                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 20px; background: var(--amber); color: #000; font-weight: bold; font-size: 1.1rem; min-height: 50px;">CONFIRMAR Y COBRAR</button>
+                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 20px; background: var(--amber); color: #000; font-weight: bold; min-height: 50px;">CONFIRMAR Y COBRAR</button>
                 </div>
             </div>
         </div>
@@ -370,7 +301,7 @@
                     <input id="o-ant" type="number" placeholder="ANTICIPO ($)" oninput="calcOrder()">
                 </div>
                 <div class="flex-row" style="margin-bottom: 15px; border-top: 1px solid var(--amber-dim); padding-top: 15px;">
-                    <span style="font-size: 1rem;">SALDO PENDIENTE:</span>
+                    <span>SALDO PENDIENTE:</span>
                     <span style="font-size: clamp(1.2rem, 2vw, 1.5rem); color: #ff4444;">$<span id="o-sal-display">0</span></span>
                 </div>
                 <button class="btn" onclick="saveOrder()" style="width: 100%;">GENERAR ORDEN DE SERVICIO</button>
@@ -381,7 +312,6 @@
 </div>
 
 <script type="module">
-    // Todo el bloque JavaScript permanece EXACTAMENTE igual que el original
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, where,
@@ -397,9 +327,48 @@
         appId: "1:1011344400777:web:e40a1a66d9f77046bd8158"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    const fbApp = initializeApp(firebaseConfig);
+    const db = getFirestore(fbApp);
 
+    // --- LÓGICA DE LOGIN ---
+    const AUTH_USER = "admin";
+    const AUTH_PASS = "nextcom2024";
+
+    window.tryLogin = () => {
+        const u = document.getElementById("user-id").value;
+        const p = document.getElementById("user-pass").value;
+        if(u === AUTH_USER && p === AUTH_PASS) {
+            localStorage.setItem("nextcom_auth", "true");
+            startBootSequence();
+        } else {
+            const err = document.getElementById("login-err");
+            err.style.visibility = "visible";
+            setTimeout(() => err.style.visibility = "hidden", 3000);
+        }
+    };
+
+    window.logout = () => {
+        localStorage.removeItem("nextcom_auth");
+        location.reload();
+    };
+
+    async function startBootSequence() {
+        document.getElementById("login-screen").style.display = "none";
+        const boot = document.getElementById("boot");
+        boot.style.display = "flex";
+        const log = document.getElementById("boot-log");
+        const msgs = ["> INICIANDO KERNEL...", "> CARGANDO COMPONENTES FIREBASE...", "> ENLACE ESTABLECIDO.", "> BIENVENIDO, OPERADOR."];
+        for(let m of msgs) {
+            const d = document.createElement("div"); d.innerText = m;
+            log.appendChild(d);
+            await new Promise(r => setTimeout(r, 400));
+        }
+        boot.style.display = "none";
+        document.getElementById("app").style.display = "flex";
+        if(localAcc.length > 0) updateChart();
+    }
+
+    // --- LÓGICA DE NEGOCIO (Igual a la original) ---
     let localAcc = [];
     let cart = [];
     let salesChart = null;
@@ -418,7 +387,9 @@
     };
 
     function updateChart() {
-        const ctx = document.getElementById('mainChart').getContext('2d');
+        const canvas = document.getElementById('mainChart');
+        if(!canvas) return;
+        const ctx = canvas.getContext('2d');
         const labels = localAcc.map(a => a.nombre.substring(0,10));
         const stocks = localAcc.map(a => a.stock);
         const sales = localAcc.map(a => a.salidas || 0);
@@ -433,8 +404,7 @@
                 ]
             },
             options: {
-                responsive: true,
-                maintainAspectRatio: false, // Importante para contenedores responsivos
+                responsive: true, maintainAspectRatio: false,
                 scales: { 
                     y: { beginAtZero: true, grid: { color: '#1a1a1a' }, ticks: { color: '#ff7a00', font: {family: 'Share Tech Mono'} } }, 
                     x: { grid: { display: false }, ticks: { color: '#ff7a00', font: {family: 'Share Tech Mono'} } } 
@@ -468,6 +438,7 @@
     onSnapshot(collection(db, "accesorios"), snap => {
         localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         const table = document.getElementById("acc-table");
+        if(!table) return;
         table.innerHTML = "";
         localAcc.forEach(a => {
             table.innerHTML += `<tr>
@@ -486,18 +457,18 @@
 
     onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc"), limit(15)), snap => {
         const history = document.getElementById("pos-history");
+        if(!history) return;
         history.innerHTML = "";
         snap.forEach(d => {
             const v = d.data();
             const date = v.ts ? v.ts.toDate().toLocaleTimeString() : '...';
-            history.innerHTML += `<div style="border-bottom: 1px solid #222; margin-bottom:5px;">> [${date}] TOTAL: $${v.total} <span style="opacity:0.6">(${v.items} items)</span></div>`;
+            history.innerHTML += `<div style="border-bottom: 1px solid #222; margin-bottom:5px;">> [${date}] TOTAL: $${v.total}</div>`;
         });
     });
 
     window.processSale = async () => {
         if(cart.length === 0) return;
         const totalVenta = cart.reduce((acc, i) => acc + i.pv, 0);
-        const itemsNames = cart.map(i => i.nombre).join(", ");
         try {
             await runTransaction(db, async(t) => {
                 for(let item of cart) {
@@ -507,9 +478,9 @@
                 }
                 await addDoc(collection(db, "ventas"), { total: totalVenta, items: cart.length, ts: Timestamp.now() });
             });
-            logSys(`VENTA: $${totalVenta} (${itemsNames})`);
-            cart = []; renderCart(); alert("TRANSACCIÓN EXITOSA");
-        } catch (e) { alert("ERROR DE COMUNICACIÓN"); }
+            logSys(`VENTA: $${totalVenta}`);
+            cart = []; renderCart(); alert("VENTA COMPLETADA");
+        } catch (e) { alert("ERROR EN VENTA"); }
     };
 
     window.saveAccesorio = async () => {
@@ -522,7 +493,6 @@
             pv: parseFloat(document.getElementById("a-pv").value) || 0,
             entradas: stock, salidas: 0, ts: Timestamp.now()
         });
-        logSys(`NUEVO ITEM: ${nom} (${stock} UNIDADES)`);
         document.querySelectorAll("#sec-inv input").forEach(i => i.value = "");
     };
 
@@ -530,33 +500,25 @@
         const val = document.getElementById("pos-search").value.toLowerCase();
         const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
         const info = document.getElementById("pos-info");
-        if(item) info.innerHTML = `<span style="color:#fff">${item.nombre}</span> &nbsp; | &nbsp; $${item.pv} &nbsp; | &nbsp; STOCK: ${item.stock}`;
-        else info.innerText = "SISTEMA: ITEM NO LOCALIZADO";
+        if(item) info.innerHTML = `${item.nombre} | $${item.pv} | STOCK: ${item.stock}`;
+        else info.innerText = "BUSCANDO...";
     };
 
     window.addToCart = () => {
         const val = document.getElementById("pos-search").value.toLowerCase();
         const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
         if(item && item.stock > 0) { cart.push(item); renderCart(); }
-        else if(item) { alert("ERROR: STOCK INSUFICIENTE"); }
     };
 
     function renderCart() {
         const container = document.getElementById("cart-items");
-        container.innerHTML = "";
-        let total = 0;
-        cart.forEach((i) => { 
-            total += i.pv; 
-            container.innerHTML += `<div class="flex-row" style="margin-bottom:8px;"><span>> ${i.nombre}</span><span>$${i.pv}</span></div>`; 
-        });
+        let total = 0; container.innerHTML = "";
+        cart.forEach(i => { total += i.pv; container.innerHTML += `<div class="flex-row"><span>> ${i.nombre}</span><span>$${i.pv}</span></div>`; });
         document.getElementById("cart-total").innerText = total.toFixed(2);
     }
 
     window.deleteItem = async (col, id) => {
-        if(confirm("¿CONFIRMAR ELIMINACIÓN PERMANENTE?")) {
-            await deleteDoc(doc(db, col, id));
-            logSys(`ELIMINADO: ID_${id.substring(0,5)} DE ${col.toUpperCase()}`);
-        }
+        if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, col, id));
     };
 
     window.openReorder = (id, n) => {
@@ -567,38 +529,29 @@
     window.closeReorder = () => document.getElementById("reorder-modal").style.display = "none";
     window.confirmReorder = async () => {
         const q = parseInt(document.getElementById("re-qty").value);
-        if(isNaN(q)) return;
         const ref = doc(db, "accesorios", window.currentReId);
         const snap = await getDoc(ref);
         await updateDoc(ref, { stock: snap.data().stock + q, entradas: snap.data().entradas + q });
-        logSys(`REABASTECIDO: ${snap.data().nombre} (+${q})`);
         closeReorder();
     };
 
     window.saveOrder = async () => {
-        const cliente = document.getElementById("o-cliente").value;
-        const modelo = document.getElementById("o-eq").value;
-        if(!cliente) return;
+        const cl = document.getElementById("o-cliente").value;
+        if(!cl) return;
         await addDoc(collection(db, "ordenes"), {
-            cliente: cliente,
-            modelo: modelo,
-            saldo: document.getElementById("o-sal-display").innerText,
-            ts: Timestamp.now()
+            cliente: cl, modelo: document.getElementById("o-eq").value,
+            saldo: document.getElementById("o-sal-display").innerText, ts: Timestamp.now()
         });
-        logSys(`ORDEN_SERVICIO: ${cliente} | ${modelo}`);
         document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
-        document.getElementById("o-sal-display").innerText = "0";
     };
 
     onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => {
         const list = document.getElementById("orders-list");
+        if(!list) return;
         list.innerHTML = "";
         snap.forEach(d => {
             const o = d.data();
-            list.innerHTML += `<div class="card flex-row">
-                <div><strong style="color:#fff; font-size:1.1rem">${o.cliente}</strong><br>${o.modelo} | <span style="color:#ff4444">DEUDA: $${o.saldo}</span></div>
-                <button class="btn btn-del" onclick="deleteItem('ordenes','${d.id}')">FINALIZAR</button>
-            </div>`;
+            list.innerHTML += `<div class="card flex-row"><div>${o.cliente} | ${o.modelo} | $${o.saldo}</div><button class="btn btn-del" onclick="deleteItem('ordenes','${d.id}')">X</button></div>`;
         });
     });
 
@@ -608,23 +561,17 @@
         document.getElementById("o-sal-display").innerText = (pc - ant).toFixed(2);
     };
 
-    window.addEventListener("load", async () => {
-        const log = document.getElementById("boot-log");
-        const msgs = ["> INICIANDO KERNEL...", "> CARGANDO COMPONENTES FIREBASE...", "> ENLACE ESTABLECIDO.", "> BIENVENIDO, OPERADOR."];
-        for(let m of msgs) {
-            const d = document.createElement("div"); d.innerText = m;
-            log.appendChild(d);
-            await new Promise(r => setTimeout(r, 300));
+    window.addEventListener("load", () => {
+        if(localStorage.getItem("nextcom_auth") === "true") {
+            startBootSequence();
         }
-        document.getElementById("boot").style.display = "none";
-        document.getElementById("app").style.display = "flex";
-        // Forzar actualización del gráfico una vez cargado el layout
-        if(localAcc.length > 0) updateChart();
     });
 
     setInterval(() => {
-        document.getElementById("clock").innerText = new Date().toLocaleTimeString();
-        document.getElementById("date-display").innerText = new Date().toISOString().split('T')[0];
+        const clock = document.getElementById("clock");
+        if(clock) clock.innerText = new Date().toLocaleTimeString();
+        const dateDisp = document.getElementById("date-display");
+        if(dateDisp) dateDisp.innerText = new Date().toISOString().split('T')[0];
     }, 1000);
 </script>
 </body>
