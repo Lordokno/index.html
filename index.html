@@ -3,259 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM_OS_v2.3_STABLE_MERGE</title>
+    <title>NEXTCOM_OS_v2.4_ULTIMATE</title>
     <style>
-
-        /* EFECTO DE RUIDO VISUAL */
-#boot-screen {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: #000;
-    z-index: 20000;
-    display: flex;
-    flex-direction: column;
-    padding: 40px;
-    overflow: hidden;
-}
-
-/* Grano de película / Estática sutil */
-#boot-screen::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grains.jpg');
-    opacity: 0.04;
-    pointer-events: none;
-    animation: grain-jump 0.1s steps(2) infinite;
-}
-
-@keyframes grain-jump {
-    0% { transform: translate(0,0); }
-    50% { transform: translate(-5%, -5%); }
-    100% { transform: translate(5%, 5%); }
-}
-
-.glitch-text {
-    animation: text-flicker 0.05s infinite;
-}
-
-@keyframes text-flicker {
-    0% { opacity: 0.98; }
-    50% { opacity: 1; }
-    100% { opacity: 0.98; }
-}
-#boot-screen {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: #000;
-    z-index: 20000;
-    display: flex;
-    flex-direction: column;
-    padding: 40px;
-    overflow: hidden;
-}
-
-#boot-screen::before {
-    content: "";
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grains.jpg');
-    opacity: 0.04;
-    pointer-events: none;
-    animation: grain-jump 0.1s steps(2) infinite;
-}
-
-@keyframes grain-jump {
-    0% { transform: translate(0,0); }
-    50% { transform: translate(-5%, -5%); }
-    100% { transform: translate(5%, 5%); }
-}
-
-.boot-text {
-    color: var(--amber);
-    font-size: 1.4rem;
-    margin-bottom: 4px;
-    text-shadow: 0 0 5px var(--amber-dim);
-}
-
-.cursor {
-    display: inline-block;
-    width: 10px; height: 1.4rem;
-    background: var(--amber);
-    animation: blink 0.8s infinite;
-}
-
-.hidden-os { display: none !important; }
-
-
-        
         @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-        :root { --amber: #ffb000; --amber-dim: #945f00; --bg: #0d0d0d; --scanline: rgba(255, 176, 0, 0.03); }
-        * { box-sizing: border-box; font-family: 'VT323', monospace; color: var(--amber); text-transform: uppercase; }
-        body { margin: 0; background: var(--bg); overflow-x: hidden; letter-spacing: 1px; }
+        
+        :root { 
+            --amber: #ffb000; 
+            --amber-dim: #945f00; 
+            --bg: #0d0d0d; 
+            --scanline: rgba(255, 176, 0, 0.03); 
+        }
 
-        /* EFECTO CRT BARRIDO */
+        /* --- UI BASE --- */
+        * { box-sizing: border-box; font-family: 'VT323', monospace; color: var(--amber); text-transform: uppercase; }
+        body { margin: 0; background: var(--bg); overflow: hidden; letter-spacing: 1px; }
+
+        /* --- PANTALLA DE CARGA (BOOT) --- */
+        #boot-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 99999; display: flex; flex-direction: column;
+            padding: 40px; overflow: hidden;
+        }
+        #boot-screen::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Grains.jpg');
+            opacity: 0.04; pointer-events: none; animation: grain-jump 0.1s steps(2) infinite;
+        }
+        @keyframes grain-jump { 0% { transform: translate(0,0); } 100% { transform: translate(2%, 2%); } }
+        
+        .boot-text { color: var(--amber); font-size: 1.4rem; margin-bottom: 4px; line-height: 1.2; }
+        .cursor { display: inline-block; width: 10px; height: 1.4rem; background: var(--amber); animation: blink 0.8s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* --- INTERFAZ PRINCIPAL --- */
+        header { border-bottom: 2px solid var(--amber); padding: 10px 20px; display: flex; justify-content: space-between; background: #000; position: sticky; top: 0; z-index: 100; }
+        .main-layout { display: flex; height: calc(100vh - 50px); }
+        .sidebar { width: 220px; border-right: 2px solid var(--amber); padding: 15px; display: flex; flex-direction: column; gap: 8px; background: #050505; }
+        .container { flex: 1; padding: 20px; overflow-y: auto; position: relative; }
+        
+        .section { display: none; } 
+        .section.active { display: block; }
+        .card { border: 1px solid var(--amber); padding: 15px; margin-bottom: 20px; background: rgba(255, 176, 0, 0.02); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+
+        input, select { background: transparent; border: 1px solid var(--amber-dim); padding: 8px; width: 100%; font-size: 1.1rem; outline: none; }
+        .btn { background: transparent; border: 1px solid var(--amber-dim); padding: 8px; cursor: pointer; text-align: center; width: 100%; margin-top: 5px; }
+        .btn:hover { background: var(--amber); color: #000; font-weight: bold; }
+
+        /* --- TAGS DE STOCK --- */
+        .tag-low { background: var(--amber); color: #000; padding: 2px 4px; animation: blink 1.5s infinite; }
+        .tag-out { background: #ff0000; color: #fff; padding: 2px 4px; animation: blink 0.5s infinite; }
+
+        .hidden-os { display: none !important; }
+
+        /* EFECTO CRT GLOBAL */
         body::after {
             content: ""; position: fixed; top: 0; left: 0; width: 100%; height: 2px;
             background: rgba(255, 176, 0, 0.06); z-index: 10001; pointer-events: none;
             animation: crt-sweep 4s linear infinite;
         }
         @keyframes crt-sweep { 0% { top: 100%; } 100% { top: -5%; } }
-        body::before { content: " "; display: block; position: fixed; top: 0; left: 0; bottom: 0; right: 0; background: linear-gradient(var(--scanline) 50%, rgba(0, 0, 0, 0) 50%); background-size: 100% 2px; z-index: 9999; pointer-events: none; }
-
-        header { border-bottom: 2px solid var(--amber); padding: 10px 20px; display: flex; justify-content: space-between; background: #000; position: sticky; top: 0; z-index: 100; }
-        .main-layout { display: flex; min-height: 100vh; }
-        .sidebar { width: 220px; border-right: 2px solid var(--amber); padding: 15px; display: flex; flex-direction: column; gap: 8px; background: #050505; }
-        .container { flex: 1; padding: 20px; max-width: 1400px; }
-        
-        .section { display: none; } .section.active { display: block; }
-        .card { border: 1px solid var(--amber); padding: 15px; margin-bottom: 20px; background: rgba(255, 176, 0, 0.02); position: relative; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-
-        input, select { background: transparent; border: 1px solid var(--amber-dim); padding: 8px; width: 100%; font-size: 1.1rem; outline: none; }
-        input:focus { border: 1px solid var(--amber); border-left: 5px solid var(--amber); }
-
-        .btn { background: transparent; border: 1px solid var(--amber-dim); padding: 5px 15px; cursor: pointer; transition: 0.2s; text-align: center; }
-        .btn:hover { background: var(--amber); color: #000; font-weight: bold; }
-
-        /* TAGS DE STOCK */
-        .tag-low { background: var(--amber); color: #000; padding: 2px 4px; animation: blink 1.5s infinite; }
-        .tag-out { background: #ff0000; color: #fff; padding: 2px 4px; animation: blink 0.5s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
-
-        .table-os { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        .table-os th, .table-os td { border: 1px solid var(--amber-dim); padding: 8px; text-align: left; }
-
-        /* PANEL REABASTECIMIENTO */
-        #reorder-modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; background: #000; border: 2px solid var(--amber); padding: 20px; z-index: 10005; }
     </style>
 </head>
 <body>
+
 <div id="boot-screen">
     <div id="boot-log"></div>
-    <span class="cursor" id="boot-cursor"></span>
+    <div><span class="cursor"></span></div>
 </div>
+
 <header>
-    <div>NEXTCOM_OS v2.3 // STOCK_AUDIO_SYSTEM</div>
-    <div>TIME: <span id="clock">00:00:00</span></div>
+    <div>NEXTCOM_OS v2.4 // TALLER_CENTRAL</div>
+    <div id="clock">00:00:00</div>
 </header>
 
 <div class="main-layout">
     <div class="sidebar">
-        <button class="btn" onclick="nav('dash')">[ 01_DASHBOARD ]</button>
-        <button class="btn" onclick="nav('new')">[ 02_NUEVA_ORDEN ]</button>
-        <button class="btn" onclick="nav('acc')">[ 03_INVENTARIO ]</button>
-        <button class="btn" onclick="nav('pos')">[ 04_VENTAS_POS ]</button>
+        <button class="btn" onclick="nav('dash')">[ 01_ORDENES ]</button>
+        <button class="btn" onclick="nav('inv')">[ 02_INVENTARIO ]</button>
+        <button class="btn" onclick="nav('pos')">[ 03_VENTAS_POS ]</button>
+        <button class="btn" onclick="nav('hist')">[ 04_HISTORIAL ]</button>
         <div style="margin-top:auto">
-            <button class="btn" onclick="showStats()" style="width:100%">/STATS</button>
+            <button class="btn" onclick="showStats()">/STATS</button>
         </div>
     </div>
 
-    <div class="container">
-        <div class="card">
-            <label>> BUSCADOR_SISTEMA:</label>
-            <input type="text" id="gSearch" placeholder="CLIENTE O PRODUCTO..." oninput="globalSearch()">
-        </div>
-
+    <div class="container" id="app-content">
         <div id="sec-dash" class="section active">
-            <h2>> ORDENES_EN_CURSO</h2>
-            <div id="orders-list">ACCEDIENDO_MEMORIA...</div>
+            <h2>> ESTADO_DEL_TALLER</h2>
+            <div id="orders-list">ESPERANDO_DATOS...</div>
         </div>
 
-        <div id="sec-new" class="section">
+        <div id="sec-inv" class="section">
             <div class="card">
-                <h2>> REGISTRO_NXT</h2>
+                <h2>> REGISTRO_DE_STOCK</h2>
                 <div class="grid">
-                    <input type="text" id="o-cliente" placeholder="CLIENTE">
-                    <input type="text" id="o-eq" placeholder="MODELO">
-                    <input type="text" id="o-falla" placeholder="FALLA">
-                    <select id="o-prio">
-                        <option value="NORMAL">NORMAL</option>
-                        <option value="URGENTE">URGENTE</option>
-                        <option value="EXPRESS">EXPRESS</option>
-                    </select>
-                </div>
-                <div class="grid" style="margin-top:10px">
-                    <input type="number" id="o-pc" placeholder="PRECIO" oninput="calcOrder()">
-                    <input type="number" id="o-ant" placeholder="ANTICIPO" oninput="calcOrder()">
-                    <input type="number" id="o-sal" placeholder="SALDO" readonly>
-                </div>
-                <button class="btn" onclick="saveOrder()" style="margin-top:15px; width:100%">[ GUARDAR_REGISTRO ]</button>
-            </div>
-        </div>
-
-        <div id="sec-acc" class="section">
-            <div class="card">
-                <h2>> ALMACEN_CONTROL</h2>
-                <div class="grid">
-                    <input type="text" id="a-nom" placeholder="NOMBRE">
+                    <input type="text" id="a-nom" placeholder="NOMBRE PRODUCTO">
                     <input type="number" id="a-costo" placeholder="COSTO">
-                    <input type="number" id="a-pv" placeholder="PRECIO">
+                    <input type="number" id="a-pv" placeholder="PRECIO VENTA">
                     <input type="number" id="a-stock" placeholder="CANTIDAD">
                 </div>
-                <button class="btn" onclick="saveAccesorio()" style="margin-top:10px">[ AGREGAR_PRODUCTO ]</button>
-                <table class="table-os">
-                    <thead><tr><th>PRODUCTO</th><th>S_ACT</th><th>HISTORIAL</th><th>ACCION</th></tr></thead>
-                    <tbody id="acc-table"></tbody>
-                </table>
+                <button class="btn" onclick="saveAccesorio()">[ GUARDAR EN DB ]</button>
+            </div>
+            <div class="card">
+                <div id="acc-table-container">Cargando tabla...</div>
             </div>
         </div>
 
         <div id="sec-pos" class="section">
             <div class="grid">
                 <div class="card">
-                    <h2>> TERMINAL_POS</h2>
-                    <input type="text" id="pos-search" placeholder="BUSCAR..." oninput="posSearch()">
-                    <div id="pos-info" style="margin:10px 0; height:20px"></div>
-                    <button class="btn" onclick="addToCart()">[ AGREGAR ]</button>
+                    <h2>> TERMINAL_VENTA</h2>
+                    <input type="text" id="pos-search" placeholder="BUSCAR PRODUCTO..." oninput="posSearch()">
+                    <div id="pos-info" style="margin-top:10px; min-height:30px"></div>
+                    <button class="btn" onclick="addToCart()">[ AGREGAR AL CARRO ]</button>
                 </div>
                 <div class="card">
-                    <h2>> CARRO_COMPRAS</h2>
-                    <div id="cart-items"></div>
-                    <div style="border-top:1px solid; margin-top:10px; text-align:right">
-                        TOTAL: $<span id="cart-total">0</span>
-                    </div>
-                    <button class="btn" style="width:100%; margin-top:10px" onclick="processSale()">[ COMPLETAR_VENTA ]</button>
+                    <h2>> CARRITO</h2>
+                    <div id="cart-list"></div>
+                    <div style="border-top:1px solid; margin-top:10px; text-align:right">TOTAL: $<span id="cart-total">0</span></div>
+                    <button class="btn" onclick="processSale()">[ CONFIRMAR VENTA ]</button>
                 </div>
-                
-</div>
+            </div>
+        </div>
 
-<div class="card">
-                <h2>HISTORIAL_DE_VENTAS</h2>
-                <div id="vta-list" style="max-height: 300px; overflow-y: auto; background: rgba(0,0,0,0.3); padding: 10px; border: 1px solid var(--amber-dim);">
-                    CARGANDO_LOGS...
-                </div>
-
-            
+        <div id="sec-hist" class="section">
+            <div class="card">
+                <h2>> HISTORIAL_REC RECIENTE</h2>
+                <div id="vta-list"></div>
             </div>
         </div>
     </div>
 </div>
 
-<div id="reorder-modal">
-    <h3>=== REABASTECER_ITEM ===</h3>
-    <p id="re-nombre">---</p>
-    <label>> CANTIDAD A SUMAR:</label>
-    <input type="number" id="re-qty">
-    <button class="btn" onclick="confirmReorder()" style="margin-top:10px"> [ CONFIRMAR ]</button>
-    <button class="btn" onclick="closeReorder()"> [ CANCELAR ]</button>
-</div>
-
-<div id="stats-overlay" style="display:none; position:fixed; top:10%; left:10%; width:80%; height:80%; background:#000; border:2px solid var(--amber); z-index:10002; padding:30px;">
-    <h2>=== SYSTEM_ANALYTICS_V2.3 ===</h2>
-    <div id="stats-data"></div>
-    <button class="btn" onclick="this.parentElement.style.display='none'" style="margin-top:20px">[ SALIR ]</button>
-</div>
-
-
-    <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, Timestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
+    // CONFIGURACIÓN FIREBASE (Mantén la tuya si esta no conecta)
     const firebaseConfig = {
         apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
         authDomain: "nextcom--multiservicos-server.firebaseapp.com",
@@ -268,142 +153,103 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    let localOrders = [], localAcc = [], localVtas = [], cart = [];
-// --- GENERADOR DE AUDIO: RUIDO CRT ---
-function startStaticNoise() {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const bufferSize = 2 * audioCtx.sampleRate;
-    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
+    // --- VARIABLES DE ESTADO ---
+    let localAcc = [], cart = [];
 
-    // Generar Ruido Blanco
-    for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-    }
-
-    const whiteNoise = audioCtx.createBufferSource();
-    whiteNoise.buffer = noiseBuffer;
-    whiteNoise.loop = true;
-
-    // Filtro Paso-Banda para que suene a "aire" o "estática de monitor"
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 800;
-    filter.Q.value = 0.5;
-
-    const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.02; // Volumen muy bajo para no molestar
-
-    whiteNoise.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    whiteNoise.start();
-
-    // Retornar función para detener el ruido
-    return () => {
-        gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
-        setTimeout(() => whiteNoise.stop(), 1000);
-    };
-}
-    // --- AUDIO SYSTEM (ALERTA BEEP) ---
+    // --- AUDIO SYSTEM ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playBeep(type) {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain); gain.connect(audioCtx.destination);
-        if(type === 'error') {
-            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
-            gain.gain.setTargetAtTime(0.5, audioCtx.currentTime, 0.01);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.3);
-        } else {
-            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-            gain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.01);
-            osc.start(); osc.stop(audioCtx.currentTime + 0.1);
-        }
+        osc.frequency.setValueAtTime(type === 'error' ? 150 : 800, audioCtx.currentTime);
+        gain.gain.setTargetAtTime(0.1, audioCtx.currentTime, 0.01);
+        osc.start(); osc.stop(audioCtx.currentTime + (type === 'error' ? 0.3 : 0.1));
     }
 
-    // --- CORE NAV ---
-    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+    function startStaticNoise() {
+        const bufferSize = 2 * audioCtx.sampleRate;
+        const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+        const whiteNoise = audioCtx.createBufferSource();
+        whiteNoise.buffer = noiseBuffer; whiteNoise.loop = true;
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0.01;
+        whiteNoise.connect(gainNode); gainNode.connect(audioCtx.destination);
+        whiteNoise.start();
+        return gainNode;
+    }
+
+    // --- BOOT SEQUENCE ---
+    const bootLines = [
+        "NEXTCOM OS v2.4.2026",
+        "SYSTEM: NEXTCOM MULTISERVICIOS",
+        "TERMINAL_ID: NXT-" + Math.floor(Math.random()*9000),
+        "------------------------------------",
+        "LOADING CORE_KERNEL...",
+        "CONNECTING FIREBASE_DB... OK",
+        "SCANNING INVENTORY... 100%",
+        "LOADING AUDIO_ENGINE... READY",
+        "------------------------------------",
+        "ACCESS GRANTED.",
+        "WELCOME, TECHNICIAN."
+    ];
+
+    async function runBoot() {
+        const log = document.getElementById('boot-log');
+        const noise = startStaticNoise();
+        for(let line of bootLines) {
+            const d = document.createElement('div');
+            d.className = 'boot-text'; log.appendChild(d);
+            for(let c of line) { d.textContent += c; await new Promise(r => setTimeout(r, 15)); }
+            await new Promise(r => setTimeout(r, line.includes('...') ? 600 : 200));
+        }
+        await new Promise(r => setTimeout(r, 800));
+        noise.gain.setTargetAtTime(0, audioCtx.currentTime, 0.5);
+        document.getElementById('boot-screen').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('boot-screen').classList.add('hidden-os');
+            document.body.style.overflow = 'auto';
+            playBeep('nav');
+        }, 800);
+    }
+
+    // --- LÓGICA DE NEGOCIO ---
     window.nav = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById('sec-' + id).classList.add('active');
         playBeep('nav');
     };
 
-    // --- MODULO STOCK (UPDATE MODULAR) ---
-    window.updateStock = async (id, qty, type) => {
-        const ref = doc(db, "accesorios", id);
-        const snap = await getDoc(ref);
-        if(snap.exists()){
-            let d = snap.data();
-            let nStock = d.stock || 0;
-            let nEntradas = d.entradas || 0;
-            let nSalidas = d.salidas || 0;
-
-            if(type === 'entrada') { nStock += parseInt(qty); nEntradas += parseInt(qty); }
-            else { nStock -= parseInt(qty); nSalidas += parseInt(qty); }
-
-            await updateDoc(ref, { stock: nStock, entradas: nEntradas, salidas: nSalidas });
-        }
-    };
-
-    // --- INVENTARIO ---
     window.saveAccesorio = async () => {
         const data = {
             nombre: document.getElementById('a-nom').value,
             costo: parseFloat(document.getElementById('a-costo').value),
             pv: parseFloat(document.getElementById('a-pv').value),
             stock: parseInt(document.getElementById('a-stock').value),
-            entradas: parseInt(document.getElementById('a-stock').value),
-            salidas: 0,
             ts: Timestamp.now()
         };
         await addDoc(collection(db, "accesorios"), data);
-        playBeep('nav');
+        alert("REGISTRADO");
     };
 
     onSnapshot(collection(db, "accesorios"), (snap) => {
         localAcc = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        const tb = document.getElementById('acc-table'); tb.innerHTML = "";
+        const container = document.getElementById('acc-table-container');
+        let html = '<table style="width:100%; border-collapse:collapse"><tr><th>ITEM</th><th>STOCK</th><th>ACCION</th></tr>';
         localAcc.forEach(a => {
-            let status = a.stock <= 0 ? '<span class="tag-out">AGOTADO</span>' : (a.stock <= 2 ? '<span class="tag-low">BAJO</span>' : '');
-            tb.innerHTML += `<tr>
-                <td>${a.nombre} ${status}</td>
-                <td>${a.stock}</td>
-                <td style="font-size:0.8rem">E:${a.entradas || 0} | S:${a.salidas || 0}</td>
-                <td>
-                    <button class="btn" onclick="openReorder('${a.id}','${a.nombre}')">[ RE-STOCK ]</button>
-                    <button class="btn" onclick="deleteItem('accesorios','${a.id}')">X</button>
-                </td>
-            </tr>`;
+            const st = a.stock <= 0 ? '<span class="tag-out">OUT</span>' : (a.stock <= 2 ? '<span class="tag-low">LOW</span>' : 'OK');
+            html += `<tr><td>${a.nombre}</td><td>${a.stock} ${st}</td><td><button onclick="deleteDoc(doc(db,'accesorios','${a.id}'))">X</button></td></tr>`;
         });
+        container.innerHTML = html + '</table>';
     });
 
-    // --- REABASTECIMIENTO ---
-    window.openReorder = (id, nombre) => {
-        document.getElementById('re-nombre').innerText = nombre;
-        window.currentReId = id;
-        document.getElementById('reorder-modal').style.display = 'block';
-    };
-    window.closeReorder = () => document.getElementById('reorder-modal').style.display = 'none';
-    window.confirmReorder = async () => {
-        const q = document.getElementById('re-qty').value;
-        if(q > 0) {
-            await updateStock(window.currentReId, q, 'entrada');
-            closeReorder();
-            playBeep('nav');
-        }
-    };
-
-    // --- POS ---
+    // --- POS & HISTORIAL ---
     window.posSearch = () => {
         const val = document.getElementById('pos-search').value.toLowerCase();
         const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
-        if(item) {
-            document.getElementById('pos-info').innerText = `STOCK: ${item.stock} | PRECIO: $${item.pv}`;
-            if(item.stock <= 0) playBeep('error');
-        }
+        document.getElementById('pos-info').innerText = item ? `STK: ${item.stock} | PRECIO: $${item.pv}` : "---";
     };
 
     window.addToCart = () => {
@@ -415,12 +261,11 @@ function startStaticNoise() {
             playBeep('nav');
         } else {
             playBeep('error');
-            alert("SIN STOCK DISPONIBLE");
         }
     };
 
     function renderCart() {
-        const l = document.getElementById('cart-items'); l.innerHTML = "";
+        const l = document.getElementById('cart-list'); l.innerHTML = "";
         let t = 0;
         cart.forEach(i => { t += i.pv; l.innerHTML += `<div>> ${i.nombre} - $${i.pv}</div>`; });
         document.getElementById('cart-total').innerText = t;
@@ -428,263 +273,32 @@ function startStaticNoise() {
 
     window.processSale = async () => {
         if(cart.length === 0) return;
-        for(let i of cart) { await updateStock(i.id, 1, 'salida'); }
-        await addDoc(collection(db, "ventas"), { 
-            total: cart.reduce((a,b)=>a+b.pv,0), 
-            ganancia: cart.reduce((a,b)=>a+(b.pv-b.costo),0), 
-            ts: Timestamp.now() 
-        });
-        cart = []; renderCart();
-        playBeep('nav');
-        alert("VENTA FINALIZADA");
-    };
-
-    // --- ORDENES Y STATS ---
-    window.calcOrder = () => {
-        const pc = document.getElementById('o-pc').value || 0;
-        const ant = document.getElementById('o-ant').value || 0;
-        document.getElementById('o-sal').value = pc - ant;
-    };
-
-    window.saveOrder = async () => {
-        const data = {
-            cliente: document.getElementById('o-cliente').value,
-            modelo: document.getElementById('o-eq').value,
-            falla: document.getElementById('o-falla').value,
-            prio: document.getElementById('o-prio').value,
-            saldo: document.getElementById('o-sal').value,
-            estado: 'RECIBIDO',
+        for(let i of cart) {
+            const ref = doc(db, "accesorios", i.id);
+            await updateDoc(ref, { stock: i.stock - 1 });
+        }
+        await addDoc(collection(db, "ventas"), {
+            total: cart.reduce((a,b)=>a+b.pv, 0),
+            items: cart.map(i => i.nombre),
             ts: Timestamp.now()
-        };
-        await addDoc(collection(db, "ordenes"), data);
-        nav('dash');
+        });
+        cart = []; renderCart(); alert("VENTA EXITOSA");
     };
 
-    onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), (snap) => {
-        localOrders = snap.docs.map(d => ({id: d.id, ...d.data()}));
-        const l = document.getElementById('orders-list'); l.innerHTML = "";
-        localOrders.forEach(o => {
-            l.innerHTML += `<div class="card ${o.prio==='EXPRESS'?'prio-express':''}">
-                [${o.prio}] ${o.cliente} | ${o.modelo} | SALDO: $${o.saldo} <br>
-                ESTADO: ${o.estado}
-            </div>`;
+    onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc")), (snap) => {
+        const l = document.getElementById('vta-list'); l.innerHTML = "";
+        snap.forEach(d => {
+            const v = d.data();
+            l.innerHTML += `<div style="border-bottom:1px solid var(--amber-dim)">[${v.ts.toDate().toLocaleTimeString()}] TOTAL: $${v.total} <br> ${v.items.join(", ")}</div>`;
         });
     });
 
-    window.showStats = () => {
-        const totalV = localAcc.reduce((a,b) => a + ( (b.pv-b.costo)*b.salidas ), 0);
-        document.getElementById('stats-data').innerHTML = `
-            > PRODUCTOS EN STOCK: ${localAcc.length} <br>
-            > TOTAL UNIDADES: ${localAcc.reduce((a,b)=>a+b.stock,0)} <br>
-            > GANANCIA ESTIMADA VENTAS: $${totalV.toFixed(2)} <br>
-            > SERVICIOS ACTIVOS: ${localOrders.length}
-        `;
-        document.getElementById('stats-overlay').style.display = 'block';
-        playBeep('nav');
-    };
+    // --- RELOJ ---
+    setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
 
-    window.deleteItem = async (c, id) => { if(confirm("¿BORRAR?")) await deleteDoc(doc(db, c, id)); };
-// --- SALES-MODULE.JS: LÓGICA DE PERSISTENCIA Y CONTROL ---
+    // --- INICIAR ---
+    runBoot();
 
-// 1. Inicialización de Persistencia Local (Respaldo)
-if (!localStorage.getItem('salesHistory')) {
-    localStorage.setItem('salesHistory', JSON.stringify([]));
-}
-
-// 2. Función Principal: PROCESAR VENTA (Sincronizada)
-window.processSale = async () => {
-    if (cart.length === 0) return;
-
-    console.log("VALIDANDO STOCK...");
-    
-    // Verificar stock antes de cualquier movimiento
-    for (let item of cart) {
-        if (item.stock <= 0) {
-            playBeep('error');
-            alert(`ERROR: STOCK INSUFICIENTE PARA ${item.nombre}`);
-            return;
-        }
-    }
-
-    console.log("PROCESANDO VENTA...");
-    const saleId = `SALE-${Date.now()}`;
-    const totalVenta = cart.reduce((acc, item) => acc + item.pv, 0);
-    const gananciaVenta = cart.reduce((acc, item) => acc + (item.pv - item.costo), 0);
-    const fechaActual = new Date().toLocaleString();
-
-    try {
-        // A. Actualizar Inventario (Firebase + Stock Local)
-        for (let item of cart) {
-            await window.updateStock(item.id, 1, 'salida');
-        }
-
-        // B. Crear objeto de venta estructurado
-        const nuevaVenta = {
-            id: saleId,
-            items: cart.map(i => i.nombre),
-            total: totalVenta,
-            ganancia: gananciaVenta,
-            fecha: fechaActual,
-            ts: Date.now()
-        };
-
-        // C. Guardar en Firebase
-        await addDoc(collection(db, "ventas"), nuevaVenta);
-
-        // D. Guardar en localStorage (Para evitar desaparición al recargar)
-        const localHistory = JSON.parse(localStorage.getItem('salesHistory'));
-        localHistory.push(nuevaVenta);
-        localStorage.setItem('salesHistory', JSON.stringify(localHistory));
-
-        console.log("VENTA REGISTRADA | INVENTARIO ACTUALIZADO");
-        
-        // E. Limpieza y Feedback
-        cart = [];
-        renderCart();
-        renderSalesHistory(); // Actualizar la tabla de historial
-        playBeep('nav');
-        alert(`VENTA EXITOSA: ${saleId}`);
-
-    } catch (error) {
-        console.error("CRITICAL_ERROR_POS:", error);
-        playBeep('error');
-    }
-};
-
-// 3. Renderizado de Historial (Sin duplicados)
-window.renderSalesHistory = () => {
-    const historyContainer = document.getElementById('vta-list');
-    if (!historyContainer) return;
-
-    // Obtener datos combinados (priorizando LocalStorage para rapidez)
-    const sales = JSON.parse(localStorage.getItem('salesHistory')) || [];
-    
-    // Ordenar por fecha (más reciente arriba)
-    sales.sort((a, b) => b.ts - a.ts);
-
-    historyContainer.innerHTML = sales.map(v => `
-        <div style="border-bottom: 1px solid var(--amber-dim); padding: 5px 0; font-size: 0.9rem;">
-            [${v.fecha}] <span style="color: #fff;">${v.id}</span><br>
-            ITEMS: ${v.items.join(", ")}<br>
-            TOTAL: $${v.total.toFixed(2)} | GANANCIA: $${v.ganancia.toFixed(2)}
-        </div>
-    `).join("");
-
-    updateSalesTotals(sales);
-};
-
-// 4. Cálculo de Totales (Ventas del día/mes)
-function updateSalesTotals(sales) {
-    const hoy = new Date().toLocaleDateString();
-    const totalDia = sales
-        .filter(s => new Date(s.ts).toLocaleDateString() === hoy)
-        .reduce((acc, s) => acc + s.total, 0);
-
-    const totalMes = sales.reduce((acc, s) => acc + s.total, 0);
-
-    // Si existe el módulo de stats, actualizarlo
-    const statsBox = document.getElementById('stats-data');
-    if (statsBox && document.getElementById('stats-overlay').style.display === 'block') {
-        showStats(); // Refrescar stats si el modal está abierto
-    }
-}
-
-// --- SISTEMA DE ARRANQUE NEXTCOM OS v2.4 ---
-
-const bootLines = [
-    "NEXTCOM OS [Version 2.4.2026]",
-    "(C) 2026 NEXTCOM MULTISERVICIOS CORP.",
-    "--------------------------------------",
-    "BIOS CHECKING RAM... 640KB OK",
-    "INITIALIZING KERNEL MODULES...",
-    "LOADING FIREBASE_DB_DRIVER: [DONE]",
-    "CONNECTING TO CLOUD_SERVER... SUCCESS",
-    "SCANNING LOCAL_STORAGE... 128 BYTES FOUND",
-    "LOADING INVENTORY_INDEX... OK",
-    "VERIFYING POS_TERMINAL_01... READY",
-    "SETTING UP CRT_EMULATION_LAYER...",
-    "--------------------------------------",
-    "ACCESS GRANTED.",
-    "WELCOME, TECHNICIAN."
-];
-
-// Generador de Ruido CRT (Audio)
-function startStaticNoise(audioCtx) {
-    const bufferSize = 2 * audioCtx.sampleRate;
-    const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-    const output = noiseBuffer.getChannelData(0);
-
-    for (let i = 0; i < bufferSize; i++) {
-        output[i] = Math.random() * 2 - 1;
-    }
-
-    const whiteNoise = audioCtx.createBufferSource();
-    whiteNoise.buffer = noiseBuffer;
-    whiteNoise.loop = true;
-
-    const filter = audioCtx.createBiquadFilter();
-    filter.type = "bandpass";
-    filter.frequency.value = 850;
-    filter.Q.value = 0.5;
-
-    const gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.015; // Volumen sutil de fondo
-
-    whiteNoise.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    whiteNoise.start();
-    return gainNode;
-}
-
-// Función Principal de Arranque
-async function runBootSequence() {
-    const logContainer = document.getElementById('boot-log');
-    const bootScreen = document.getElementById('boot-screen');
-    const cursor = document.getElementById('boot-cursor');
-    
-    // Iniciar contexto de audio al interactuar o cargar
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const noiseGain = startStaticNoise(audioCtx);
-
-    document.body.style.overflow = 'hidden';
-
-    for (let line of bootLines) {
-        const div = document.createElement('div');
-        div.className = 'boot-text';
-        logContainer.appendChild(div);
-
-        // Efecto escritura por cada caracter
-        for (let char of line) {
-            div.textContent += char;
-            await new Promise(r => setTimeout(r, 15));
-        }
-
-        // Pausa lógica entre líneas
-        const wait = line.includes('...') ? 500 : 150;
-        await new Promise(r => setTimeout(r, wait));
-        logContainer.scrollTop = logContainer.scrollHeight;
-    }
-
-    // Finalización
-    await new Promise(r => setTimeout(r, 1000));
-    
-    // Desvanecer ruido y pantalla
-    noiseGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.4);
-    bootScreen.style.transition = 'opacity 0.8s ease';
-    bootScreen.style.opacity = '0';
-    
-    setTimeout(() => {
-        bootScreen.classList.add('hidden-os');
-        document.body.style.overflow = 'auto';
-        // Beep de sistema listo (asumiendo que tienes playBeep)
-        if (typeof playBeep === 'function') playBeep('nav');
-    }, 800);
-}
-
-// Disparador
-window.addEventListener('DOMContentLoaded', runBootSequence);
 </script>
 </body>
 </html>
