@@ -19,6 +19,8 @@
             --padd-main: clamp(10px, 3vw, 30px);
             --padd-card: clamp(10px, 2vw, 20px);
             --gap-grid: clamp(10px, 2vw, 20px);
+            /* Tamaño Unificado */
+            --font-size-base: 0.9rem;
         }
 
         body {
@@ -30,6 +32,7 @@
             height: 100vh;
             width: 100vw;
             display: flex;
+            font-size: var(--font-size-base);
         }
 
         /* --- PANTALLA DE LOGIN --- */
@@ -77,7 +80,8 @@
             position: fixed; inset: 0;
             background: #000; z-index: 10001;
             padding: var(--padd-main); display: none; flex-direction: column;
-            font-size: clamp(0.9rem, 1.5vw, 1.2rem); line-height: 1.5;
+            line-height: 1.5;
+            font-size: var(--font-size-base);
         }
 
         #app { 
@@ -100,26 +104,39 @@
             box-sizing: border-box; width: 100%;
         }
 
-        /* --- UI ELEMENTS --- */
+        /* --- UI ELEMENTS (NORMALIZADOS) --- */
+        h2, h3 { 
+            font-size: var(--font-size-base); 
+            font-weight: bold; 
+            letter-spacing: 1px; 
+            text-transform: uppercase;
+            border-bottom: 1px solid var(--amber-dim);
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+        }
+
         .btn {
             background: transparent; border: 1px solid var(--amber);
-            color: var(--amber); padding: clamp(8px, 1vw, 10px); 
+            color: var(--amber); padding: 10px; 
             cursor: pointer; font-family: 'Share Tech Mono'; 
             transition: 0.2s; text-transform: uppercase;
-            box-sizing: border-box; font-size: clamp(0.8rem, 1vw, 1rem);
+            box-sizing: border-box; 
+            font-size: var(--font-size-base);
+            font-weight: bold;
         }
         .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 10px var(--amber); }
 
-        .btn-del { border-color: var(--red); color: var(--red); padding: 5px 12px; height: fit-content; }
+        .btn-del { border-color: var(--red); color: var(--red); }
         .btn-del:hover { background: var(--red); color: #000; }
         
-        .btn-status { border-color: var(--amber-dim); font-size: 0.7rem; padding: 4px 8px; }
+        .btn-status { border-color: var(--amber-dim); font-weight: normal; }
 
         input {
             background: #0a0a0a; border: 1px solid var(--amber-dim);
-            color: var(--amber); padding: clamp(8px, 1vw, 12px); 
+            color: var(--amber); padding: 10px; 
             width: 100%; margin-bottom: 10px; font-family: 'Share Tech Mono';
-            box-sizing: border-box; font-size: clamp(0.9rem, 1vw, 1rem);
+            box-sizing: border-box; 
+            font-size: var(--font-size-base);
         }
 
         .grid-responsive {
@@ -135,8 +152,8 @@
 
         .table-wrap { overflow-x: auto; width: 100%; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; min-width: 400px; }
-        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; font-size: 0.8rem; text-transform: uppercase; }
-        td { padding: 12px; border-bottom: 1px solid var(--amber-dim); vertical-align: middle; font-size: 0.9rem; }
+        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; font-size: var(--font-size-base); font-weight: bold; text-transform: uppercase; }
+        td { padding: 12px; border-bottom: 1px solid var(--amber-dim); vertical-align: middle; font-size: var(--font-size-base); }
 
         .card { border: 1px solid var(--amber-dim); padding: var(--padd-card); margin-bottom: 15px; background: rgba(10,10,10,0.5); position: relative; }
         
@@ -145,7 +162,7 @@
         .history-container {
             height: clamp(150px, 25vh, 220px); overflow-y: auto;
             border: 1px solid var(--amber-dim); padding: 15px;
-            background: rgba(255, 122, 0, 0.02); font-size: 0.85rem;
+            background: rgba(255, 122, 0, 0.02); font-size: var(--font-size-base);
         }
 
         .section { display: none; }
@@ -159,26 +176,25 @@
             display: none; width: clamp(280px, 90%, 350px); box-sizing: border-box;
         }
 
-        .chart-wrap { position: relative; width: 100%; height: clamp(200px, 30vh, 280px); margin-top: 10px; }
-        canvas { position: absolute; inset: 0; width: 100% !important; height: 100% !important; }
-
+        .chart-wrap { position: relative; width: 100%; height: 250px; margin-top: 10px; }
+        
         .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: var(--gap-grid); margin-bottom: 20px; }
-        .kpi-card { border: 1px solid var(--amber-dim); padding: clamp(10px, 1.5vw, 15px); text-align: center; background: rgba(255, 122, 0, 0.05); }
-        .kpi-val { font-size: clamp(1.2rem, 2vw, 1.8rem); color: #fff; display: block; }
-        .kpi-lab { font-size: clamp(0.6rem, 0.8vw, 0.7rem); opacity: 0.7; text-transform: uppercase;}
+        .kpi-card { border: 1px solid var(--amber-dim); padding: 15px; text-align: center; background: rgba(255, 122, 0, 0.05); }
+        .kpi-val { font-size: var(--font-size-base); font-weight: bold; color: #fff; display: block; margin-top: 5px; }
+        .kpi-lab { font-size: var(--font-size-base); opacity: 0.7; text-transform: uppercase; letter-spacing: 1px; }
         .critico { border-color: var(--red); color: var(--red) !important; }
 
         .order-item { margin-bottom: 5px; border-bottom: 1px solid #222; padding-bottom: 5px; }
+
+        /* Reloj y Fecha */
+        #clock { font-size: var(--font-size-base); font-weight: bold; color: #fff; border: 1px solid var(--amber); padding: 10px; display: inline-block; }
+        #date-display { font-size: var(--font-size-base); opacity: 0.7; }
 
         @media (max-width: 900px) {
             #app { flex-direction: column; }
             .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--amber); flex-direction: row; flex-wrap: wrap; justify-content: center; padding: 10px; }
             .sidebar div:first-child { width: 100%; text-align: center; margin-bottom: 10px !important; }
             .sidebar .btn { flex: 1; min-width: 120px; }
-        }
-
-        @media (max-width: 600px) {
-            .sidebar .btn { min-width: 45%; }
         }
     </style>
 </head>
@@ -188,21 +204,21 @@
 <div class="scanline"></div>
 
 <div id="login-screen">
-    <div style="font-size: 24px; font-weight: bold; margin-bottom: 20px; letter-spacing: 2px;">SECURE_ACCESS_v3.0</div>
+    <div style="font-weight: bold; margin-bottom: 20px; letter-spacing: 4px; border: 1px solid var(--amber); padding: 10px;">SECURE_ACCESS_v3.0</div>
     <div class="login-box">
-        <label style="display:block; margin-bottom:5px; font-size: 0.8rem;">OPERATOR_ID</label>
+        <label style="display:block; margin-bottom:5px; font-weight: bold;">[OPERATOR_ID]</label>
         <input type="text" id="user-id" placeholder="USUARIO">
-        <label style="display:block; margin-bottom:5px; font-size: 0.8rem;">ACCESS_KEY</label>
+        <label style="display:block; margin-bottom:5px; font-weight: bold;">[ACCESS_KEY]</label>
         <input type="password" id="user-pass" placeholder="CONTRASEÑA">
         <button class="btn" onclick="tryLogin()" style="width: 100%; margin-top: 10px;">VALIDAR CREDENCIALES</button>
-        <div id="login-err" style="color: var(--red); font-size: 0.7rem; margin-top: 10px; text-align: center; visibility: hidden;">ACCESO DENEGADO: CREDENCIALES INVÁLIDAS</div>
+        <div id="login-err" style="color: var(--red); margin-top: 10px; text-align: center; visibility: hidden;">ACCESO DENEGADO</div>
     </div>
 </div>
 
 <div id="boot"><div id="boot-log"></div></div>
 
 <div id="reorder-modal">
-    <h3 style="margin-top:0">[ REABASTECER_STOCK ]</h3>
+    <h3>[ REABASTECER_STOCK ]</h3>
     <p id="re-nombre" style="color:#fff">---</p>
     <input type="number" id="re-qty" placeholder="CANTIDAD A SUMAR">
     <button class="btn" onclick="confirmReorder()" style="width: 100%;">EJECUTAR INCREMENTO</button>
@@ -211,12 +227,12 @@
 
 <div id="app">
     <div class="sidebar">
-        <div style="font-size: 18px; font-weight: bold; margin-bottom: 25px; color:#fff; letter-spacing: 1px;">NEXTCOM_OS_v3.0</div>
+        <div style="font-weight: bold; margin-bottom: 25px; color:#fff; letter-spacing: 1px; border-bottom: 2px solid var(--amber);">NEXTCOM_OS_v3.0</div>
         <button class="btn" onclick="nav('dash')">01_DASHBOARD</button>
         <button class="btn" onclick="nav('inv')">02_INVENTARIO</button>
         <button class="btn" onclick="nav('pos')">03_POS_VENTA</button>
         <button class="btn" onclick="nav('orden')">04_ORDENES</button>
-        <button class="btn" onclick="logout()" style="margin-top: auto; border-color: var(--amber-dim); font-size: 0.7rem;">LOGOUT_SYSTEM</button>
+        <button class="btn" onclick="logout()" style="margin-top: auto; border-color: var(--amber-dim);">LOGOUT_SYSTEM</button>
     </div>
 
     <div class="main">
@@ -239,15 +255,15 @@
 
             <div class="grid-responsive">
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 150px;">
-                    <div id="clock" style="font-size: clamp(2rem, 5vw, 50px); margin-bottom: 5px;">00:00:00</div>
-                    <div id="date-display" style="letter-spacing: 3px; opacity: 0.7; font-size: clamp(0.7rem, 1vw, 1rem);">YYYY-MM-DD</div>
+                    <div id="clock">00:00:00</div>
+                    <div id="date-display" style="margin-top:10px;">YYYY-MM-DD</div>
                 </div>
                 <div class="card">
-                    <h3 style="margin-top:0">RENDIMIENTO_DE_INVENTARIO</h3>
+                    <h3>RENDIMIENTO_DE_INVENTARIO</h3>
                     <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
                 </div>
                 <div class="card" style="grid-column: auto / span 2;">
-                    <h3 style="margin-top:0">> SYSTEM_LOG (ACTIVIDAD_RECIENTE)</h3>
+                    <h3>> SYSTEM_LOG (ACTIVIDAD_RECIENTE)</h3>
                     <div id="sys-log" class="history-container"><div>[SYSTEM] KERNEL_READY...</div></div>
                 </div>
             </div>
@@ -271,355 +287,5 @@
                 </table>
             </div>
         </div>
-
-        <div id="sec-pos" class="section">
-            <h2>> PUNTO_DE_VENTA</h2>
-            <div class="grid-responsive">
-                <div>
-                    <input id="pos-search" placeholder="ESCRIBA PARA BUSCAR PRODUCTO..." oninput="posSearch()">
-                    <div id="pos-info" class="card" style="min-height: 60px; display: flex; align-items: center; justify-content: center; font-weight: bold; text-align: center; font-size: 0.9rem;">ESPERANDO ENTRADA...</div>
-                    <button class="btn" onclick="addToCart()" style="width: 100%; margin-bottom: 25px;">AÑADIR AL CARRITO</button>
-                    <h3>> REGISTRO_DE_VENTAS</h3>
-                    <div id="pos-history" class="history-container"><div>SISTEMA LISTO...</div></div>
-                </div>
-                <div class="card" style="display: flex; flex-direction: column;">
-                    <h3 style="margin-top:0">CARRITO_ACTUAL</h3>
-                    <div id="cart-items" style="flex: 1; min-height: 150px; max-height: 300px; overflow-y: auto; border-bottom: 1px solid var(--amber-dim); margin-bottom: 15px;"></div>
-                    <div class="flex-row">
-                        <span>TOTAL_A_PAGAR:</span>
-                        <span style="font-size: clamp(1.5rem, 3vw, 2rem); color: #fff;">$<span id="cart-total">0</span></span>
-                    </div>
-                    <button class="btn" onclick="processSale()" style="width: 100%; margin-top: 20px; background: var(--amber); color: #000; font-weight: bold; min-height: 50px;">CONFIRMAR Y COBRAR</button>
-                </div>
-            </div>
         </div>
-
-        <div id="sec-orden" class="section">
-            <h2>> SERVICIOS_TECNICOS</h2>
-            <div class="card">
-                <div class="form-grid">
-                    <input id="o-cliente" placeholder="NOMBRE DEL CLIENTE" style="grid-column: span 2;">
-                    <input id="o-eq" placeholder="EQUIPO / MODELO">
-                    <input id="o-falla" placeholder="FALLA REPORTADA">
-                    <input id="o-pc" type="number" placeholder="PRECIO TOTAL ($)">
-                    <input id="o-ant" type="number" placeholder="ANTICIPO ($)" oninput="calcOrder()">
-                </div>
-                <div class="flex-row" style="margin-bottom: 15px; border-top: 1px solid var(--amber-dim); padding-top: 15px;">
-                    <span>SALDO PENDIENTE:</span>
-                    <span style="font-size: clamp(1.2rem, 2vw, 1.5rem); color: #ff4444;">$<span id="o-sal-display">0</span></span>
-                </div>
-                <button class="btn" onclick="saveOrder()" style="width: 100%;">GENERAR ORDEN DE SERVICIO</button>
-            </div>
-            
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RECIBIDOS_EN_TALLER</th>
-                            <th>TRABAJOS_TERMINADOS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td id="list-recibidos" style="width: 50%; vertical-align: top;"></td>
-                            <td id="list-terminados" style="width: 50%; vertical-align: top;"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
 </div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { 
-        getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, where,
-        doc, updateDoc, deleteDoc, Timestamp, runTransaction, getDoc 
-    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
-        authDomain: "nextcom--multiservicos-server.firebaseapp.com",
-        projectId: "nextcom--multiservicos-server",
-        storageBucket: "nextcom--multiservicos-server.firebasestorage.app",
-        messagingSenderId: "1011344400777",
-        appId: "1:1011344400777:web:e40a1a66d9f77046bd8158"
-    };
-
-    const fbApp = initializeApp(firebaseConfig);
-    const db = getFirestore(fbApp);
-
-    // --- LÓGICA DE LOGIN ---
-    const AUTH_USER = "admin";
-    const AUTH_PASS = "nextcom2024";
-
-    window.tryLogin = () => {
-        const u = document.getElementById("user-id").value;
-        const p = document.getElementById("user-pass").value;
-        if(u === AUTH_USER && p === AUTH_PASS) {
-            localStorage.setItem("nextcom_auth", "true");
-            startBootSequence();
-        } else {
-            const err = document.getElementById("login-err");
-            err.style.visibility = "visible";
-            setTimeout(() => err.style.visibility = "hidden", 3000);
-        }
-    };
-
-    window.logout = () => {
-        localStorage.removeItem("nextcom_auth");
-        location.reload();
-    };
-
-    async function startBootSequence() {
-        document.getElementById("login-screen").style.display = "none";
-        const boot = document.getElementById("boot");
-        boot.style.display = "flex";
-        const log = document.getElementById("boot-log");
-        const msgs = ["> INICIANDO KERNEL...", "> CARGANDO COMPONENTES FIREBASE...", "> ENLACE ESTABLECIDO.", "> BIENVENIDO, OPERADOR."];
-        for(let m of msgs) {
-            const d = document.createElement("div"); d.innerText = m;
-            log.appendChild(d);
-            await new Promise(r => setTimeout(r, 400));
-        }
-        boot.style.display = "none";
-        document.getElementById("app").style.display = "flex";
-        if(localAcc.length > 0) updateChart();
-    }
-
-    let localAcc = [];
-    let cart = [];
-    let salesChart = null;
-
-    function logSys(msg) {
-        const log = document.getElementById("sys-log");
-        const time = new Date().toLocaleTimeString();
-        const entry = document.createElement("div");
-        entry.innerHTML = `[${time}] ${msg}`;
-        log.prepend(entry);
-    }
-
-    window.nav = (id) => {
-        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
-        document.getElementById("sec-" + id).classList.add("active");
-    };
-
-    function updateChart() {
-        const canvas = document.getElementById('mainChart');
-        if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const labels = localAcc.map(a => a.nombre.substring(0,10));
-        const stocks = localAcc.map(a => a.stock);
-        const sales = localAcc.map(a => a.salidas || 0);
-        if (salesChart) salesChart.destroy();
-        salesChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    { label: 'STOCK', data: stocks, backgroundColor: '#ff7a00' },
-                    { label: 'VENTAS', data: sales, backgroundColor: '#444' }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: '#1a1a1a' }, ticks: { color: '#ff7a00', font: {family: 'Share Tech Mono'} } }, 
-                    x: { grid: { display: false }, ticks: { color: '#ff7a00', font: {family: 'Share Tech Mono'} } } 
-                },
-                plugins: { legend: { labels: { color: '#ff7a00', font: { family: 'Share Tech Mono' } } } }
-            }
-        });
-    }
-
-    function updateKPIs() {
-        const criticoCount = localAcc.filter(a => a.stock <= 3).length;
-        document.getElementById("kpi-stock").innerText = criticoCount;
-        const card = document.getElementById("kpi-stock-card");
-        if(criticoCount > 0) card.classList.add("critico");
-        else card.classList.remove("critico");
-
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const qVentas = query(collection(db, "ventas"), where("ts", ">=", Timestamp.fromDate(today)));
-        onSnapshot(qVentas, snap => {
-            let totalHoy = 0;
-            snap.forEach(d => totalHoy += d.data().total);
-            document.getElementById("kpi-ventas").innerText = totalHoy.toFixed(2);
-        });
-
-        onSnapshot(collection(db, "ordenes"), snap => {
-            document.getElementById("kpi-ordenes").innerText = snap.size;
-        });
-    }
-
-    onSnapshot(collection(db, "accesorios"), snap => {
-        localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        const table = document.getElementById("acc-table");
-        if(!table) return;
-        table.innerHTML = "";
-        localAcc.forEach(a => {
-            table.innerHTML += `<tr>
-                <td>${a.nombre}</td>
-                <td style="font-weight:bold; color:${a.stock <= 3 ? '#ff4444' : '#fff'}">${a.stock}</td>
-                <td style="font-size:0.8rem">ENT: ${a.entradas} | SAL: ${a.salidas}</td>
-                <td style="text-align:right">
-                    <button class="btn" onclick="openReorder('${a.id}','${a.nombre}')" style="padding: 5px 10px;">+</button>
-                    <button class="btn btn-del" onclick="deleteItem('accesorios','${a.id}')">X</button>
-                </td>
-            </tr>`;
-        });
-        updateChart();
-        updateKPIs();
-    });
-
-    onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc"), limit(15)), snap => {
-        const history = document.getElementById("pos-history");
-        if(!history) return;
-        history.innerHTML = "";
-        snap.forEach(d => {
-            const v = d.data();
-            const date = v.ts ? v.ts.toDate().toLocaleTimeString() : '...';
-            history.innerHTML += `<div style="border-bottom: 1px solid #222; margin-bottom:5px;">> [${date}] TOTAL: $${v.total}</div>`;
-        });
-    });
-
-    window.processSale = async () => {
-        if(cart.length === 0) return;
-        const totalVenta = cart.reduce((acc, i) => acc + i.pv, 0);
-        try {
-            await runTransaction(db, async(t) => {
-                for(let item of cart) {
-                    const ref = doc(db, "accesorios", item.id);
-                    const snap = await t.get(ref);
-                    t.update(ref, { stock: snap.data().stock - 1, salidas: (snap.data().salidas || 0) + 1 });
-                }
-                await addDoc(collection(db, "ventas"), { total: totalVenta, items: cart.length, ts: Timestamp.now() });
-            });
-            logSys(`VENTA: $${totalVenta}`);
-            cart = []; renderCart(); alert("VENTA COMPLETADA");
-        } catch (e) { alert("ERROR EN VENTA"); }
-    };
-
-    window.saveAccesorio = async () => {
-        const nom = document.getElementById("a-nom").value;
-        const stock = parseInt(document.getElementById("a-stock").value);
-        if(!nom || isNaN(stock)) return;
-        await addDoc(collection(db, "accesorios"), {
-            nombre: nom, stock: stock,
-            costo: parseFloat(document.getElementById("a-costo").value) || 0,
-            pv: parseFloat(document.getElementById("a-pv").value) || 0,
-            entradas: stock, salidas: 0, ts: Timestamp.now()
-        });
-        document.querySelectorAll("#sec-inv input").forEach(i => i.value = "");
-    };
-
-    window.posSearch = () => {
-        const val = document.getElementById("pos-search").value.toLowerCase();
-        const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
-        const info = document.getElementById("pos-info");
-        if(item) info.innerHTML = `${item.nombre} | $${item.pv} | STOCK: ${item.stock}`;
-        else info.innerText = "BUSCANDO...";
-    };
-
-    window.addToCart = () => {
-        const val = document.getElementById("pos-search").value.toLowerCase();
-        const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
-        if(item && item.stock > 0) { cart.push(item); renderCart(); }
-    };
-
-    function renderCart() {
-        const container = document.getElementById("cart-items");
-        let total = 0; container.innerHTML = "";
-        cart.forEach(i => { total += i.pv; container.innerHTML += `<div class="flex-row"><span>> ${i.nombre}</span><span>$${i.pv}</span></div>`; });
-        document.getElementById("cart-total").innerText = total.toFixed(2);
-    }
-
-    window.deleteItem = async (col, id) => {
-        if(confirm("¿ELIMINAR DEFINITIVAMENTE?")) await deleteDoc(doc(db, col, id));
-    };
-
-    window.openReorder = (id, n) => {
-        window.currentReId = id;
-        document.getElementById("re-nombre").innerText = n;
-        document.getElementById("reorder-modal").style.display = "block";
-    };
-    window.closeReorder = () => document.getElementById("reorder-modal").style.display = "none";
-    window.confirmReorder = async () => {
-        const q = parseInt(document.getElementById("re-qty").value);
-        const ref = doc(db, "accesorios", window.currentReId);
-        const snap = await getDoc(ref);
-        await updateDoc(ref, { stock: snap.data().stock + q, entradas: snap.data().entradas + q });
-        closeReorder();
-    };
-
-    // --- NUEVA LÓGICA DE ÓRDENES ---
-    window.saveOrder = async () => {
-        const cl = document.getElementById("o-cliente").value;
-        if(!cl) return;
-        await addDoc(collection(db, "ordenes"), {
-            cliente: cl, 
-            modelo: document.getElementById("o-eq").value,
-            falla: document.getElementById("o-falla").value,
-            saldo: document.getElementById("o-sal-display").innerText, 
-            estado: "RECIBIDO",
-            ts: Timestamp.now()
-        });
-        document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
-        document.getElementById("o-sal-display").innerText = "0";
-    };
-
-    window.toggleOrderStatus = async (id, currentStatus) => {
-        const newStatus = currentStatus === "RECIBIDO" ? "TERMINADO" : "RECIBIDO";
-        await updateDoc(doc(db, "ordenes", id), { estado: newStatus });
-    };
-
-    onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => {
-        const colRecibidos = document.getElementById("list-recibidos");
-        const colTerminados = document.getElementById("list-terminados");
-        if(!colRecibidos || !colTerminados) return;
-        
-        colRecibidos.innerHTML = "";
-        colTerminados.innerHTML = "";
-
-        snap.forEach(d => {
-            const o = d.data();
-            const cardHtml = `
-                <div class="card order-item">
-                    <div style="font-size:0.85rem; color:#fff; margin-bottom:5px;">${o.cliente}</div>
-                    <div style="font-size:0.75rem; opacity:0.8;">${o.modelo} | Pendiente: $${o.saldo}</div>
-                    <div style="margin-top:8px;" class="flex-row">
-                        <button class="btn btn-status" onclick="toggleOrderStatus('${d.id}', '${o.estado}')">
-                            ${o.estado === 'RECIBIDO' ? '>> TERMINAR' : '<< REABRIR'}
-                        </button>
-                        <button class="btn btn-del" style="padding:2px 8px; font-size:0.6rem" onclick="deleteItem('ordenes','${d.id}')">X</button>
-                    </div>
-                </div>`;
-            
-            if(o.estado === "TERMINADO") colTerminados.innerHTML += cardHtml;
-            else colRecibidos.innerHTML += cardHtml;
-        });
-    });
-
-    window.calcOrder = () => {
-        const pc = parseFloat(document.getElementById("o-pc").value) || 0;
-        const ant = parseFloat(document.getElementById("o-ant").value) || 0;
-        document.getElementById("o-sal-display").innerText = (pc - ant).toFixed(2);
-    };
-
-    window.addEventListener("load", () => {
-        if(localStorage.getItem("nextcom_auth") === "true") {
-            startBootSequence();
-        }
-    });
-
-    setInterval(() => {
-        const clock = document.getElementById("clock");
-        if(clock) clock.innerText = new Date().toLocaleTimeString();
-        const dateDisp = document.getElementById("date-display");
-        if(dateDisp) dateDisp.innerText = new Date().toISOString().split('T')[0];
-    }, 1000);
-</script>
-</body>
-</html>
