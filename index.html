@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXTCOM OS v4.5 // ANALYTICS EDITION</title>
+    <title>NEXTCOM OS v4.5 // FULL CONTROL</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -100,6 +100,24 @@
         .active { display: block; animation: fadeIn 0.3s; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+        /* --- ESTILOS ORDENES MEJORADOS --- */
+        .order-card { 
+            border: 1px solid #222; 
+            background: #0a0a0a; 
+            padding: 15px; 
+            margin-bottom: 10px; 
+            position: relative;
+            border-left: 4px solid var(--amber);
+        }
+        .order-header { display: flex; justify-content: space-between; border-bottom: 1px solid #222; padding-bottom: 8px; margin-bottom: 8px; }
+        .order-client { font-weight: bold; color: #fff; }
+        .order-meta { font-size: 0.75rem; color: #888; }
+        .order-body { font-size: 0.85rem; line-height: 1.4; }
+        .order-price { color: var(--green); font-weight: bold; margin-top: 5px; display: block;}
+        .badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; }
+        .badge-recibido { background: var(--amber-dim); color: #fff; }
+        .badge-terminado { background: var(--green); color: #000; }
+
         #reorder-modal {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: #000; border: 2px solid var(--blue); padding: 30px; z-index: 10005;
@@ -177,7 +195,7 @@
                     <div id="date-display" style="letter-spacing: 5px; margin-top: 10px; opacity: 0.8;">2026-XX-XX</div>
                 </div>
                 <div class="card">
-                    <h3 style="margin-top:0; font-size: 0.9rem;">RENDIMIENTO_DIARIO (GANANCIAS)</h3>
+                    <h3 style="margin-top:0; font-size: 0.9rem;">RENDIMIENTO_DIARIO</h3>
                     <div style="height: 200px;"><canvas id="mainChart"></canvas></div>
                 </div>
                 <div class="card" style="grid-column: span 2;">
@@ -241,20 +259,30 @@
 
         <div id="sec-orden" class="section">
             <h2>> TALLER_Y_SERVICIOS</h2>
-            <div class="card">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="grid-responsive" style="grid-template-columns: 350px 1fr;">
+                <div class="card">
+                    <h3>NUEVA ORDEN</h3>
                     <input id="o-cliente" placeholder="NOMBRE CLIENTE">
                     <input id="o-tel" placeholder="TELÉFONO">
                     <input id="o-eq" placeholder="DISPOSITIVO / MODELO">
-                    <input id="o-falla" placeholder="FALLA / REPARACIÓN">
-                    <input id="o-pc" type="number" placeholder="PRECIO TOTAL $">
-                    <input id="o-ant" type="number" placeholder="ANTICIPO $">
+                    <textarea id="o-falla" placeholder="FALLA / REPARACIÓN" rows="2"></textarea>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px;">
+                        <input id="o-pc" type="number" placeholder="PRECIO $">
+                        <input id="o-ant" type="number" placeholder="ANTICIPO $">
+                    </div>
+                    <button class="btn btn-blue" id="save-order-btn" style="width: 100%;">GENERAR ORDEN</button>
                 </div>
-                <button class="btn btn-blue" id="save-order-btn" style="width: 100%;">GENERAR NUEVA ORDEN</button>
-            </div>
-            <div class="grid-responsive">
-                <div><h3>PENDIENTES</h3><div id="list-recibidos"></div></div>
-                <div><h3>LISTOS / ENTREGADOS</h3><div id="list-terminados"></div></div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h3 style="border-left: 3px solid var(--amber); padding-left: 10px;">PENDIENTES</h3>
+                        <div id="list-recibidos" style="max-height: 500px; overflow-y: auto;"></div>
+                    </div>
+                    <div>
+                        <h3 style="border-left: 3px solid var(--green); padding-left: 10px;">ENTREGADOS</h3>
+                        <div id="list-terminados" style="max-height: 500px; overflow-y: auto;"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -285,11 +313,19 @@
                     <input id="g-monto" type="number" placeholder="MONTO $">
                     <button class="btn btn-red" id="save-gasto-btn" style="width: 100%;">REGISTRAR EGRESO</button>
                 </div>
-                <div class="card" style="text-align: center;">
-                    <h3>BALANCE ACTUAL</h3>
+                <div class="card" style="text-align: center; border-color: var(--green);">
+                    <h3>BALANCE DIARIO</h3>
                     <div id="c-total" style="font-size: 3rem; color: var(--green);">$0.00</div>
-                    <div style="font-size: 0.8rem; opacity: 0.6; margin-bottom: 15px;">Ventas acumuladas - Gastos</div>
-                    <button class="btn btn-white" id="close-cash-btn" style="width: 100%; border-color: var(--green); color: var(--green);">REALIZAR CIERRE DE CAJA</button>
+                    <button class="btn btn-green" id="close-cash-btn" style="width: 100%; margin-top: 10px;">REALIZAR CIERRE DE CAJA</button>
+                </div>
+                <div class="card" style="grid-column: span 2;">
+                    <h3>HISTORIAL DE CIERRES</h3>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        <table style="margin-top:0">
+                            <thead><tr><th>FECHA / HORA</th><th>VENTAS</th><th>GASTOS</th><th>TOTAL</th></tr></thead>
+                            <tbody id="cierres-history-table"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -300,7 +336,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, where,
-        doc, updateDoc, deleteDoc, Timestamp, runTransaction, getDoc, writeBatch, getDocs
+        doc, updateDoc, deleteDoc, Timestamp, runTransaction, getDoc, writeBatch, getDocs 
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -358,7 +394,6 @@
         onSnapshot(collection(db, "accesorios"), snap => {
             localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             renderInventory();
-            document.getElementById("dash-alertas").innerText = localAcc.filter(a => a.stock <= 3).length;
         });
 
         onSnapshot(collection(db, "ordenes"), snap => {
@@ -377,35 +412,39 @@
         });
         
         onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc"), limit(10)), snap => {
-            const h = document.getElementById("sales-history-table");
-            h.innerHTML = "";
+            const h = document.getElementById("sales-history-table"); h.innerHTML = "";
             snap.forEach(d => {
                 const v = d.data();
-                const fecha = v.ts ? v.ts.toDate().toLocaleTimeString() : '---';
                 h.innerHTML += `<tr>
-                    <td>${fecha}</td>
+                    <td>${v.ts ? v.ts.toDate().toLocaleTimeString() : '---'}</td>
                     <td>${v.items_count || 1} item(s)</td>
                     <td style="color:var(--green)">$${v.total.toFixed(2)}</td>
-                    <td style="text-align:right">
-                        <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem" onclick="deleteItem('ventas','${d.id}')">ELIMINAR</button>
-                    </td>
+                    <td style="text-align:right"><button class="btn btn-red" style="padding:2px 6px" onclick="deleteItem('ventas','${d.id}')">X</button></td>
                 </tr>`;
             });
         });
 
-        // Sync para Gráfico (Últimos 7 cierres)
-        onSnapshot(query(collection(db, "cierres"), orderBy("ts", "desc"), limit(7)), snap => {
-            const data = snap.docs.map(d => ({
-                fecha: d.data().fecha,
-                ganancia: d.data().balance
-            })).reverse();
-            updateChart(data);
+        onSnapshot(query(collection(db, "cierres"), orderBy("ts", "desc"), limit(20)), snap => {
+            const h = document.getElementById("cierres-history-table"); h.innerHTML = "";
+            const chartData = [];
+            snap.forEach(d => {
+                const c = d.data();
+                const fechaLegible = c.ts ? c.ts.toDate().toLocaleString('es-ES') : '---';
+                h.innerHTML += `<tr>
+                    <td>${fechaLegible}</td>
+                    <td>$${c.ventas.toFixed(2)}</td>
+                    <td style="color:var(--red)">$${c.gastos.toFixed(2)}</td>
+                    <td style="color:var(--green)">$${c.balance.toFixed(2)}</td>
+                </tr>`;
+                chartData.push({ x: c.fecha, y: c.balance });
+            });
+            updateChart(chartData.reverse().slice(-7));
         });
 
         updateCajaRealTime();
     }
 
-    // --- CAJA Y CIERRE ---
+    // --- CAJA Y CIERRE MEJORADO ---
     function updateCajaRealTime() {
         onSnapshot(collection(db, "ventas"), snapV => {
             currentVentas = 0; snapV.forEach(d => currentVentas += d.data().total);
@@ -419,69 +458,96 @@
 
     document.getElementById("close-cash-btn").onclick = async () => {
         const balance = currentVentas - currentGastos;
-        if(!confirm(`¿CONFIRMAR CIERRE DE CAJA?\nTotal Ventas: $${currentVentas}\nBalance: $${balance}`)) return;
+        if(!confirm(`CONFIRMAR CIERRE DE CAJA\nBalance: $${balance.toFixed(2)}`)) return;
 
         try {
-            // 1. Guardar histórico de cierre
             await addDoc(collection(db, "cierres"), {
                 fecha: new Date().toLocaleDateString(),
                 ventas: currentVentas,
                 gastos: currentGastos,
                 balance: balance,
-                ts: Timestamp.now()
+                ts: Timestamp.now() // Esto guarda fecha y HORA exactas
             });
 
-            // 2. Limpiar ventas y gastos actuales (Masivo)
             const b = writeBatch(db);
-            const vSnap = await getDocs(collection(db, "ventas"));
-            vSnap.forEach(d => b.delete(d.ref));
-            const gSnap = await getDocs(collection(db, "gastos"));
-            gSnap.forEach(d => b.delete(d.ref));
-            
+            const vSnap = await getDocs(collection(db, "ventas")); vSnap.forEach(d => b.delete(d.ref));
+            const gSnap = await getDocs(collection(db, "gastos")); gSnap.forEach(d => b.delete(d.ref));
             await b.commit();
-            logSys("CIERRE DE CAJA EXITOSO - SISTEMA REINICIADO");
-            alert("CAJA CERRADA CON ÉXITO");
-        } catch(e) {
-            console.error(e);
-            alert("ERROR AL CERRAR CAJA");
+            logSys("CIERRE DE CAJA COMPLETADO");
+            alert("Cierre realizado con éxito");
+        } catch(e) { alert("Error al cerrar"); }
+    };
+
+    // --- ORDENES REDISEÑADAS ---
+    function renderOrders(snap) {
+        const rec = document.getElementById("list-recibidos");
+        const ter = document.getElementById("list-terminados");
+        rec.innerHTML = ""; ter.innerHTML = "";
+        
+        snap.forEach(d => {
+            const o = d.data();
+            const fecha = o.ts ? o.ts.toDate().toLocaleDateString() : '---';
+            const card = `
+                <div class="order-card" style="border-left-color: ${o.estado === 'TERMINADO' ? 'var(--green)' : 'var(--amber)'}">
+                    <div class="order-header">
+                        <span class="order-client">${o.cliente}</span>
+                        <span class="badge ${o.estado === 'TERMINADO' ? 'badge-terminado' : 'badge-recibido'}">${o.estado}</span>
+                    </div>
+                    <div class="order-body">
+                        <div><strong style="color:var(--blue)">EQUIPO:</strong> ${o.modelo}</div>
+                        <div><strong style="color:var(--blue)">FALLA:</strong> ${o.falla || 'No especificada'}</div>
+                        <span class="order-price">TOTAL: $${o.precio} | ANT: $${o.anticipo || 0}</span>
+                        <div class="order-meta">Ingreso: ${fecha} | Tel: ${o.tel || 'S/N'}</div>
+                    </div>
+                    <div style="margin-top:10px; display:flex; gap:5px">
+                        <button class="btn btn-white" style="flex:1; padding:4px; font-size:0.7rem" onclick="toggleStatus('${d.id}','${o.estado}')">CAMBIAR ESTADO</button>
+                        <button class="btn btn-red" style="padding:4px 10px; font-size:0.7rem" onclick="deleteItem('ordenes','${d.id}')">BORRAR</button>
+                    </div>
+                </div>
+            `;
+            if(o.estado === "TERMINADO") ter.innerHTML += card; else rec.innerHTML += card;
+        });
+    }
+
+    document.getElementById("save-order-btn").onclick = async () => {
+        const data = {
+            cliente: document.getElementById("o-cliente").value,
+            tel: document.getElementById("o-tel").value,
+            modelo: document.getElementById("o-eq").value,
+            falla: document.getElementById("o-falla").value,
+            precio: parseFloat(document.getElementById("o-pc").value) || 0,
+            anticipo: parseFloat(document.getElementById("o-ant").value) || 0,
+            estado: "RECIBIDO", ts: Timestamp.now()
+        };
+        if(data.cliente) {
+            await addDoc(collection(db, "ordenes"), data);
+            document.querySelectorAll("#sec-orden input, #sec-orden textarea").forEach(i => i.value = "");
+            logSys("NUEVA ORDEN REGISTRADA");
         }
     };
 
-    // --- GRÁFICO LINEAL ---
+    // --- GRÁFICO ---
     function updateChart(historyData) {
         const ctx = document.getElementById('mainChart').getContext('2d');
-        const labels = historyData.length ? historyData.map(d => d.fecha) : ['SIN DATOS'];
-        const values = historyData.length ? historyData.map(d => d.ganancia) : [0];
-
         if (salesChart) salesChart.destroy();
         salesChart = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: labels,
-                datasets: [{
-                    label: 'GANANCIA $',
-                    data: values,
+                labels: historyData.map(d => d.x),
+                datasets: [{ 
+                    label: 'BALANCE $', 
+                    data: historyData.map(d => d.y), 
                     borderColor: '#ff7a00',
-                    backgroundColor: 'rgba(255, 122, 0, 0.1)',
+                    backgroundColor: 'rgba(255,122,0,0.1)',
                     fill: true,
-                    tension: 0.4,
-                    borderWidth: 2,
-                    pointBackgroundColor: '#fff'
+                    tension: 0.3
                 }]
             },
-            options: { 
-                responsive: true, 
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true, grid: { color: '#222' }, ticks: { color: '#aaa' } },
-                    x: { grid: { display: false }, ticks: { color: '#aaa' } }
-                },
-                plugins: { legend: { display: false } } 
-            }
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
         });
     }
 
-    // --- RESTO DE FUNCIONALIDADES (ORIGINALES) ---
+    // --- MANTENIMIENTO DE FUNCIONES ORIGINALES ---
     function renderInventory() {
         const t = document.getElementById("acc-table"); t.innerHTML = "";
         localAcc.forEach(a => {
@@ -492,7 +558,6 @@
                 <td style="text-align:right">
                     <button class="btn btn-blue" style="padding:4px 8px" onclick="openReorder('${a.id}','${a.nombre}')">+</button>
                     <button class="btn btn-white" style="padding:4px 8px" onclick="editInv('${a.id}')">EDIT</button>
-                    <button class="btn btn-red" style="padding:4px 8px" onclick="deleteItem('accesorios','${a.id}')">DEL</button>
                 </td>
             </tr>`;
         });
@@ -529,7 +594,6 @@
 
     document.getElementById("pos-search").oninput = () => {
         const v = document.getElementById("pos-search").value.toLowerCase();
-        if(!v) { document.getElementById("pos-info").innerText = "---"; return; }
         const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
         document.getElementById("pos-info").innerText = i ? `${i.nombre} | Stock: ${i.stock} | $${i.pv}` : "NO ENCONTRADO";
         document.getElementById("pos-info").dataset.currentId = i ? i.id : "";
@@ -541,8 +605,7 @@
         if(i && i.stock > 0) {
             cart.push({...i}); renderCart();
             document.getElementById("pos-search").value = "";
-            document.getElementById("pos-info").innerText = "---";
-        } else if(i) alert("SIN STOCK");
+        }
     };
 
     function renderCart() {
@@ -568,46 +631,14 @@
                     const itemSnap = await transaction.get(itemRef);
                     transaction.update(itemRef, { stock: itemSnap.data().stock - 1 });
                 }
-                await addDoc(collection(db, "ventas"), { 
-                    total: cart.reduce((a, b) => a + b.pv, 0), 
-                    items_count: cart.length, ts: Timestamp.now() 
-                });
+                await addDoc(collection(db, "ventas"), { total: cart.reduce((a, b) => a + b.pv, 0), items_count: cart.length, ts: Timestamp.now() });
             });
             cart = []; renderCart(); logSys("VENTA REALIZADA");
-        } catch (e) { alert("Error: " + e); }
-    };
-
-    function renderOrders(snap) {
-        const rec = document.getElementById("list-recibidos");
-        const ter = document.getElementById("list-terminados");
-        rec.innerHTML = ""; ter.innerHTML = "";
-        snap.forEach(d => {
-            const o = d.data();
-            const c = `<div class="card" style="font-size:0.8rem">
-                <div style="color:#fff; font-weight:bold">${o.cliente}</div>
-                <div>${o.modelo} - $${o.precio}</div>
-                <div style="margin-top:8px; display:flex; gap:5px">
-                    <button class="btn btn-blue" onclick="toggleStatus('${d.id}','${o.estado}')">ST</button>
-                    <button class="btn btn-red" onclick="deleteItem('ordenes','${d.id}')">X</button>
-                </div>
-            </div>`;
-            if(o.estado === "TERMINADO") ter.innerHTML += c; else rec.innerHTML += c;
-        });
-    }
-
-    document.getElementById("save-order-btn").onclick = async () => {
-        const data = {
-            cliente: document.getElementById("o-cliente").value,
-            modelo: document.getElementById("o-eq").value,
-            precio: parseFloat(document.getElementById("o-pc").value) || 0,
-            estado: "RECIBIDO", ts: Timestamp.now()
-        };
-        if(data.cliente) await addDoc(collection(db, "ordenes"), data);
-        document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
+        } catch (e) { alert("Error"); }
     };
 
     window.toggleStatus = async (id, s) => { await updateDoc(doc(db, "ordenes", id), { estado: s === "RECIBIDO" ? "TERMINADO" : "RECIBIDO" }); };
-
+    
     document.getElementById("save-pedido-btn").onclick = async () => {
         const det = document.getElementById("p-detalle").value;
         if(det) await addDoc(collection(db, "pedidos_st"), { detalle: det, ts: Timestamp.now() });
@@ -626,7 +657,7 @@
         document.getElementById("g-desc").value = ""; document.getElementById("g-monto").value = "";
     };
 
-    window.deleteItem = async (col, id) => { if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, col, id)); };
+    window.deleteItem = async (col, id) => { if(confirm("¿ELIMINAR REGISTRO?")) await deleteDoc(doc(db, col, id)); };
 
     function logSys(msg) {
         const log = document.getElementById("sys-log");
