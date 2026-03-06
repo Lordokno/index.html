@@ -115,6 +115,8 @@
         .btn-del:hover { background: var(--red); color: #000; }
         
         .btn-status { border-color: var(--amber-dim); font-size: 0.7rem; padding: 4px 8px; }
+        .btn-edit { border-color: #33aaff; color: #33aaff; font-size: 0.7rem; padding: 4px 8px; }
+        .btn-edit:hover { background: #33aaff; color: #000; }
         .btn-ws { border-color: var(--green); color: var(--green); font-size: 0.7rem; padding: 4px 8px; }
         .btn-ws:hover { background: var(--green); color: #000; }
 
@@ -560,12 +562,35 @@
             div.innerHTML = `<div style="color:#fff">${o.cliente}</div><div style="font-size:0.75rem">${o.modelo} | $${o.saldo}</div>
                 <div class="flex-row" style="margin-top:8px">
                     <button class="btn btn-status" onclick="toggleStatus('${d.id}','${o.estado}')">${o.estado === 'RECIBIDO' ? '>> TERM.' : '<< REAB.'}</button>
+                    <button class="btn btn-edit" onclick="editOrder('${d.id}')">[E]</button>
                     ${o.estado === 'TERMINADO' ? `<button class="btn btn-ws" onclick="sendWhatsApp('${o.tel}','${o.cliente}','${o.modelo}','${o.saldo}')">AVISO</button>` : ''}
                     <button class="btn btn-del" style="padding:4px" onclick="deleteItem('ordenes','${d.id}')">X</button>
                 </div>`;
             if(o.estado === "TERMINADO") ter.appendChild(div); else rec.appendChild(div);
         });
     }
+
+    // --- EDICIÓN DE ÓRDENES ---
+    window.editOrder = async (id) => {
+        const ref = doc(db, "ordenes", id);
+        const snap = await getDoc(ref);
+        if(!snap.exists()) return;
+        const o = snap.data();
+
+        const field = prompt("¿QUÉ DESEA EDITAR?\n1: CLIENTE\n2: EQUIPO\n3: SALDO PENDIENTE\n4: TELÉFONO");
+        let update = {};
+
+        switch(field) {
+            case "1": update.cliente = prompt("NUEVO NOMBRE:", o.cliente) || o.cliente; break;
+            case "2": update.modelo = prompt("NUEVO EQUIPO:", o.modelo) || o.modelo; break;
+            case "3": update.saldo = prompt("NUEVO SALDO ($):", o.saldo) || o.saldo; break;
+            case "4": update.tel = prompt("NUEVO TELÉFONO:", o.tel) || o.tel; break;
+            default: return;
+        }
+
+        await updateDoc(ref, update);
+        logSys(`ORDEN EDITADA: ${id}`);
+    };
 
     // --- ACCIONES CORE ---
     window.deleteItem = async (c, id) => { if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, c, id)); };
