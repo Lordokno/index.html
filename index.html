@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXTCOM OS v3.9 // INVENTORY OPTIMIZED</title>
+    <title>NEXTCOM OS v4.0 // DASHBOARD PRO</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,7 +29,7 @@
             height: 100vh; width: 100vw; display: flex;
         }
 
-        /* --- EFECTOS CRT --- */
+        /* --- CRT EFFECTS --- */
         .crt-overlay {
             position: fixed; inset: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
@@ -61,7 +61,7 @@
         }
         .main { flex: 1; padding: var(--padd-main); overflow-y: auto; background: var(--bg); box-sizing: border-box; }
 
-        /* --- BOTONES --- */
+        /* --- BUTTONS --- */
         .btn {
             background: transparent; border: 1px solid var(--amber);
             color: var(--amber); padding: 10px; cursor: pointer; font-family: 'Share Tech Mono'; 
@@ -84,17 +84,17 @@
         }
 
         .card { border: 1px solid var(--amber-dim); padding: var(--padd-card); margin-bottom: 15px; background: rgba(10,10,10,0.5); }
-        .grid-responsive { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--gap-grid); }
+        .grid-responsive { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--gap-grid); }
         
-        /* --- TABLAS --- */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0,0,0,0.3); }
-        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 12px; border-bottom: 1px solid #1a1a1a; font-size: 0.9rem; vertical-align: middle; }
-        
-        .stock-badge { padding: 2px 6px; border: 1px solid; font-weight: bold; }
-        .stock-low { border-color: var(--red); color: var(--red); animation: blink 1.5s infinite; }
-        .stock-ok { border-color: var(--green); color: var(--green); }
-        @keyframes blink { 50% { opacity: 0.5; } }
+        /* --- DASHBOARD SPECIFIC --- */
+        .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .kpi-box { border: 1px solid var(--amber-dim); padding: 15px; text-align: center; background: rgba(255, 122, 0, 0.03); }
+        .kpi-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px; }
+        .kpi-value { font-size: 1.8rem; color: #fff; font-weight: bold; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; font-size: 0.8rem; }
+        td { padding: 12px; border-bottom: 1px solid #1a1a1a; font-size: 0.9rem; }
 
         .section { display: none; }
         .active { display: block; animation: fadeIn 0.3s; }
@@ -119,12 +119,12 @@
 <div class="scanline"></div>
 
 <div id="login-screen">
-    <div style="font-size: 20px; margin-bottom: 20px;">[ ACCESO_RESTRINGIDO ]</div>
+    <div style="font-size: 20px; margin-bottom: 20px;">[ NEXTCOM_OS_SECURE ]</div>
     <div class="login-box">
         <input type="text" id="user-id" placeholder="OPERADOR">
         <input type="password" id="user-pass" placeholder="CONTRASEÑA">
-        <button class="btn btn-blue" id="login-btn" style="width: 100%;">VALIDAR_SISTEMA</button>
-        <div id="login-err" style="color: var(--red); margin-top: 10px; visibility: hidden;">ERROR_DE_CREDENCIALES</div>
+        <button class="btn btn-blue" id="login-btn" style="width: 100%;">ENTRAR</button>
+        <div id="login-err" style="color: var(--red); margin-top: 10px; visibility: hidden;">ACCESO DENEGADO</div>
     </div>
 </div>
 
@@ -140,7 +140,7 @@
 
 <div id="app">
     <div class="sidebar">
-        <div style="font-weight: bold; color:#fff; margin-bottom: 10px;">NEXTCOM_OS_v3.9</div>
+        <div style="font-weight: bold; color:#fff; margin-bottom: 10px;">NEXTCOM_OS_v4.0</div>
         <button class="btn" onclick="nav('dash')">01_DASHBOARD</button>
         <button class="btn" onclick="nav('inv')">02_INVENTARIO</button>
         <button class="btn" onclick="nav('pos')">03_POS_VENTA</button>
@@ -152,59 +152,58 @@
 
     <div class="main">
         <div id="sec-dash" class="section active">
-            <h2>> DASHBOARD</h2>
+            <h2>> SYSTEM_OVERVIEW</h2>
+            
+            <div class="kpi-container">
+                <div class="kpi-box" style="border-left: 3px solid var(--green);">
+                    <div class="kpi-label">Ventas Hoy</div>
+                    <div class="kpi-value" id="dash-ventas">$0.00</div>
+                </div>
+                <div class="kpi-box" style="border-left: 3px solid var(--blue);">
+                    <div class="kpi-label">Equipos en Taller</div>
+                    <div class="kpi-value" id="dash-taller">0</div>
+                </div>
+                <div class="kpi-box" style="border-left: 3px solid var(--red);">
+                    <div class="kpi-label">Alertas Stock</div>
+                    <div class="kpi-value" id="dash-alertas" style="color: var(--red);">0</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">Estado Sistema</div>
+                    <div class="kpi-value" style="font-size: 1rem; color: var(--green);">ONLINE</div>
+                </div>
+            </div>
+
             <div class="grid-responsive">
-                <div class="card" style="text-align: center;">
-                    <div id="clock" style="font-size: 3rem; color:#fff">00:00:00</div>
-                    <div id="date-display">2026-XX-XX</div>
+                <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 200px;">
+                    <div id="clock" style="font-size: 3.5rem; color:#fff; text-shadow: 0 0 15px var(--amber);">00:00:00</div>
+                    <div id="date-display" style="letter-spacing: 5px; margin-top: 10px; opacity: 0.8;">2026-XX-XX</div>
                 </div>
                 <div class="card">
-                    <h3 style="margin-top:0">ESTADO_STOCK</h3>
-                    <div style="height: 150px;"><canvas id="mainChart"></canvas></div>
+                    <h3 style="margin-top:0; font-size: 0.9rem;">REPUESTOS_TOP_STOCK</h3>
+                    <div style="height: 200px;"><canvas id="mainChart"></canvas></div>
                 </div>
                 <div class="card" style="grid-column: span 2;">
-                    <h3>SISTEMA_LOG</h3>
-                    <div id="sys-log" style="height: 150px; overflow-y:auto; font-size: 0.8rem;"></div>
+                    <h3 style="margin-top:0; font-size: 0.9rem;">RECUPERANDO_ULTIMOS_LOGS...</h3>
+                    <div id="sys-log" style="height: 120px; overflow-y:auto; font-size: 0.8rem; line-height: 1.6; color: #ccc; font-family: 'Share Tech Mono';"></div>
                 </div>
             </div>
         </div>
 
         <div id="sec-inv" class="section">
-            <h2>> GESTIÓN_DE_INVENTARIO</h2>
-            <div class="card" style="border-left: 4px solid var(--green);">
-                <div style="margin-bottom: 10px; font-size: 0.8rem; color: var(--green);">[+] REGISTRAR_NUEVO_PRODUCTO</div>
-                <input id="a-nom" placeholder="DESCRIPCIÓN DEL ARTÍCULO / MODELO">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                    <div>
-                        <label style="font-size: 0.7rem; display: block; margin-bottom: 4px;">CANTIDAD</label>
-                        <input id="a-stock" type="number" placeholder="0">
-                    </div>
-                    <div>
-                        <label style="font-size: 0.7rem; display: block; margin-bottom: 4px;">COSTO $</label>
-                        <input id="a-costo" type="number" placeholder="0.00">
-                    </div>
-                    <div>
-                        <label style="font-size: 0.7rem; display: block; margin-bottom: 4px;">PRECIO VENTA $</label>
-                        <input id="a-pv" type="number" placeholder="0.00">
-                    </div>
+            <h2>> INVENTARIO</h2>
+            <div class="card">
+                <input id="a-nom" placeholder="DESCRIPCIÓN">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <input id="a-stock" type="number" placeholder="CANT">
+                    <input id="a-costo" type="number" placeholder="COSTO $">
+                    <input id="a-pv" type="number" placeholder="VENTA $">
                 </div>
-                <button class="btn btn-green" id="save-inv-btn" style="width: 100%; margin-top: 5px; letter-spacing: 2px; font-weight: bold;">GUARDAR EN BASE DE DATOS</button>
+                <button class="btn btn-green" id="save-inv-btn" style="width: 100%;">REGISTRAR</button>
             </div>
-            
-            <div class="table-wrap" style="background: rgba(10,10,10,0.8); border: 1px solid var(--amber-dim);">
-                <table>
-                    <thead>
-                        <tr>
-                            <th style="width: 40%;">PRODUCTO_ITEM</th>
-                            <th style="text-align: center;">STOCK</th>
-                            <th style="text-align: center;">ENT/SAL</th>
-                            <th style="text-align: center;">P_VENTA</th>
-                            <th style="text-align: right;">ACCIONES</th>
-                        </tr>
-                    </thead>
-                    <tbody id="acc-table"></tbody>
-                </table>
-            </div>
+            <table>
+                <thead><tr><th>ITEM</th><th>STOCK</th><th>DATA</th><th style="text-align:right">OP</th></tr></thead>
+                <tbody id="acc-table"></tbody>
+            </table>
         </div>
 
         <div id="sec-pos" class="section">
@@ -225,51 +224,46 @@
         </div>
 
         <div id="sec-orden" class="section">
-            <h2>> TALLER_SERVICIO</h2>
+            <h2>> TALLER</h2>
             <div class="card">
+                <input id="o-cliente" placeholder="CLIENTE">
+                <input id="o-eq" placeholder="EQUIPO">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <input id="o-cliente" placeholder="CLIENTE">
-                    <input id="o-tel" placeholder="TELEFONO">
-                    <input id="o-eq" placeholder="EQUIPO">
-                    <input id="o-falla" placeholder="FALLA">
+                    <input id="o-tel" placeholder="TEL">
                     <input id="o-pc" type="number" placeholder="TOTAL $">
-                    <input id="o-ant" type="number" placeholder="ANTICIPO $">
                 </div>
-                <div style="color:var(--red); margin-bottom: 10px;">SALDO: $<span id="o-sal-display">0.00</span></div>
-                <button class="btn btn-blue" id="save-order-btn" style="width: 100%;">GUARDAR_ORDEN</button>
+                <button class="btn btn-blue" id="save-order-btn" style="width: 100%;">GENERAR ORDEN</button>
             </div>
             <div class="grid-responsive">
-                <div><h3>RECIBIDOS</h3><div id="list-recibidos"></div></div>
-                <div><h3>TERMINADOS</h3><div id="list-terminados"></div></div>
+                <div><h3>EN TALLER</h3><div id="list-recibidos"></div></div>
+                <div><h3>LISTOS</h3><div id="list-terminados"></div></div>
             </div>
         </div>
 
         <div id="sec-pedidos" class="section">
-            <h2>> PEDIDOS: ST TECHNOLOGY LIMITED</h2>
-            <div class="card" style="border-color: var(--blue);">
-                <textarea id="p-detalle" placeholder="LISTA DE REPUESTOS O PRODUCTOS..." rows="4"></textarea>
+            <h2>> PEDIDOS_ST</h2>
+            <div class="card">
+                <textarea id="p-detalle" placeholder="LISTA DE PEDIDO..." rows="4"></textarea>
                 <div style="display: flex; gap:10px;">
-                    <button class="btn btn-blue" id="save-pedido-btn" style="flex:1">REGISTRAR BITÁCORA</button>
-                    <button class="btn btn-green" id="whatsapp-st-btn" style="flex:1">CONSULTAR ST (+502)</button>
+                    <button class="btn btn-blue" id="save-pedido-btn" style="flex:1">BITÁCORA</button>
+                    <button class="btn btn-green" id="whatsapp-st-btn" style="flex:1">WHATSAPP ST</button>
                 </div>
             </div>
             <tbody id="pedidos-table"></tbody>
         </div>
 
         <div id="sec-admin" class="section">
-            <h2>> CONTROL_CAJA</h2>
+            <h2>> CAJA</h2>
             <div class="grid-responsive">
                 <div class="card">
-                    <h3>GASTO_NUEVO</h3>
+                    <h3>GASTO</h3>
                     <input id="g-desc" placeholder="CONCEPTO">
                     <input id="g-monto" type="number" placeholder="MONTO $">
-                    <button class="btn btn-red" id="save-gasto-btn" style="width: 100%;">REGISTRAR_GASTO</button>
+                    <button class="btn btn-red" id="save-gasto-btn" style="width: 100%;">REGISTRAR</button>
                 </div>
-                <div class="card" style="border-color:#fff">
-                    <h3>BALANCE_DIARIO</h3>
-                    <div style="color:var(--green)">VENTAS: <span id="c-ventas">$0.00</span></div>
-                    <div style="color:var(--red)">GASTOS: <span id="c-egresos">$0.00</span></div>
-                    <div style="font-size: 1.5rem; color:#fff; border-top: 1px solid #333; margin-top: 10px;">TOTAL: <span id="c-total">$0.00</span></div>
+                <div class="card">
+                    <h3>BALANCE</h3>
+                    <div id="c-total" style="font-size: 2rem;">$0.00</div>
                 </div>
             </div>
         </div>
@@ -318,48 +312,35 @@
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("boot").style.display = "flex";
         const log = document.getElementById("boot-log");
-        const lines = ["> KERNEL_3.9_LOAD", "> SYNC_INVENTORY...", "> MODULES_OK.", "> READY."];
+        const lines = ["> KERNEL_4.0_READY", "> SYNC_DASHBOARD...", "> SYSTEM_ONLINE."];
         for(let l of lines) { log.innerHTML += `<div>${l}</div>`; await new Promise(r => setTimeout(r, 200)); }
         document.getElementById("boot").style.display = "none";
         document.getElementById("app").style.display = "flex";
         initSync();
     }
 
-    // --- INVENTARIO (LÓGICA MEJORADA) ---
-    function renderInventory() {
-        const t = document.getElementById("acc-table");
-        t.innerHTML = "";
-        localAcc.forEach(a => {
-            const isLow = a.stock <= 3;
-            t.innerHTML += `<tr>
-                <td style="color:#fff; font-weight:bold;">${a.nombre}</td>
-                <td style="text-align: center;">
-                    <span class="stock-badge ${isLow ? 'stock-low' : 'stock-ok'}">${a.stock}</span>
-                </td>
-                <td style="text-align: center; font-size: 0.75rem; opacity: 0.8;">
-                    <span style="color:var(--green)">↑${a.entradas}</span> <span style="color:var(--red)">↓${a.salidas}</span>
-                </td>
-                <td style="text-align: center; color: var(--blue);">$${a.pv}</td>
-                <td style="text-align: right;">
-                    <button class="btn btn-blue" style="padding:4px 8px; font-size:0.7rem;" onclick="openReorder('${a.id}','${a.nombre}')">RE-STOCK</button>
-                    <button class="btn btn-red" style="padding:4px 8px; font-size:0.7rem;" onclick="deleteItem('accesorios','${a.id}')">ELIM</button>
-                </td>
-            </tr>`;
-        });
-    }
-
-    // --- MANTENIMIENTO DE FUNCIONES ---
     function initSync() {
         onSnapshot(collection(db, "accesorios"), snap => {
             localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             renderInventory();
             updateChart();
+            const low = localAcc.filter(a => a.stock <= 3).length;
+            document.getElementById("dash-alertas").innerText = low;
         });
-        onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => renderOrders(snap));
-        onSnapshot(query(collection(db, "pedidos_st"), orderBy("ts", "desc"), limit(5)), snap => {
-            const p = document.getElementById("pedidos-table"); if(p) p.innerHTML = "";
+        onSnapshot(collection(db, "ordenes"), snap => {
+            const taller = snap.docs.filter(d => d.data().estado === "RECIBIDO").length;
+            document.getElementById("dash-taller").innerText = taller;
+            renderOrders(snap);
         });
         updateCajaRealTime();
+    }
+
+    function renderInventory() {
+        const t = document.getElementById("acc-table"); t.innerHTML = "";
+        localAcc.forEach(a => {
+            t.innerHTML += `<tr><td>${a.nombre}</td><td>${a.stock}</td><td>$${a.pv}</td>
+            <td style="text-align:right"><button class="btn btn-blue" onclick="openReorder('${a.id}','${a.nombre}')">+</button></td></tr>`;
+        });
     }
 
     window.openReorder = (id, n) => {
@@ -369,12 +350,11 @@
 
     document.getElementById("confirm-reorder-btn").onclick = async () => {
         const q = parseInt(document.getElementById("re-qty").value);
-        if(!q) return;
         const ref = doc(db, "accesorios", currentReId);
         const s = await getDoc(ref);
-        await updateDoc(ref, { stock: s.data().stock + q, entradas: (s.data().entradas || 0) + q });
+        await updateDoc(ref, { stock: s.data().stock + q });
         document.getElementById("reorder-modal").style.display = "none";
-        logSys(`STOCK ACTUALIZADO: ${s.data().nombre}`);
+        logSys(`STOCK +${q}: ${s.data().nombre}`);
     };
 
     document.getElementById("save-inv-btn").onclick = async () => {
@@ -382,13 +362,10 @@
         const stock = parseInt(document.getElementById("a-stock").value);
         if(!nom || isNaN(stock)) return;
         await addDoc(collection(db, "accesorios"), { 
-            nombre: nom, stock: stock, cost: parseFloat(document.getElementById("a-costo").value) || 0,
-            pv: parseFloat(document.getElementById("a-pv").value) || 0, entradas: stock, salidas: 0, ts: Timestamp.now() 
+            nombre: nom, stock: stock, pv: parseFloat(document.getElementById("a-pv").value) || 0, ts: Timestamp.now() 
         });
-        document.getElementById("a-nom").value = ""; document.getElementById("a-stock").value = "";
     };
 
-    // --- POS & ORDENES ---
     document.getElementById("pos-search").oninput = () => {
         const v = document.getElementById("pos-search").value.toLowerCase();
         const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
@@ -400,7 +377,7 @@
         const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
         if(i && i.stock > 0) {
             cart.push(i);
-            document.getElementById("cart-items").innerHTML += `<div style="font-size:0.8rem">> ${i.nombre} - $${i.pv}</div>`;
+            document.getElementById("cart-items").innerHTML += `<div>> ${i.nombre}</div>`;
             document.getElementById("cart-total").innerText = cart.reduce((a, b) => a + b.pv, 0).toFixed(2);
         }
     };
@@ -408,16 +385,9 @@
     document.getElementById("process-sale-btn").onclick = async () => {
         if(!cart.length) return;
         const total = cart.reduce((a, b) => a + b.pv, 0);
-        await runTransaction(db, async(t) => {
-            for(let i of cart) {
-                const ref = doc(db, "accesorios", i.id);
-                const s = await t.get(ref);
-                t.update(ref, { stock: s.data().stock - 1, salidas: (s.data().salidas || 0) + 1 });
-            }
-            t.set(doc(collection(db, "ventas")), { total: total, ts: Timestamp.now() });
-        });
+        await addDoc(collection(db, "ventas"), { total: total, ts: Timestamp.now() });
         cart = []; document.getElementById("cart-items").innerHTML = ""; document.getElementById("cart-total").innerText = "0.00";
-        alert("VENTA REGISTRADA");
+        logSys("VENTA COMPLETADA");
     };
 
     function renderOrders(snap) {
@@ -426,83 +396,22 @@
         rec.innerHTML = ""; ter.innerHTML = "";
         snap.forEach(d => {
             const o = d.data();
-            const c = `<div class="card" style="font-size:0.8rem">
-                <div style="color:#fff">${o.cliente}</div><div>${o.modelo} | $${o.saldo}</div>
-                <div style="margin-top:8px">
-                    <button class="btn btn-blue" style="padding:3px" onclick="toggleStatus('${d.id}','${o.estado}')">EST</button>
-                    <button class="btn btn-white" style="padding:3px" onclick="editOrder('${d.id}')">EDIT</button>
-                    <button class="btn btn-red" style="padding:3px" onclick="deleteItem('ordenes','${d.id}')">X</button>
-                </div>
-            </div>`;
+            const c = `<div class="card"><div>${o.cliente}</div><button class="btn btn-blue" onclick="toggleStatus('${d.id}','${o.estado}')">MOD</button></div>`;
             if(o.estado === "TERMINADO") ter.innerHTML += c; else rec.innerHTML += c;
         });
     }
 
     window.toggleStatus = async (id, s) => { await updateDoc(doc(db, "ordenes", id), { estado: s === "RECIBIDO" ? "TERMINADO" : "RECIBIDO" }); };
-    window.deleteItem = async (c, id) => { if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, c, id)); };
 
-    window.editOrder = async (id) => {
-        const ref = doc(db, "ordenes", id);
-        const snap = await getDoc(ref);
-        const o = snap.data();
-        const f = prompt("1:NOMBRE 2:EQUIPO 3:SALDO");
-        let up = {};
-        if(f==="1") up.cliente = prompt("NOM:", o.cliente);
-        if(f==="2") up.modelo = prompt("EQ:", o.modelo);
-        if(f==="3") up.saldo = prompt("SALDO:", o.saldo);
-        if(Object.keys(up).length) await updateDoc(ref, up);
-    };
-
-    document.getElementById("save-order-btn").onclick = async () => {
-        const cl = document.getElementById("o-cliente").value;
-        if(!cl) return;
-        await addDoc(collection(db, "ordenes"), {
-            cliente: cl, tel: document.getElementById("o-tel").value, modelo: document.getElementById("o-eq").value,
-            saldo: document.getElementById("o-sal-display").innerText, estado: "RECIBIDO", ts: Timestamp.now()
-        });
-        document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
-    };
-
-    // --- PEDIDOS ST ---
-    document.getElementById("whatsapp-st-btn").onclick = () => {
-        const det = document.getElementById("p-detalle").value;
-        const msg = `Buen día ST Technology Limited, necesito:\n\n${det}`;
-        window.open(`https://wa.me/50249698555?text=${encodeURIComponent(msg)}`, '_blank');
-    };
-
-    document.getElementById("save-pedido-btn").onclick = async () => {
-        const det = document.getElementById("p-detalle").value;
-        if(det) await addDoc(collection(db, "pedidos_st"), { detalle: det, ts: Timestamp.now() });
-    };
-
-    // --- CAJA ---
     function updateCajaRealTime() {
         const today = new Date(); today.setHours(0,0,0,0);
         onSnapshot(query(collection(db, "ventas"), where("ts", ">=", Timestamp.fromDate(today))), snap => {
             let t = 0; snap.forEach(d => t += d.data().total);
-            document.getElementById("c-ventas").innerText = `$${t.toFixed(2)}`;
-            calcNeto();
-        });
-        onSnapshot(query(collection(db, "gastos"), where("ts", ">=", Timestamp.fromDate(today))), snap => {
-            let t = 0; snap.forEach(d => t += d.data().monto);
-            document.getElementById("c-egresos").innerText = `$${t.toFixed(2)}`;
-            calcNeto();
+            document.getElementById("dash-ventas").innerText = `$${t.toFixed(2)}`;
+            document.getElementById("c-total").innerText = `$${t.toFixed(2)}`;
         });
     }
 
-    function calcNeto() {
-        const v = parseFloat(document.getElementById("c-ventas").innerText.replace('$','')) || 0;
-        const g = parseFloat(document.getElementById("c-egresos").innerText.replace('$','')) || 0;
-        document.getElementById("c-total").innerText = `$${(v - g).toFixed(2)}`;
-    }
-
-    document.getElementById("save-gasto-btn").onclick = async () => {
-        const d = document.getElementById("g-desc").value;
-        const m = parseFloat(document.getElementById("g-monto").value);
-        if(d && m) await addDoc(collection(db, "gastos"), { descripcion: d, monto: m, ts: Timestamp.now() });
-    };
-
-    // --- UTILIDADES ---
     function logSys(msg) {
         const log = document.getElementById("sys-log");
         log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>` + log.innerHTML;
@@ -515,20 +424,18 @@
             type: 'bar',
             data: {
                 labels: localAcc.slice(0,5).map(a => a.nombre),
-                datasets: [{ label: 'STOCK', data: localAcc.slice(0,5).map(a => a.stock), backgroundColor: '#ff7a00' }]
+                datasets: [{ label: 'UNIDADES', data: localAcc.slice(0,5).map(a => a.stock), backgroundColor: '#ff7a00', borderColor: '#fff', borderWidth: 1 }]
             },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                plugins: { legend: { display: false } },
+                scales: { y: { grid: { color: '#222' }, ticks: { color: '#ff7a00' } }, x: { ticks: { color: '#ff7a00' } } }
+            }
         });
     }
 
     document.getElementById("logout-btn").onclick = () => { localStorage.removeItem("nextcom_auth"); location.reload(); };
     document.getElementById("close-reorder-btn").onclick = () => document.getElementById("reorder-modal").style.display = "none";
-    document.getElementById("o-pc").oninput = document.getElementById("o-ant").oninput = () => {
-        const p = parseFloat(document.getElementById("o-pc").value) || 0;
-        const a = parseFloat(document.getElementById("o-ant").value) || 0;
-        document.getElementById("o-sal-display").innerText = (p - a).toFixed(2);
-    };
-
     window.onload = () => { if(localStorage.getItem("nextcom_auth") === "true") startBoot(); };
     setInterval(() => { document.getElementById("clock").innerText = new Date().toLocaleTimeString(); }, 1000);
 </script>
