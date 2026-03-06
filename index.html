@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM OS v7.8 // PAGINATED EDITION</title>
+    <title>NEXTCOM OS v7.9 // TALLER FULL INFO</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -32,7 +32,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 0.85rem; }
         td { background: rgba(255,255,255,0.03); padding: 12px; color: #ccc; }
-        .taller-col { height: 500px; overflow-y: auto; padding-right: 10px; border: 1px solid #111; border-radius: 8px; }
+        .taller-col { height: 550px; overflow-y: auto; padding-right: 10px; border: 1px solid #111; border-radius: 8px; }
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
         .toast { background: #000; border: 1px solid var(--green); color: #fff; padding: 12px 20px; margin-top: 10px; border-radius: 4px; box-shadow: 0 0 15px rgba(0,255,0,0.2); }
         @media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { position: absolute; left: 0; top: 0; width: 100%; color: #000; } }
@@ -104,7 +104,10 @@
         <div id="sec-taller" class="section">
             <div style="display:grid; grid-template-columns: 320px 1fr; gap:20px;">
                 <div class="card"><h3>INGRESO DE EQUIPO</h3><input id="o-cli" placeholder="CLIENTE"><input id="o-tel" placeholder="TEL"><input id="o-mod" placeholder="EQUIPO"><textarea id="o-fal" placeholder="FALLA"></textarea><div style="display:flex; gap:10px;"><input id="o-pre" type="number" placeholder="PRECIO"><input id="o-ant" type="number" placeholder="ANTICIPO"></div><button class="btn btn-blue" style="width:100%" onclick="saveOrder()">CREAR ORDEN</button></div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;"><div><h4 style="color:var(--amber)">PENDIENTES</h4><div id="list-pending" class="taller-col"></div></div><div><h4 style="color:var(--green)">LISTOS</h4><div id="list-ready" class="taller-col"></div></div></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+                    <div><h4 style="color:var(--amber)">PENDIENTES</h4><div id="list-pending" class="taller-col"></div></div>
+                    <div><h4 style="color:var(--green)">LISTOS</h4><div id="list-ready" class="taller-col"></div></div>
+                </div>
             </div>
         </div>
 
@@ -147,9 +150,7 @@
     window.db = db; window.deleteDoc = deleteDoc; window.doc = doc; window.updateDoc = updateDoc;
 
     let localInv = []; let cart = []; let salesChart = null;
-    let currentPage = 1;
-    let itemsPerPage = 10;
-    let filteredInv = [];
+    let currentPage = 1; let itemsPerPage = 10; let filteredInv = [];
 
     window.nav = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -171,7 +172,7 @@
         setTimeout(() => t.remove(), 3000);
     }
 
-    // INVENTARIO PAGINADO
+    // INVENTARIO
     window.saveInventory = async () => {
         const n = document.getElementById('inv-n').value, c = parseFloat(document.getElementById('inv-c').value),
               p = parseFloat(document.getElementById('inv-p').value), s = parseInt(document.getElementById('inv-s').value);
@@ -187,31 +188,27 @@
 
     window.filterTablePaginated = (v) => {
         filteredInv = localInv.filter(i => i.nombre.toLowerCase().includes(v.toLowerCase()));
-        currentPage = 1;
-        renderInventory();
+        currentPage = 1; renderInventory();
     };
 
     window.changePage = (dir) => {
         const maxPage = Math.ceil(filteredInv.length / itemsPerPage);
         if (currentPage + dir > 0 && currentPage + dir <= maxPage) {
-            currentPage += dir;
-            renderInventory();
+            currentPage += dir; renderInventory();
         }
     };
 
     function renderInventory() {
         const t = document.getElementById('table-inv'); t.innerHTML = '';
         const start = (currentPage - 1) * itemsPerPage;
-        const end = start + itemsPerPage;
-        const pageItems = filteredInv.slice(start, end);
-
+        const pageItems = filteredInv.slice(start, start + itemsPerPage);
         pageItems.forEach(i => {
             t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td><td><button class="btn btn-blue" style="padding:4px;display:inline" onclick="editStock('${i.id}',${i.stock})">E</button> <button class="btn btn-red" style="padding:4px;display:inline" onclick="deleteDoc(doc(db,'accesorios','${i.id}'))">X</button></td></tr>`;
         });
         document.getElementById('page-info').innerText = `PÁGINA ${currentPage} DE ${Math.ceil(filteredInv.length / itemsPerPage) || 1}`;
     }
 
-    // POS Y VENTAS
+    // POS
     window.searchPOS = (v) => {
         const res = document.getElementById('pos-results'); res.innerHTML = '';
         if(v.length < 2) return;
@@ -311,9 +308,7 @@
 
         onSnapshot(collection(db, "accesorios"), snap => {
             localInv = snap.docs.map(d => ({id:d.id, ...d.data()}));
-            filteredInv = [...localInv]; 
-            renderInventory(); // Usar la nueva función de renderizado
-            
+            filteredInv = [...localInv]; renderInventory();
             let sAlert = 0;
             localInv.forEach(i => { if(i.stock <= 3) sAlert++; });
             document.getElementById('kpi-s').innerText = sAlert;
@@ -325,7 +320,27 @@
             snap.forEach(d => {
                 const o = d.data(); const ready = o.estado === "LISTO";
                 if(!ready) count++;
-                const h = `<div class="card" style="border-left:4px solid ${ready?'var(--green)':'var(--amber)'}; padding:10px; margin-bottom:10px;"><b>${o.cliente}</b><br><small>${o.modelo}</small><br><button class="btn" style="padding:2px 5px; font-size:0.6rem; margin-top:5px;" onclick="swapOrder('${d.id}', '${o.estado}')">SWAP</button></div>`;
+                // TARJETA DE TALLER CON INFORMACIÓN COMPLETA
+                const h = `
+                    <div class="card" style="border-left:5px solid ${ready?'var(--green)':'var(--amber)'}; padding:15px; margin-bottom:15px; font-size:0.8rem; background:rgba(255,255,255,0.02)">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                            <b style="color:#fff; font-size:1rem;">${o.cliente}</b>
+                            <span style="color:var(--blue)">${o.tel || 'S/N'}</span>
+                        </div>
+                        <div style="color:var(--amber); margin-bottom:8px;">MODELO: <span style="color:#ccc">${o.modelo}</span></div>
+                        <div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:4px; margin-bottom:10px; border:1px solid #222;">
+                            <small style="color:var(--red)">FALLA:</small><br>
+                            <span style="color:#eee">${o.falla}</span>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; border-top:1px solid #222; padding-top:10px;">
+                            <span>TOTAL: <b>$${o.precio}</b></span>
+                            <span>ANT: <b style="color:var(--green)">$${o.anticipo}</b></span>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:12px;">
+                            <button class="btn" style="flex:1; padding:5px; margin:0;" onclick="swapOrder('${d.id}', '${o.estado}')">MOVER</button>
+                            <button class="btn btn-red" style="padding:5px 12px; margin:0;" onclick="deleteDoc(doc(db,'ordenes','${d.id}'))">X</button>
+                        </div>
+                    </div>`;
                 if(ready) r.innerHTML += h; else p.innerHTML += h;
             });
             document.getElementById('kpi-t').innerText = count;
