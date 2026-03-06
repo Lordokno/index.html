@@ -115,6 +115,8 @@
         .btn-del:hover { background: var(--red); color: #000; }
         
         .btn-status { border-color: var(--amber-dim); font-size: 0.7rem; padding: 4px 8px; }
+        .btn-ws { border-color: var(--green); color: var(--green); font-size: 0.7rem; padding: 4px 8px; }
+        .btn-ws:hover { background: var(--green); color: #000; }
 
         input {
             background: #0a0a0a; border: 1px solid var(--amber-dim);
@@ -141,7 +143,7 @@
 
         .card { border: 1px solid var(--amber-dim); padding: var(--padd-card); margin-bottom: 15px; background: rgba(10,10,10,0.5); position: relative; }
         
-        .flex-row { display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
         
         .history-container {
             height: clamp(150px, 25vh, 220px); overflow-y: auto;
@@ -300,6 +302,7 @@
             <div class="card">
                 <div class="form-grid">
                     <input id="o-cliente" placeholder="NOMBRE DEL CLIENTE" style="grid-column: span 2;">
+                    <input id="o-tel" type="tel" placeholder="WHATSAPP (Ej: 50370000000)" style="grid-column: span 2;">
                     <input id="o-eq" placeholder="EQUIPO / MODELO">
                     <input id="o-falla" placeholder="FALLA REPORTADA">
                     <input id="o-pc" type="number" placeholder="PRECIO TOTAL ($)">
@@ -409,6 +412,16 @@
     window.nav = (id) => {
         document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
         document.getElementById("sec-" + id).classList.add("active");
+    };
+
+    // --- LÓGICA WHATSAPP ---
+    window.sendWhatsApp = (tel, cliente, equipo, saldo) => {
+        if(!tel || tel.length < 8) {
+            alert("NUMERO TELEFONICO NO VALIDO O AUSENTE");
+            return;
+        }
+        const msg = `Hola *${cliente}*, te informamos de *NEXTCOM* que tu equipo *${equipo}* ya esta listo para ser retirado. %0A%0A*Saldo pendiente:* $${saldo}%0A¡Te esperamos!`;
+        window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
     };
 
     // --- GRÁFICOS Y KPIs ---
@@ -524,11 +537,17 @@
             div.className = "card order-item";
             div.innerHTML = `
                 <div style="font-size:0.85rem; color:#fff; margin-bottom:5px;">${o.cliente}</div>
-                <div style="font-size:0.75rem; opacity:0.8;">${o.modelo} | Pendiente: $${o.saldo}</div>
+                <div style="font-size:0.75rem; opacity:0.8;">${o.modelo} | SALDO: $${o.saldo}</div>
                 <div style="margin-top:8px;" class="flex-row">
                     <button class="btn btn-status" onclick="toggleOrderStatus('${d.id}', '${o.estado}')">
                         ${o.estado === 'RECIBIDO' ? '>> TERMINAR' : '<< REABRIR'}
                     </button>
+                    
+                    ${o.estado === 'TERMINADO' ? `
+                    <button class="btn btn-ws" onclick="sendWhatsApp('${o.tel}', '${o.cliente}', '${o.modelo}', '${o.saldo}')">
+                        WS_AVISO
+                    </button>` : ''}
+
                     <button class="btn btn-del-order" style="padding:2px 8px; font-size:0.6rem">X</button>
                 </div>`;
             
@@ -637,7 +656,6 @@
                     if(newStock < 0) throw "Sin stock para " + item.nombre;
                     t.update(ref, { stock: newStock, salidas: (snap.data().salidas || 0) + 1 });
                 }
-                // Registro de la venta dentro de la misma transacción
                 const ventaRef = doc(collection(db, "ventas"));
                 t.set(ventaRef, { total: totalVenta, items: cart.length, ts: Timestamp.now() });
             });
@@ -649,7 +667,6 @@
         }
     };
 
-    // --- LÓGICA DE ÓRDENES ---
     const calcSaldo = () => {
         const pc = parseFloat(document.getElementById("o-pc").value) || 0;
         const ant = parseFloat(document.getElementById("o-ant").value) || 0;
@@ -661,9 +678,11 @@
 
     document.getElementById("save-order-btn").onclick = async () => {
         const cl = document.getElementById("o-cliente").value;
+        const tel = document.getElementById("o-tel").value;
         if(!cl) return;
         await addDoc(collection(db, "ordenes"), {
             cliente: cl, 
+            tel: tel,
             modelo: document.getElementById("o-eq").value,
             falla: document.getElementById("o-falla").value,
             saldo: document.getElementById("o-sal-display").innerText, 
