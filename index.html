@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM OS v7.1 // FIXED EDITION</title>
+    <title>NEXTCOM OS v7.5 // FINAL SUPREME</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -16,22 +16,37 @@
         }
         * { box-sizing: border-box; outline: none; transition: all 0.2s ease; }
         body { margin: 0; background: var(--bg); color: var(--amber); font-family: var(--font-main); height: 100vh; overflow: hidden; display: flex; }
+        
+        /* SCROLLBAR CUSTOM */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--amber); border-radius: 10px; }
+
         .sidebar { width: 260px; background: #000; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; z-index: 100; }
         .main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+        
         .btn { background: transparent; border: 1px solid var(--amber); color: var(--amber); padding: 12px; cursor: pointer; font-family: var(--font-title); font-size: 0.7rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; justify-content: center; }
         .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 15px var(--amber); }
-        .btn-blue { border-color: var(--blue); color: var(--blue); } .btn-green { border-color: var(--green); color: var(--green); } .btn-red { border-color: var(--red); color: var(--red); }
+        .btn-blue { border-color: var(--blue); color: var(--blue); } 
+        .btn-green { border-color: var(--green); color: var(--green); } 
+        .btn-red { border-color: var(--red); color: var(--red); }
+
         .card { background: var(--glass); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
         input, textarea { background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff; padding: 12px; width: 100%; margin-bottom: 12px; font-family: var(--font-main); border-left: 3px solid var(--amber); }
+        
         .section { display: none; animation: fadeIn 0.4s ease-out; }
         .active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+        
+        table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 0.85rem; }
+        th { text-align: left; color: #555; padding: 5px 10px; font-family: var(--font-title); font-size: 0.6rem; }
         td { background: rgba(255,255,255,0.03); padding: 12px; color: #ccc; }
+
+        /* TALLER SCROLL SYSTEM */
+        .taller-col { height: 500px; overflow-y: auto; padding-right: 10px; border: 1px solid #111; border-radius: 8px; background: rgba(0,0,0,0.2); }
+
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
         .toast { background: #000; border: 1px solid var(--green); color: #fff; padding: 12px 20px; margin-top: 10px; border-radius: 4px; box-shadow: 0 0 15px rgba(0,255,0,0.2); }
-        .stat-box { background: #0a0a0a; border: 1px solid #222; padding: 20px; border-radius: 12px; text-align: center; border-bottom: 3px solid var(--amber); }
-        .stat-box b { font-family: var(--font-title); font-size: 1.5rem; display: block; color: #fff; }
+        
         @media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { position: absolute; left: 0; top: 0; width: 100%; color: #000; } }
     </style>
 </head>
@@ -57,36 +72,34 @@
         <button class="btn" onclick="nav('inv')">📦 INVENTARIO</button>
         <button class="btn" onclick="nav('pos')">🛒 VENTAS (POS)</button>
         <button class="btn" onclick="nav('taller')">🔧 TALLER / ST</button>
-        <button class="btn" onclick="nav('caja')">💰 CAJA / GASTOS</button>
+        <button class="btn" onclick="nav('caja')">💰 CAJA Y LOGS</button>
         <button class="btn btn-blue" onclick="nav('st')">🛰️ PEDIDOS ST</button>
         <button class="btn btn-red" style="margin-top:auto;" onclick="location.reload()">🔒 LOGOUT</button>
     </div>
 
     <div class="main">
+        
         <div id="sec-dash" class="section active">
             <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:25px;">
-                <div class="stat-box"><b><span id="kpi-v">$0.00</span></b><small>Ventas Hoy</small></div>
-                <div class="stat-box" style="border-color:var(--green)"><b><span id="kpi-u">$0.00</span></b><small>Utilidad</small></div>
-                <div class="stat-box" style="border-color:var(--blue)"><b><span id="kpi-t">0</span></b><small>Taller</small></div>
-                <div class="stat-box" style="border-color:var(--red)"><b><span id="kpi-s">0</span></b><small>Alertas</small></div>
+                <div class="card" style="text-align:center;"><b><span id="kpi-v">$0.00</span></b><br><small>Ventas Hoy</small></div>
+                <div class="card" style="text-align:center; border-color:var(--green)"><b><span id="kpi-u">$0.00</span></b><br><small>Utilidad</small></div>
+                <div class="card" style="text-align:center; border-color:var(--blue)"><b><span id="kpi-t">0</span></b><br><small>En Taller</small></div>
+                <div class="card" style="text-align:center; border-color:var(--red)"><b><span id="kpi-s">0</span></b><br><small>Bajo Stock</small></div>
             </div>
-            <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
-                <div class="card"><canvas id="mainChart" height="120"></canvas></div>
-                <div class="card"><h3>SISTEMA LOG</h3><div id="sys-log" style="font-size:0.7rem; height:220px; overflow-y:auto;"></div></div>
-            </div>
+            <div class="card"><h3>FLUJO FINANCIERO</h3><canvas id="mainChart" height="100"></canvas></div>
         </div>
 
         <div id="sec-inv" class="section">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <h2>INVENTARIO</h2>
-                <button class="btn btn-green" onclick="toggleElement('add-inv')">+ ITEM</button>
+                <h2>CATÁLOGO DE INVENTARIO</h2>
+                <button class="btn btn-green" onclick="toggleElement('add-inv')">+ NUEVO ITEM</button>
             </div>
             <div id="add-inv" class="card" style="display:none; grid-template-columns:repeat(4, 1fr) 100px; gap:10px;">
                 <input id="inv-n" placeholder="NOMBRE"><input id="inv-c" type="number" placeholder="COSTO $"><input id="inv-p" type="number" placeholder="VENTA $"><input id="inv-s" type="number" placeholder="STOCK">
                 <button class="btn btn-green" onclick="saveInventory()">OK</button>
             </div>
             <div class="card">
-                <input type="text" placeholder="Filtrar..." oninput="filterTable('table-inv', this.value)">
+                <input type="text" placeholder="Filtrar inventario..." oninput="filterTable('table-inv', this.value)">
                 <table>
                     <thead><tr><th>PRODUCTO</th><th>COSTO</th><th>PRECIO</th><th>STOCK</th><th>ACCION</th></tr></thead>
                     <tbody id="table-inv"></tbody>
@@ -97,14 +110,14 @@
         <div id="sec-pos" class="section">
             <div style="display:grid; grid-template-columns: 1fr 380px; gap:20px;">
                 <div>
-                    <input id="pos-input" placeholder="BUSCAR PRODUCTO..." oninput="searchPOS(this.value)">
+                    <input id="pos-input" placeholder="BUSCAR POR NOMBRE..." oninput="searchPOS(this.value)">
                     <div id="pos-results" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
                 </div>
                 <div class="card" style="border-color:var(--blue)">
-                    <h3>CARRITO</h3>
-                    <div id="cart-list" style="min-height:280px;"></div>
-                    <div style="display:flex; justify-content:space-between; font-size:1.8rem;"><span>TOTAL:</span><span id="cart-total">$0.00</span></div>
-                    <button class="btn btn-green" style="width:100%; height:50px; margin-top:15px;" onclick="processSale()">COBRAR VENTA</button>
+                    <h3>ORDEN ACTUAL</h3>
+                    <div id="cart-list" style="min-height:300px; border-bottom:1px solid #222; margin-bottom:10px;"></div>
+                    <div style="display:flex; justify-content:space-between; font-size:2rem; font-family:var(--font-title);"><span>TOTAL:</span><span id="cart-total">$0.00</span></div>
+                    <button class="btn btn-green" style="width:100%; height:50px; margin-top:15px;" onclick="processSale()">FINALIZAR VENTA</button>
                 </div>
             </div>
         </div>
@@ -112,44 +125,62 @@
         <div id="sec-taller" class="section">
             <div style="display:grid; grid-template-columns: 320px 1fr; gap:20px;">
                 <div class="card">
-                    <h3>NUEVA ORDEN</h3>
-                    <input id="o-cli" placeholder="CLIENTE"><input id="o-tel" placeholder="TEL"><input id="o-mod" placeholder="EQUIPO">
-                    <textarea id="o-fal" placeholder="FALLA"></textarea>
-                    <div style="display:flex; gap:10px;"><input id="o-pre" type="number" placeholder="PRECIO"><input id="o-ant" type="number" placeholder="ANT."></div>
-                    <button class="btn btn-blue" style="width:100%" onclick="saveOrder()">GUARDAR E IMPRIMIR</button>
+                    <h3>INGRESO DE EQUIPO</h3>
+                    <input id="o-cli" placeholder="CLIENTE"><input id="o-tel" placeholder="TELÉFONO"><input id="o-mod" placeholder="DISPOSITIVO">
+                    <textarea id="o-fal" placeholder="FALLA / OBSERVACIONES"></textarea>
+                    <div style="display:flex; gap:10px;"><input id="o-pre" type="number" placeholder="PRECIO"><input id="o-ant" type="number" placeholder="ANTICIPO"></div>
+                    <button class="btn btn-blue" style="width:100%" onclick="saveOrder()">CREAR ORDEN E IMPRIMIR</button>
                 </div>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                    <div><h4 style="color:var(--amber)">PENDIENTES</h4><div id="list-pending"></div></div>
-                    <div><h4 style="color:var(--green)">LISTOS</h4><div id="list-ready"></div></div>
+                    <div><h4 style="color:var(--amber)">PENDIENTES</h4><div id="list-pending" class="taller-col"></div></div>
+                    <div><h4 style="color:var(--green)">LISTOS / ENTREGADOS</h4><div id="list-ready" class="taller-col"></div></div>
                 </div>
             </div>
         </div>
 
         <div id="sec-caja" class="section">
             <div style="display:grid; grid-template-columns: 320px 1fr; gap:20px;">
-                <div class="card">
-                    <h3>EGRESO</h3>
-                    <input id="g-desc" placeholder="RAZÓN"><input id="g-monto" type="number" placeholder="MONTO $">
-                    <button class="btn btn-red" style="width:100%" onclick="saveGasto()">REGISTRAR</button>
-                    <div style="text-align:center; margin-top:30px;">
-                        <small>CAJA HOY</small><div id="caja-neto" style="font-size:2.5rem; color:var(--green);">$0.00</div>
-                        <button class="btn btn-green" style="width:100%; margin-top:10px;" onclick="realizarCierre()">CERRAR DÍA</button>
+                <div>
+                    <div class="card">
+                        <h3>REGISTRAR GASTO</h3>
+                        <input id="g-desc" placeholder="CONCEPTO"><input id="g-monto" type="number" placeholder="MONTO $">
+                        <button class="btn btn-red" style="width:100%" onclick="saveGasto()">AÑADIR EGRESO</button>
+                    </div>
+                    <div class="card" style="text-align:center; border-color:var(--green)">
+                        <small>BALANCE NETO HOY</small>
+                        <div id="caja-neto" style="font-size:2.8rem; color:var(--green);">$0.00</div>
+                        <button class="btn btn-green" style="width:100%; margin-top:15px;" onclick="realizarCierre()">EFECTUAR CIERRE</button>
                     </div>
                 </div>
-                <div class="card">
-                    <h3>CIERRES</h3>
-                    <table><thead><tr><th>FECHA</th><th>HORA</th><th>TOTAL</th></tr></thead><tbody id="historial-cierres"></tbody></table>
+                <div style="display:grid; grid-template-rows: 1fr 1fr; gap:20px;">
+                    <div class="card" style="height:300px; overflow-y:auto;">
+                        <h3>HISTORIAL VENTAS (HOY)</h3>
+                        <table><thead><tr><th>HORA</th><th>TOTAL</th><th>UTILIDAD</th></tr></thead><tbody id="logs-ventas"></tbody></table>
+                    </div>
+                    <div class="card" style="height:300px; overflow-y:auto;">
+                        <h3>HISTORIAL GASTOS (HOY)</h3>
+                        <table><thead><tr><th>HORA</th><th>CONCEPTO</th><th>MONTO</th></tr></thead><tbody id="logs-gastos"></tbody></table>
+                    </div>
                 </div>
+            </div>
+            <div class="card">
+                <h3>REGISTRO DE CIERRES ANTERIORES</h3>
+                <table><thead><tr><th>FECHA</th><th>HORA</th><th>SALDO FINAL</th></tr></thead><tbody id="historial-cierres"></tbody></table>
             </div>
         </div>
 
         <div id="sec-st" class="section">
-            <div class="card"><textarea id="st-msg" placeholder="Piezas faltantes..." rows="4"></textarea><button class="btn btn-blue" onclick="savePedido()">AÑADIR A LISTA</button></div>
             <div class="card">
-                <div id="st-lista" style="background:rgba(0,0,0,0.3); padding:15px; min-height:100px; white-space:pre-wrap; margin-bottom:15px; border:1px solid #222;"></div>
-                <div style="display:flex; gap:10px;"><button class="btn btn-green" style="flex:2" onclick="sendToST()">ENVIAR WHATSAPP</button><button class="btn btn-red" style="flex:1" onclick="clearST()">LIMPIAR</button></div>
+                <textarea id="st-msg" placeholder="Escriba aquí los repuestos faltantes..." rows="3"></textarea>
+                <button class="btn btn-blue" onclick="savePedido()">AGREGAR A LISTA</button>
+            </div>
+            <div class="card">
+                <h3>LISTA DE REQUERIMIENTOS</h3>
+                <div id="st-lista-box" style="margin-bottom:20px;"></div>
+                <div style="display:flex; gap:10px;"><button class="btn btn-green" style="flex:2" onclick="sendToST()">ENVIAR A ST WHATSAPP</button><button class="btn btn-red" style="flex:1" onclick="clearST()">VACIAR TODO</button></div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -172,15 +203,10 @@
     const fbApp = initializeApp(firebaseConfig);
     const db = getFirestore(fbApp);
 
-    // EXPORTAR A WINDOW PARA QUE LOS BOTONES HTML FUNCIONEN
-    window.db = db;
-    window.deleteDoc = deleteDoc;
-    window.doc = doc;
-    window.updateDoc = updateDoc;
+    // EXPORT GLOBALS
+    window.db = db; window.deleteDoc = deleteDoc; window.doc = doc; window.updateDoc = updateDoc;
 
-    let localInv = [];
-    let cart = [];
-    let salesChart = null;
+    let localInv = []; let cart = []; let salesChart = null;
 
     window.nav = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
@@ -191,14 +217,13 @@
         if(document.getElementById('access-code').value === "nextcom2024") {
             document.getElementById('login-screen').style.display='none';
             document.getElementById('app').style.display='flex';
-            startSync();
-            initChart();
-        } else { showToast("ERROR DE ACCESO", "var(--red)"); }
+            startSync(); initChart();
+        } else { showToast("ACCESO DENEGADO", "var(--red)"); }
     };
 
     function showToast(msg, color = "var(--green)") {
-        const t = document.createElement('div');
-        t.className = 'toast'; t.style.borderColor = color; t.innerText = msg;
+        const t = document.createElement('div'); t.className = 'toast'; 
+        t.style.borderColor = color; t.innerText = msg;
         document.getElementById('toast-container').appendChild(t);
         setTimeout(() => t.remove(), 3000);
     }
@@ -207,7 +232,7 @@
     window.saveInventory = async () => {
         const n = document.getElementById('inv-n').value, c = parseFloat(document.getElementById('inv-c').value),
               p = parseFloat(document.getElementById('inv-p').value), s = parseInt(document.getElementById('inv-s').value);
-        if(!n || isNaN(p)) return showToast("FALTAN DATOS", "var(--red)");
+        if(!n || isNaN(p)) return;
         await addDoc(collection(db, "accesorios"), { nombre:n, costo:c||0, pv:p, stock:s||0, ts:Timestamp.now() });
         document.querySelectorAll('#add-inv input').forEach(i => i.value='');
         showToast("ITEM REGISTRADO");
@@ -225,14 +250,13 @@
     window.addToCart = (id) => {
         const item = localInv.find(i => i.id === id);
         if(item.stock > 0) { cart.push(item); renderCart(); }
-        else { showToast("SIN STOCK", "var(--red)"); }
     };
 
     function renderCart() {
         const l = document.getElementById('cart-list'); let total = 0; l.innerHTML = '';
         cart.forEach((item, idx) => {
             total += item.pv;
-            l.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${item.nombre}</span><b>$${item.pv}</b><button onclick="removeFromCart(${idx})" style="color:var(--red); background:none; border:none; cursor:pointer;">X</button></div>`;
+            l.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.nombre}</span><b>$${item.pv}</b><button onclick="removeFromCart(${idx})" style="color:var(--red); background:none; border:none; cursor:pointer;">X</button></div>`;
         });
         document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
     }
@@ -244,9 +268,9 @@
         const utilidad = total - cart.reduce((a,b) => a+(b.costo||0), 0);
         const batch = writeBatch(db);
         cart.forEach(item => batch.update(doc(db, "accesorios", item.id), { stock: item.stock - 1 }));
-        await addDoc(collection(db, "ventas"), { total, utilidad, ts: Timestamp.now() });
+        await addDoc(collection(db, "ventas"), { total, utilidad, ts: Timestamp.now(), hora: new Date().toLocaleTimeString() });
         await batch.commit();
-        cart = []; renderCart(); showToast("VENTA REALIZADA");
+        cart = []; renderCart(); showToast("VENTA EXITOSA");
     };
 
     // TALLER
@@ -270,22 +294,22 @@
         await updateDoc(doc(db, "ordenes", id), { estado: next });
     };
 
-    // FINANZAS
+    // CAJA
     window.saveGasto = async () => {
         const d = document.getElementById('g-desc').value, m = parseFloat(document.getElementById('g-monto').value);
-        if(d && m) await addDoc(collection(db, "gastos"), { desc: d, monto: m, ts: Timestamp.now() });
+        if(d && m) await addDoc(collection(db, "gastos"), { desc: d, monto: m, ts: Timestamp.now(), hora: new Date().toLocaleTimeString() });
         document.getElementById('g-desc').value = ''; document.getElementById('g-monto').value = '';
     };
 
     window.realizarCierre = async () => {
         const neto = parseFloat(document.getElementById('caja-neto').innerText.replace('$',''));
-        if(!confirm(`¿CERRAR DÍA CON $${neto}?`)) return;
+        if(!confirm(`¿CONFIRMAR CIERRE POR $${neto}?`)) return;
         await addDoc(collection(db, "cierres"), { total: neto, ts: Timestamp.now(), fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString() });
         const b = writeBatch(db);
         const v = await getDocs(collection(db, "ventas")); v.forEach(d => b.delete(d.ref));
         const g = await getDocs(collection(db, "gastos")); g.forEach(d => b.delete(d.ref));
         await b.commit();
-        showToast("CIERRE COMPLETADO");
+        showToast("CIERRE DE HISTORIALES EXITOSO");
     };
 
     // ST
@@ -294,10 +318,15 @@
         if(msg) await addDoc(collection(db, "pedidos_st"), { msg, ts: Timestamp.now() });
         document.getElementById('st-msg').value = '';
     };
-    window.sendToST = () => { window.open(`https://wa.me/50249698555?text=${encodeURIComponent(document.getElementById('st-lista').innerText)}`); };
     window.clearST = async () => {
+        if(!confirm("¿VACIAR TODA LA LISTA?")) return;
         const snap = await getDocs(collection(db, "pedidos_st"));
         const b = writeBatch(db); snap.forEach(d => b.delete(d.ref)); await b.commit();
+    };
+    window.sendToST = () => { 
+        let t = "PEDIDO NEXTCOM:\n";
+        document.querySelectorAll('.st-item-text').forEach(el => t += el.innerText + "\n");
+        window.open(`https://wa.me/50249698555?text=${encodeURIComponent(t)}`); 
     };
 
     // SYNC
@@ -313,7 +342,7 @@
             let sAlert = 0;
             localInv.forEach(i => {
                 if(i.stock <= 3) sAlert++;
-                t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td><td><button class="btn btn-red" style="padding:5px" onclick="deleteDoc(doc(db,'accesorios','${i.id}'))">X</button></td></tr>`;
+                t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td><td><button class="btn btn-red" style="padding:4px" onclick="deleteDoc(doc(db,'accesorios','${i.id}'))">X</button></td></tr>`;
             });
             document.getElementById('kpi-s').innerText = sAlert;
         });
@@ -324,7 +353,7 @@
             snap.forEach(d => {
                 const o = d.data(); const ready = o.estado === "LISTO";
                 if(!ready) count++;
-                const h = `<div class="card" style="border-left:4px solid ${ready?'var(--green)':'var(--amber)'}"><b>${o.cliente}</b><br><small>${o.modelo}</small><br><button class="btn" style="padding:4px; font-size:0.6rem; margin-top:5px;" onclick="swapOrder('${d.id}', '${o.estado}')">SWAP</button></div>`;
+                const h = `<div class="card" style="border-left:4px solid ${ready?'var(--green)':'var(--amber)'}; padding:10px; margin-bottom:10px;"><b>${o.cliente}</b><br><small>${o.modelo}</small><br><button class="btn" style="padding:2px 5px; font-size:0.6rem; margin-top:5px;" onclick="swapOrder('${d.id}', '${o.estado}')">SWAP</button></div>`;
                 if(ready) r.innerHTML += h; else p.innerHTML += h;
             });
             document.getElementById('kpi-t').innerText = count;
@@ -333,8 +362,16 @@
         onSnapshot(collection(db, "ventas"), snapV => {
             onSnapshot(collection(db, "gastos"), snapG => {
                 let v = 0, u = 0, g = 0;
-                snapV.forEach(d => { v += d.data().total; u += d.data().utilidad; });
-                snapG.forEach(d => g += d.data().monto);
+                const lv = document.getElementById('logs-ventas'); lv.innerHTML = '';
+                const lg = document.getElementById('logs-gastos'); lg.innerHTML = '';
+                snapV.forEach(d => { 
+                    const data = d.data(); v += data.total; u += data.utilidad; 
+                    lv.innerHTML += `<tr><td>${data.hora || '--'}</td><td>$${data.total}</td><td>$${data.utilidad}</td></tr>`;
+                });
+                snapG.forEach(d => { 
+                    const data = d.data(); g += data.monto; 
+                    lg.innerHTML += `<tr><td>${data.hora || '--'}</td><td>${data.desc}</td><td>$${data.monto}</td></tr>`;
+                });
                 document.getElementById('kpi-v').innerText = `$${v.toFixed(2)}`;
                 document.getElementById('kpi-u').innerText = `$${u.toFixed(2)}`;
                 document.getElementById('caja-neto').innerText = `$${(v-g).toFixed(2)}`;
@@ -348,14 +385,19 @@
         });
 
         onSnapshot(query(collection(db, "pedidos_st"), orderBy("ts", "asc")), snap => {
-            let t = ''; snap.forEach(d => t += `• ${d.data().msg}\n`);
-            document.getElementById('st-lista').innerText = t;
+            const box = document.getElementById('st-lista-box'); box.innerHTML = '';
+            snap.forEach(d => {
+                box.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:8px; margin-bottom:5px; border:1px solid #222;">
+                    <span class="st-item-text">• ${d.data().msg}</span>
+                    <button class="btn btn-red" style="padding:2px 8px; margin:0;" onclick="deleteDoc(doc(db,'pedidos_st','${d.id}'))">X</button>
+                </div>`;
+            });
         });
     }
 
     function initChart() {
         const ctx = document.getElementById('mainChart').getContext('2d');
-        salesChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ingresos', 'Egresos'], datasets: [{ data: [0, 0], backgroundColor: ['#00ff88', '#ff2a2a'] }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
+        salesChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ingresos', 'Egresos'], datasets: [{ data: [0, 0], backgroundColor: ['#00ff88', '#ff2a2a'] }] }, options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#222' } } } } });
     }
 
     window.toggleElement = (id) => { const e = document.getElementById(id); e.style.display = e.style.display === 'none' ? 'grid' : 'none'; };
