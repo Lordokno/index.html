@@ -224,6 +224,15 @@
                     </div>
                     <button class="btn btn-green" id="process-sale-btn" style="width: 100%; margin-top: 15px;">FINALIZAR VENTA</button>
                 </div>
+                <div class="card" style="grid-column: span 2;">
+                    <h3>HISTORIAL_RECIENTE</h3>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        <table style="margin-top:0">
+                            <thead><tr><th>FECHA</th><th>ITEMS</th><th>TOTAL</th></tr></thead>
+                            <tbody id="sales-history-table"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -331,6 +340,12 @@
         document.getElementById("boot").style.display = "none";
         document.getElementById("app").style.display = "flex";
         initSync();
+        updateDate();
+    }
+
+    function updateDate() {
+        const d = new Date();
+        document.getElementById("date-display").innerText = d.toISOString().split('T')[0];
     }
 
     function initSync() {
@@ -354,6 +369,22 @@
             document.getElementById("lista-acumulada").innerText = listaHtml;
             document.getElementById("lista-acumulada").dataset.raw = rawText;
         });
+        
+        // Historial de ventas
+        onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc"), limit(10)), snap => {
+            const h = document.getElementById("sales-history-table");
+            h.innerHTML = "";
+            snap.forEach(d => {
+                const v = d.data();
+                const fecha = v.ts ? v.ts.toDate().toLocaleTimeString() : '---';
+                h.innerHTML += `<tr>
+                    <td>${fecha}</td>
+                    <td>${v.items_count || 1} item(s)</td>
+                    <td style="color:var(--green)">$${v.total.toFixed(2)}</td>
+                </tr>`;
+            });
+        });
+
         updateCajaRealTime();
     }
 
@@ -406,16 +437,22 @@
     // --- VENTAS ---
     document.getElementById("pos-search").oninput = () => {
         const v = document.getElementById("pos-search").value.toLowerCase();
+        if(!v) { document.getElementById("pos-info").innerText = "---"; return; }
         const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
         document.getElementById("pos-info").innerText = i ? `${i.nombre} | Stock: ${i.stock} | $${i.pv}` : "NO ENCONTRADO";
+        document.getElementById("pos-info").dataset.currentId = i ? i.id : "";
     };
 
     document.getElementById("add-to-cart-btn").onclick = () => {
-        const v = document.getElementById("pos-search").value.toLowerCase();
-        const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
+        const id = document.getElementById("pos-info").dataset.currentId;
+        const i = localAcc.find(x => x.id === id);
         if(i && i.stock > 0) {
-            cart.push(i);
+            cart.push({...i});
             renderCart();
+            document.getElementById("pos-search").value = "";
+            document.getElementById("pos-info").innerText = "---";
+        } else if(i) {
+            alert("SIN STOCK");
         }
     };
 
@@ -437,16 +474,31 @@
     document.getElementById("process-sale-btn").onclick = async () => {
         if(!cart.length) return;
         const total = cart.reduce((a, b) => a + b.pv, 0);
-        await runTransaction(db, async(t) => {
-            for(let i of cart) {
-                const ref = doc(db, "accesorios", i.id);
-                const s = await t.get(ref);
-                t.update(ref, { stock: s.data().stock - 1 });
-            }
-            t.set(doc(collection(db, "ventas")), { total: total, ts: Timestamp.now() });
-        });
-        cart = []; renderCart();
-        logSys("VENTA REALIZADA CON ÉXITO");
+        const itemsCount = cart.length;
+
+        try {
+            await runTransaction(db, async (transaction) => {
+                for(let item of cart) {
+                    const itemRef = doc(db, "accesorios", item.id);
+                    const itemSnap = await transaction.get(itemRef);
+                    if (!itemSnap.exists()) throw "Item no existe";
+                    let newStock = itemSnap.data().stock - 1;
+                    transaction.update(itemRef, { stock: newStock });
+                }
+                const salesRef = collection(db, "ventas");
+                transaction.set(doc(salesRef), { 
+                    total: total, 
+                    items_count: itemsCount,
+                    ts: Timestamp.now() 
+                });
+            });
+            cart = []; 
+            renderCart();
+            logSys("VENTA REALIZADA CON ÉXITO");
+        } catch (e) {
+            console.error(e);
+            alert("Error en la venta: " + e);
+        }
     };
 
     // --- ORDENES ---
@@ -479,7 +531,7 @@
         document.getElementById("o-falla").value = o.falla || "";
         document.getElementById("o-pc").value = o.precio || "";
         document.getElementById("o-ant").value = o.anticipo || "";
-        await deleteDoc(doc(db, "ordenes", id)); // Elimina para re-insertar o puedes usar update
+        await deleteDoc(doc(db, "ordenes", id));
         logSys("EDITANDO ORDEN...");
     };
 
@@ -511,9 +563,8 @@
 
     document.getElementById("clear-pedidos-btn").onclick = async () => {
         if(confirm("¿BORRAR LISTA DE HOY?")) {
-            const snap = await getDoc(collection(db, "pedidos_st")); // Simplificado para borrar todos
-            // Nota: En producción recorrer snap y borrar cada doc
-            logSys("LISTA LIMPIADA");
+            // Nota: Implementar borrado por bucle si es necesario
+            logSys("ESTA FUNCIÓN REQUIERE BORRADO MASIVO");
         }
     };
 
@@ -548,7 +599,7 @@
 
     function logSys(msg) {
         const log = document.getElementById("sys-log");
-        log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>` + log.innerHTML;
+        if(log) log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>` + log.innerHTML;
     }
 
     window.openReorder = (id, n) => {
