@@ -296,39 +296,44 @@
         </div>
 
         <div id="sec-orden" class="section">
-            <h2>> SERVICIOS_TECNICOS</h2>
-            <div class="card">
-                <div class="form-grid">
-                    <input id="o-cliente" placeholder="NOMBRE DEL CLIENTE" style="grid-column: span 2;">
-                    <input id="o-eq" placeholder="EQUIPO / MODELO">
-                    <input id="o-falla" placeholder="FALLA REPORTADA">
-                    <input id="o-pc" type="number" placeholder="PRECIO TOTAL ($)">
-                    <input id="o-ant" type="number" placeholder="ANTICIPO ($)">
-                </div>
-                <div class="flex-row" style="margin-bottom: 15px; border-top: 1px solid var(--amber-dim); padding-top: 15px;">
-                    <span>SALDO PENDIENTE:</span>
-                    <span style="font-size: clamp(1.2rem, 2vw, 1.5rem); color: #ff4444;">$<span id="o-sal-display">0</span></span>
-                </div>
-                <button class="btn" id="save-order-btn" style="width: 100%;">GENERAR ORDEN DE SERVICIO</button>
-            </div>
-            
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>RECIBIDOS_EN_TALLER</th>
-                            <th>TRABAJOS_TERMINADOS</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td id="list-recibidos" style="width: 50%; vertical-align: top;"></td>
-                            <td id="list-terminados" style="width: 50%; vertical-align: top;"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+    <h2>> SERVICIOS_TECNICOS</h2>
+    <div class="card" id="order-form-container">
+        <div id="edit-indicator" style="display:none; color: var(--green); margin-bottom: 10px; font-size: 0.8rem;">
+            MODO_EDICIÓN_ACTIVO: <span id="editing-id-display"></span>
+            <button class="btn" onclick="cancelEdit()" style="padding: 2px 5px; font-size: 0.6rem; margin-left: 10px;">CANCELAR</button>
         </div>
+
+        <div class="form-grid">
+            <input id="o-cliente" placeholder="NOMBRE DEL CLIENTE" style="grid-column: span 2;">
+            <input id="o-eq" placeholder="EQUIPO / MODELO">
+            <input id="o-falla" placeholder="FALLA REPORTADA">
+            <input id="o-pc" type="number" placeholder="PRECIO TOTAL ($)">
+            <input id="o-ant" type="number" placeholder="ANTICIPO ($)">
+        </div>
+        <div class="flex-row" style="margin-bottom: 15px; border-top: 1px solid var(--amber-dim); padding-top: 15px;">
+            <span>SALDO PENDIENTE:</span>
+            <span style="font-size: clamp(1.2rem, 2vw, 1.5rem); color: #ff4444;">$<span id="o-sal-display">0</span></span>
+        </div>
+        <button class="btn" id="save-order-btn" style="width: 100%;">GENERAR ORDEN DE SERVICIO</button>
+    </div>
+    
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>RECIBIDOS_EN_TALLER</th>
+                    <th>TRABAJOS_TERMINADOS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td id="list-recibidos" style="width: 50%; vertical-align: top;"></td>
+                    <td id="list-terminados" style="width: 50%; vertical-align: top;"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
     </div>
 </div>
 
@@ -675,6 +680,109 @@
         const dateDisp = document.getElementById("date-display");
         if(dateDisp) dateDisp.innerText = new Date().toISOString().split('T')[0];
     }, 1000);
+
+    // --- NUEVA VARIABLE DE ESTADO ---
+let editingOrderId = null; // Al principio del script junto a las otras variables
+
+// --- FUNCIÓN PARA CARGAR DATOS EN EL FORMULARIO ---
+window.prepareEditOrder = (id, cliente, modelo, falla, saldo, anticipo, total) => {
+    editingOrderId = id;
+    document.getElementById("o-cliente").value = cliente;
+    document.getElementById("o-eq").value = modelo;
+    document.getElementById("o-falla").value = falla;
+    document.getElementById("o-pc").value = total || (parseFloat(saldo) + parseFloat(anticipo || 0));
+    document.getElementById("o-ant").value = anticipo || 0;
+    document.getElementById("o-sal-display").innerText = saldo;
+    
+    // UI Changes
+    document.getElementById("save-order-btn").innerText = "GUARDAR CAMBIOS EN ORDEN";
+    document.getElementById("edit-indicator").style.display = "block";
+    document.getElementById("editing-id-display").innerText = id;
+    
+    // Scroll al formulario
+    document.getElementById("order-form-container").scrollIntoView({ behavior: 'smooth' });
+};
+
+window.cancelEdit = () => {
+    editingOrderId = null;
+    document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
+    document.getElementById("o-sal-display").innerText = "0";
+    document.getElementById("save-order-btn").innerText = "GENERAR ORDEN DE SERVICIO";
+    document.getElementById("edit-indicator").style.display = "none";
+};
+
+// --- ACTUALIZACIÓN DE RENDER ORDERS (Añadir botón editar) ---
+function renderOrders(snap) {
+    const colRecibidos = document.getElementById("list-recibidos");
+    const colTerminados = document.getElementById("list-terminados");
+    if(!colRecibidos || !colTerminados) return;
+    
+    colRecibidos.innerHTML = "";
+    colTerminados.innerHTML = "";
+
+    snap.forEach(d => {
+        const o = d.data();
+        const div = document.createElement("div");
+        div.className = "card order-item";
+        div.innerHTML = `
+            <div style="font-size:0.85rem; color:#fff; margin-bottom:5px;">${o.cliente}</div>
+            <div style="font-size:0.75rem; opacity:0.8;">${o.modelo} | Pendiente: $${o.saldo}</div>
+            <div style="margin-top:8px;" class="flex-row">
+                <div>
+                    <button class="btn btn-status" onclick="toggleOrderStatus('${d.id}', '${o.estado}')">
+                        ${o.estado === 'RECIBIDO' ? '>> TERMINAR' : '<< REABRIR'}
+                    </button>
+                    <button class="btn" style="padding:4px 8px; font-size:0.7rem; border-color:var(--green); color:var(--green);" 
+                        onclick="prepareEditOrder('${d.id}', '${o.cliente}', '${o.modelo}', '${o.falla}', '${o.saldo}', '${o.anticipo || 0}', '${o.total || 0}')">
+                        EDITAR
+                    </button>
+                </div>
+                <button class="btn btn-del-order" style="padding:2px 8px; font-size:0.6rem">X</button>
+            </div>`;
+        
+        div.querySelector(".btn-del-order").onclick = () => deleteItem('ordenes', d.id);
+        
+        if(o.estado === "TERMINADO") colTerminados.appendChild(div);
+        else colRecibidos.appendChild(div);
+    });
+}
+
+// --- ACTUALIZACIÓN DE SAVE ORDER (Lógica Dual: Crear/Editar) ---
+document.getElementById("save-order-btn").onclick = async () => {
+    const cl = document.getElementById("o-cliente").value;
+    const total = document.getElementById("o-pc").value;
+    const ant = document.getElementById("o-ant").value;
+    
+    if(!cl) { alert("INGRESE NOMBRE DE CLIENTE"); return; }
+
+    const orderData = {
+        cliente: cl, 
+        modelo: document.getElementById("o-eq").value,
+        falla: document.getElementById("o-falla").value,
+        total: total,
+        anticipo: ant,
+        saldo: document.getElementById("o-sal-display").innerText, 
+        ts: Timestamp.now()
+    };
+
+    try {
+        if (editingOrderId) {
+            // EDITAR EXISTENTE
+            await updateDoc(doc(db, "ordenes", editingOrderId), orderData);
+            logSys(`ORDEN ACTUALIZADA: ${cl}`);
+            alert("CAMBIOS GUARDADOS");
+        } else {
+            // CREAR NUEVA
+            orderData.estado = "RECIBIDO"; // Solo para nuevas
+            await addDoc(collection(db, "ordenes"), orderData);
+            logSys(`ORDEN GENERADA: ${cl}`);
+        }
+        cancelEdit(); // Limpia el formulario y resetea estados
+    } catch (e) {
+        console.error("Error: ", e);
+        alert("ERROR AL GUARDAR");
+    }
+};
 </script>
 </body>
 </html>
