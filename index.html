@@ -219,6 +219,7 @@
         <button class="btn" onclick="nav('inv')">02_INVENTARIO</button>
         <button class="btn" onclick="nav('pos')">03_POS_VENTA</button>
         <button class="btn" onclick="nav('orden')">04_ORDENES</button>
+        <button class="btn" onclick="nav('admin')">05_ADMIN_CAJA</button>
         <button class="btn" id="logout-btn" style="margin-top: auto; border-color: var(--amber-dim); font-size: 0.7rem;">LOGOUT_SYSTEM</button>
     </div>
 
@@ -332,6 +333,38 @@
                 </table>
             </div>
         </div>
+
+        <div id="sec-admin" class="section">
+            <h2>> ADMINISTRACIÓN_Y_CIERRE</h2>
+            <div class="grid-responsive">
+                <div class="card">
+                    <h3 style="margin-top:0">REGISTRAR_EGRESO</h3>
+                    <input id="g-desc" placeholder="DESCRIPCIÓN DEL GASTO">
+                    <input id="g-monto" type="number" placeholder="MONTO ($)">
+                    <button class="btn" id="save-gasto-btn" style="width:100%; border-color:var(--red); color:var(--red);">REGISTRAR SALIDA</button>
+                </div>
+
+                <div class="card" style="border-color: #fff;">
+                    <h3 style="margin-top:0">BALANCE_DEL_DIA</h3>
+                    <div id="caja-resumen" style="font-size: 0.9rem; line-height: 2;">
+                        <div class="flex-row"><span>(+) VENTAS:</span> <span id="c-ventas">$0.00</span></div>
+                        <div class="flex-row" style="color:var(--red)"><span>(-) EGRESOS:</span> <span id="c-egresos">$0.00</span></div>
+                        <hr style="border:0; border-top:1px solid #333">
+                        <div class="flex-row" style="font-size:1.4rem; color:#fff"><span>TOTAL CAJA:</span> <span id="c-total">$0.00</span></div>
+                    </div>
+                    <button class="btn" id="btn-cerrar-caja" style="width:100%; margin-top:15px; background:#fff; color:#000;">EJECUTAR CIERRE DE CAJA</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <h3>HISTORIAL DE CIERRES</h3>
+                <table>
+                    <thead><tr><th>FECHA</th><th>VENTAS</th><th>GASTOS</th><th>BALANCE</th></tr></thead>
+                    <tbody id="historial-cierres"></tbody>
+                </table>
+            </div>
+        </div>
+
     </div>
 </div>
 
@@ -397,6 +430,7 @@
         boot.style.display = "none";
         document.getElementById("app").style.display = "flex";
         initListeners();
+        updateCajaRealTime();
     }
 
     function logSys(msg) {
@@ -414,69 +448,57 @@
         document.getElementById("sec-" + id).classList.add("active");
     };
 
-    // --- LÓGICA WHATSAPP ---
+    // --- WHATSAPP ---
     window.sendWhatsApp = (tel, cliente, equipo, saldo) => {
-        if(!tel || tel.length < 8) {
-            alert("NUMERO TELEFONICO NO VALIDO O AUSENTE");
-            return;
-        }
-        const msg = `Hola *${cliente}*, te informamos de *NEXTCOM* que tu equipo *${equipo}* ya esta listo para ser retirado. %0A%0A*Saldo pendiente:* $${saldo}%0A¡Te esperamos!`;
+        if(!tel || tel.length < 8) { alert("TELÉFONO NO VÁLIDO"); return; }
+        const msg = `Hola *${cliente}*, de *NEXTCOM* informamos que tu equipo *${equipo}* ya está listo. %0A%0A*Saldo:* $${saldo}%0A¡Te esperamos!`;
         window.open(`https://wa.me/${tel}?text=${msg}`, '_blank');
     };
 
-    // --- GRÁFICOS Y KPIs ---
-    function updateChart() {
-        const canvas = document.getElementById('mainChart');
-        if(!canvas) return;
-        const ctx = canvas.getContext('2d');
-        const labels = localAcc.slice(0, 10).map(a => a.nombre.substring(0,10));
-        const stocks = localAcc.slice(0, 10).map(a => a.stock);
-        const sales = localAcc.slice(0, 10).map(a => a.salidas || 0);
-        
-        if (salesChart) salesChart.destroy();
-        salesChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [
-                    { label: 'STOCK', data: stocks, backgroundColor: '#ff7a00' },
-                    { label: 'VENTAS', data: sales, backgroundColor: '#444' }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                scales: { 
-                    y: { beginAtZero: true, grid: { color: '#1a1a1a' }, ticks: { color: '#ff7a00' } }, 
-                    x: { grid: { display: false }, ticks: { color: '#ff7a00' } } 
-                },
-                plugins: { legend: { labels: { color: '#ff7a00' } } }
-            }
-        });
-    }
-
-    function updateKPIs() {
-        const criticoCount = localAcc.filter(a => a.stock <= 3).length;
-        document.getElementById("kpi-stock").innerText = criticoCount;
-        const card = document.getElementById("kpi-stock-card");
-        if(criticoCount > 0) card.classList.add("critico");
-        else card.classList.remove("critico");
-
+    // --- LÓGICA DE CAJA ---
+    function updateCajaRealTime() {
         const today = new Date();
         today.setHours(0,0,0,0);
-        
-        const qVentas = query(collection(db, "ventas"), where("ts", ">=", Timestamp.fromDate(today)));
-        onSnapshot(qVentas, snap => {
-            let totalHoy = 0;
-            snap.forEach(d => totalHoy += d.data().total);
-            document.getElementById("kpi-ventas").innerText = totalHoy.toFixed(2);
+        const tsToday = Timestamp.fromDate(today);
+
+        onSnapshot(query(collection(db, "ventas"), where("ts", ">=", tsToday)), snap => {
+            let v = 0; snap.forEach(d => v += d.data().total);
+            document.getElementById("c-ventas").innerText = `$${v.toFixed(2)}`;
+            calcularNeto();
         });
 
-        onSnapshot(collection(db, "ordenes"), snap => {
-            document.getElementById("kpi-ordenes").innerText = snap.size;
+        onSnapshot(query(collection(db, "gastos"), where("ts", ">=", tsToday)), snap => {
+            let g = 0; snap.forEach(d => g += d.data().monto);
+            document.getElementById("c-egresos").innerText = `$${g.toFixed(2)}`;
+            calcularNeto();
         });
     }
 
-    // --- LISTENERS DE FIREBASE ---
+    function calcularNeto() {
+        const v = parseFloat(document.getElementById("c-ventas").innerText.replace('$','')) || 0;
+        const g = parseFloat(document.getElementById("c-egresos").innerText.replace('$','')) || 0;
+        document.getElementById("c-total").innerText = `$${(v - g).toFixed(2)}`;
+    }
+
+    document.getElementById("save-gasto-btn").onclick = async () => {
+        const desc = document.getElementById("g-desc").value;
+        const monto = parseFloat(document.getElementById("g-monto").value);
+        if(!desc || !monto) return;
+        await addDoc(collection(db, "gastos"), { descripcion: desc, monto: monto, ts: Timestamp.now() });
+        document.getElementById("g-desc").value = ""; document.getElementById("g-monto").value = "";
+        logSys(`EGRESO: ${desc} -$${monto}`);
+    };
+
+    document.getElementById("btn-cerrar-caja").onclick = async () => {
+        if(!confirm("¿CONFIRMAR CIERRE DIARIO?")) return;
+        const b = document.getElementById("c-total").innerText;
+        const v = document.getElementById("c-ventas").innerText;
+        const g = document.getElementById("c-egresos").innerText;
+        await addDoc(collection(db, "cierres"), { fecha: new Date().toLocaleDateString(), ventas: v, gastos: g, balance: b, ts: Timestamp.now() });
+        alert("CIERRE GUARDADO");
+    };
+
+    // --- LISTENERS GENERALES ---
     function initListeners() {
         onSnapshot(collection(db, "accesorios"), snap => {
             localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -485,227 +507,177 @@
             updateKPIs();
         });
 
-        onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc"), limit(15)), snap => {
+        onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc"), limit(10)), snap => {
             const history = document.getElementById("pos-history");
-            if(!history) return;
-            history.innerHTML = "";
-            snap.forEach(d => {
-                const v = d.data();
-                const date = v.ts ? v.ts.toDate().toLocaleTimeString() : '...';
-                history.innerHTML += `<div style="border-bottom: 1px solid #222; margin-bottom:5px;">> [${date}] TOTAL: $${v.total.toFixed(2)}</div>`;
-            });
+            if(history) {
+                history.innerHTML = "";
+                snap.forEach(d => {
+                    const v = d.data();
+                    history.innerHTML += `<div>> [${v.ts ? v.ts.toDate().toLocaleTimeString() : '...'}] TOTAL: $${v.total.toFixed(2)}</div>`;
+                });
+            }
         });
 
-        onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => {
-            renderOrders(snap);
+        onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => renderOrders(snap));
+
+        onSnapshot(query(collection(db, "cierres"), orderBy("ts", "desc"), limit(10)), snap => {
+            const h = document.getElementById("historial-cierres");
+            if(h) {
+                h.innerHTML = "";
+                snap.forEach(d => {
+                    const c = d.data();
+                    h.innerHTML += `<tr><td>${c.fecha}</td><td>${c.ventas}</td><td style="color:var(--red)">${c.gastos}</td><td>${c.balance}</td></tr>`;
+                });
+            }
         });
     }
 
-    // --- FUNCIONES DE RENDER ---
+    // --- FUNCIONES RENDER ---
     function renderInventory() {
         const table = document.getElementById("acc-table");
         if(!table) return;
         table.innerHTML = "";
         localAcc.forEach(a => {
             const tr = document.createElement("tr");
-            tr.innerHTML = `
-                <td>${a.nombre}</td>
-                <td style="font-weight:bold; color:${a.stock <= 3 ? '#ff4444' : '#fff'}">${a.stock}</td>
-                <td style="font-size:0.8rem">ENT: ${a.entradas} | SAL: ${a.salidas}</td>
+            tr.innerHTML = `<td>${a.nombre}</td><td style="color:${a.stock <= 3 ? '#f44' : '#fff'}">${a.stock}</td><td>E:${a.entradas} S:${a.salidas}</td>
                 <td style="text-align:right">
-                    <button class="btn btn-reorder" data-id="${a.id}" data-name="${a.nombre}" style="padding: 5px 10px;">+</button>
-                    <button class="btn btn-del" data-id="${a.id}">X</button>
+                    <button class="btn" onclick="openReorder('${a.id}','${a.nombre}')">+</button>
+                    <button class="btn btn-del" onclick="deleteItem('accesorios','${a.id}')">X</button>
                 </td>`;
             table.appendChild(tr);
         });
-
-        table.querySelectorAll(".btn-reorder").forEach(b => b.onclick = () => openReorder(b.dataset.id, b.dataset.name));
-        table.querySelectorAll(".btn-del").forEach(b => b.onclick = () => deleteItem('accesorios', b.dataset.id));
     }
 
     function renderOrders(snap) {
-        const colRecibidos = document.getElementById("list-recibidos");
-        const colTerminados = document.getElementById("list-terminados");
-        if(!colRecibidos || !colTerminados) return;
-        
-        colRecibidos.innerHTML = "";
-        colTerminados.innerHTML = "";
-
+        const rec = document.getElementById("list-recibidos");
+        const ter = document.getElementById("list-terminados");
+        if(!rec || !ter) return;
+        rec.innerHTML = ""; ter.innerHTML = "";
         snap.forEach(d => {
             const o = d.data();
             const div = document.createElement("div");
             div.className = "card order-item";
-            div.innerHTML = `
-                <div style="font-size:0.85rem; color:#fff; margin-bottom:5px;">${o.cliente}</div>
-                <div style="font-size:0.75rem; opacity:0.8;">${o.modelo} | SALDO: $${o.saldo}</div>
-                <div style="margin-top:8px;" class="flex-row">
-                    <button class="btn btn-status" onclick="toggleOrderStatus('${d.id}', '${o.estado}')">
-                        ${o.estado === 'RECIBIDO' ? '>> TERMINAR' : '<< REABRIR'}
-                    </button>
-                    
-                    ${o.estado === 'TERMINADO' ? `
-                    <button class="btn btn-ws" onclick="sendWhatsApp('${o.tel}', '${o.cliente}', '${o.modelo}', '${o.saldo}')">
-                        WS_AVISO
-                    </button>` : ''}
-
-                    <button class="btn btn-del-order" style="padding:2px 8px; font-size:0.6rem">X</button>
+            div.innerHTML = `<div style="color:#fff">${o.cliente}</div><div style="font-size:0.75rem">${o.modelo} | $${o.saldo}</div>
+                <div class="flex-row" style="margin-top:8px">
+                    <button class="btn btn-status" onclick="toggleStatus('${d.id}','${o.estado}')">${o.estado === 'RECIBIDO' ? '>> TERM.' : '<< REAB.'}</button>
+                    ${o.estado === 'TERMINADO' ? `<button class="btn btn-ws" onclick="sendWhatsApp('${o.tel}','${o.cliente}','${o.modelo}','${o.saldo}')">AVISO</button>` : ''}
+                    <button class="btn btn-del" style="padding:4px" onclick="deleteItem('ordenes','${d.id}')">X</button>
                 </div>`;
-            
-            div.querySelector(".btn-del-order").onclick = () => deleteItem('ordenes', d.id);
-            
-            if(o.estado === "TERMINADO") colTerminados.appendChild(div);
-            else colRecibidos.appendChild(div);
+            if(o.estado === "TERMINADO") ter.appendChild(div); else rec.appendChild(div);
         });
     }
 
-    // --- ACCIONES DEL SISTEMA ---
-    const deleteItem = async (col, id) => {
-        if(confirm("¿ELIMINAR DEFINITIVAMENTE?")) {
-            await deleteDoc(doc(db, col, id));
-            logSys(`ELIMINADO: ${id} DE ${col}`);
-        }
+    // --- ACCIONES CORE ---
+    window.deleteItem = async (c, id) => { if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, c, id)); };
+    
+    window.toggleStatus = async (id, s) => { 
+        await updateDoc(doc(db, "ordenes", id), { estado: s === "RECIBIDO" ? "TERMINADO" : "RECIBIDO" }); 
     };
 
-    const openReorder = (id, n) => {
-        currentReId = id;
-        document.getElementById("re-nombre").innerText = n;
+    window.openReorder = (id, n) => {
+        currentReId = id; document.getElementById("re-nombre").innerText = n;
         document.getElementById("reorder-modal").style.display = "block";
     };
 
-    const confirmReorder = async () => {
-        const qInput = document.getElementById("re-qty");
-        const q = parseInt(qInput.value);
-        if(!q || !currentReId) return;
+    document.getElementById("confirm-reorder-btn").onclick = async () => {
+        const q = parseInt(document.getElementById("re-qty").value);
+        if(!q) return;
         const ref = doc(db, "accesorios", currentReId);
-        const snap = await getDoc(ref);
-        await updateDoc(ref, { 
-            stock: snap.data().stock + q, 
-            entradas: (snap.data().entradas || 0) + q 
-        });
+        const s = await getDoc(ref);
+        await updateDoc(ref, { stock: s.data().stock + q, entradas: (s.data().entradas || 0) + q });
         document.getElementById("reorder-modal").style.display = "none";
-        qInput.value = "";
     };
-
-    window.toggleOrderStatus = async (id, currentStatus) => {
-        const newStatus = currentStatus === "RECIBIDO" ? "TERMINADO" : "RECIBIDO";
-        await updateDoc(doc(db, "ordenes", id), { estado: newStatus });
-    };
-
-    // --- EVENTOS DE INTERFAZ ---
-    document.getElementById("login-btn").onclick = tryLogin;
-    document.getElementById("logout-btn").onclick = logout;
-    document.getElementById("close-reorder-btn").onclick = () => document.getElementById("reorder-modal").style.display = "none";
-    document.getElementById("confirm-reorder-btn").onclick = confirmReorder;
 
     document.getElementById("save-inv-btn").onclick = async () => {
         const nom = document.getElementById("a-nom").value;
         const stock = parseInt(document.getElementById("a-stock").value);
         if(!nom || isNaN(stock)) return;
-        await addDoc(collection(db, "accesorios"), {
-            nombre: nom, stock: stock,
+        await addDoc(collection(db, "accesorios"), { 
+            nombre: nom, stock: stock, 
             costo: parseFloat(document.getElementById("a-costo").value) || 0,
             pv: parseFloat(document.getElementById("a-pv").value) || 0,
-            entradas: stock, salidas: 0, ts: Timestamp.now()
+            entradas: stock, salidas: 0, ts: Timestamp.now() 
         });
         document.querySelectorAll("#sec-inv input").forEach(i => i.value = "");
-        logSys(`NUEVO ITEM: ${nom}`);
     };
 
+    document.getElementById("process-sale-btn").onclick = async () => {
+        if(!cart.length) return;
+        const total = cart.reduce((acc, i) => acc + i.pv, 0);
+        await runTransaction(db, async(t) => {
+            for(let i of cart) {
+                const r = doc(db, "accesorios", i.id);
+                const s = await t.get(r);
+                t.update(r, { stock: s.data().stock - 1, salidas: (s.data().salidas || 0) + 1 });
+            }
+            t.set(doc(collection(db, "ventas")), { total: total, ts: Timestamp.now() });
+        });
+        cart = []; document.getElementById("cart-items").innerHTML = ""; document.getElementById("cart-total").innerText = "0.00";
+        alert("VENTA OK");
+    };
+
+    // --- POS SEARCH & CART ---
     document.getElementById("pos-search").oninput = () => {
-        const val = document.getElementById("pos-search").value.toLowerCase();
-        const info = document.getElementById("pos-info");
-        if(!val) { info.innerText = "ESPERANDO ENTRADA..."; return; }
-        const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
-        if(item) info.innerHTML = `${item.nombre} | $${item.pv} | STOCK: ${item.stock}`;
-        else info.innerText = "NO ENCONTRADO";
+        const v = document.getElementById("pos-search").value.toLowerCase();
+        const item = localAcc.find(i => i.nombre.toLowerCase().includes(v));
+        document.getElementById("pos-info").innerText = item ? `${item.nombre} | $${item.pv}` : "ESPERANDO...";
     };
 
     document.getElementById("add-to-cart-btn").onclick = () => {
-        const val = document.getElementById("pos-search").value.toLowerCase();
-        const item = localAcc.find(i => i.nombre.toLowerCase().includes(val));
+        const v = document.getElementById("pos-search").value.toLowerCase();
+        const item = localAcc.find(i => i.nombre.toLowerCase().includes(v));
         if(item && item.stock > 0) {
             cart.push({...item});
-            renderCart();
-            document.getElementById("pos-search").value = "";
-        } else if(item && item.stock <= 0) {
-            alert("PRODUCTO SIN STOCK");
+            const c = document.getElementById("cart-items");
+            c.innerHTML += `<div>> ${item.nombre} - $${item.pv}</div>`;
+            document.getElementById("cart-total").innerText = cart.reduce((acc, i) => acc + i.pv, 0).toFixed(2);
         }
     };
-
-    function renderCart() {
-        const container = document.getElementById("cart-items");
-        let total = 0; container.innerHTML = "";
-        cart.forEach((i) => { 
-            total += i.pv; 
-            container.innerHTML += `<div class="flex-row"><span>> ${i.nombre}</span><span>$${i.pv.toFixed(2)}</span></div>`; 
-        });
-        document.getElementById("cart-total").innerText = total.toFixed(2);
-    }
-
-    document.getElementById("process-sale-btn").onclick = async () => {
-        if(cart.length === 0) return;
-        const totalVenta = cart.reduce((acc, i) => acc + i.pv, 0);
-        
-        try {
-            await runTransaction(db, async(t) => {
-                for(let item of cart) {
-                    const ref = doc(db, "accesorios", item.id);
-                    const snap = await t.get(ref);
-                    if (!snap.exists()) throw "Item no existe";
-                    const newStock = snap.data().stock - 1;
-                    if(newStock < 0) throw "Sin stock para " + item.nombre;
-                    t.update(ref, { stock: newStock, salidas: (snap.data().salidas || 0) + 1 });
-                }
-                const ventaRef = doc(collection(db, "ventas"));
-                t.set(ventaRef, { total: totalVenta, items: cart.length, ts: Timestamp.now() });
-            });
-            logSys(`VENTA COMPLETADA: $${totalVenta.toFixed(2)}`);
-            cart = []; renderCart(); 
-            alert("VENTA PROCESADA EXITOSAMENTE");
-        } catch (e) { 
-            alert("ERROR TRANSACCIÓN: " + e); 
-        }
-    };
-
-    const calcSaldo = () => {
-        const pc = parseFloat(document.getElementById("o-pc").value) || 0;
-        const ant = parseFloat(document.getElementById("o-ant").value) || 0;
-        document.getElementById("o-sal-display").innerText = (pc - ant).toFixed(2);
-    };
-
-    document.getElementById("o-ant").oninput = calcSaldo;
-    document.getElementById("o-pc").oninput = calcSaldo;
 
     document.getElementById("save-order-btn").onclick = async () => {
         const cl = document.getElementById("o-cliente").value;
-        const tel = document.getElementById("o-tel").value;
         if(!cl) return;
         await addDoc(collection(db, "ordenes"), {
-            cliente: cl, 
-            tel: tel,
-            modelo: document.getElementById("o-eq").value,
-            falla: document.getElementById("o-falla").value,
-            saldo: document.getElementById("o-sal-display").innerText, 
-            estado: "RECIBIDO",
-            ts: Timestamp.now()
+            cliente: cl, tel: document.getElementById("o-tel").value,
+            modelo: document.getElementById("o-eq").value, falla: document.getElementById("o-falla").value,
+            saldo: document.getElementById("o-sal-display").innerText, estado: "RECIBIDO", ts: Timestamp.now()
         });
         document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
-        document.getElementById("o-sal-display").innerText = "0.00";
-        logSys(`ORDEN GENERADA: ${cl}`);
     };
 
-    // --- INIT ---
-    window.addEventListener("load", () => {
-        if(localStorage.getItem("nextcom_auth") === "true") {
-            startBootSequence();
-        }
-    });
+    document.getElementById("o-pc").oninput = document.getElementById("o-ant").oninput = () => {
+        const p = parseFloat(document.getElementById("o-pc").value) || 0;
+        const a = parseFloat(document.getElementById("o-ant").value) || 0;
+        document.getElementById("o-sal-display").innerText = (p - a).toFixed(2);
+    };
 
+    // --- CHARTS & KPIs ---
+    function updateChart() {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        if (salesChart) salesChart.destroy();
+        salesChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: localAcc.slice(0,5).map(a => a.nombre),
+                datasets: [{ label: 'STOCK', data: localAcc.slice(0,5).map(a => a.stock), backgroundColor: '#ff7a00' }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+        });
+    }
+
+    function updateKPIs() {
+        document.getElementById("kpi-stock").innerText = localAcc.filter(a => a.stock <= 3).length;
+        onSnapshot(collection(db, "ordenes"), snap => document.getElementById("kpi-ordenes").innerText = snap.size);
+    }
+
+    document.getElementById("login-btn").onclick = tryLogin;
+    document.getElementById("logout-btn").onclick = logout;
+    document.getElementById("close-reorder-btn").onclick = () => document.getElementById("reorder-modal").style.display = "none";
+    
+    window.onload = () => { if(localStorage.getItem("nextcom_auth") === "true") startBootSequence(); };
     setInterval(() => {
-        const clock = document.getElementById("clock");
-        if(clock) clock.innerText = new Date().toLocaleTimeString();
-        const dateDisp = document.getElementById("date-display");
-        if(dateDisp) dateDisp.innerText = new Date().toISOString().split('T')[0];
+        document.getElementById("clock").innerText = new Date().toLocaleTimeString();
+        document.getElementById("date-display").innerText = new Date().toISOString().split('T')[0];
     }, 1000);
 </script>
 </body>
