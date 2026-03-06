@@ -3,76 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM OS v7.0 // SUPREME FINAL</title>
+    <title>NEXTCOM OS v7.1 // FIXED EDITION</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --amber: #ff9d00; --amber-dim: #944a00; --bg: #020202;
-            --red: #ff2a2a; --green: #00ff88; --blue: #00d9ff; --purple: #bc13fe;
-            --glass: rgba(15, 15, 15, 0.85); --border: rgba(255, 157, 0, 0.2);
+            --red: #ff2a2a; --green: #00ff88; --blue: #00d9ff;
+            --glass: rgba(15, 15, 15, 0.9); --border: rgba(255, 157, 0, 0.2);
             --font-main: 'Share Tech Mono', monospace;
             --font-title: 'Orbitron', sans-serif;
         }
-
         * { box-sizing: border-box; outline: none; transition: all 0.2s ease; }
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: var(--amber); border-radius: 10px; }
-
-        body {
-            margin: 0; background: var(--bg); color: var(--amber);
-            font-family: var(--font-main); height: 100vh; overflow: hidden; display: flex;
-            background-image: radial-gradient(circle at 50% 50%, #0a0a0a 0%, #000 100%);
-        }
-
-        .sidebar {
-            width: 260px; background: #000; border-right: 1px solid var(--border);
-            display: flex; flex-direction: column; padding: 20px; z-index: 100;
-            box-shadow: 5px 0 20px rgba(0,0,0,0.5);
-        }
-
-        .main { flex: 1; padding: 30px; overflow-y: auto; position: relative; z-index: 10; }
-
-        .btn {
-            background: transparent; border: 1px solid var(--amber); color: var(--amber);
-            padding: 12px; cursor: pointer; font-family: var(--font-title); font-size: 0.7rem;
-            letter-spacing: 1px; margin-bottom: 8px; position: relative; overflow: hidden;
-            display: flex; align-items: center; gap: 10px;
-        }
-        .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 20px var(--amber); transform: translateX(5px); }
-        .btn-blue { border-color: var(--blue); color: var(--blue); } .btn-blue:hover { background: var(--blue); color: #000; }
-        .btn-green { border-color: var(--green); color: var(--green); } .btn-green:hover { background: var(--green); color: #000; }
-        .btn-red { border-color: var(--red); color: var(--red); } .btn-red:hover { background: var(--red); color: #000; }
-
-        .card {
-            background: var(--glass); border: 1px solid var(--border); border-radius: 8px;
-            padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        input, textarea, select {
-            background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff;
-            padding: 12px; width: 100%; margin-bottom: 12px; font-family: var(--font-main);
-            border-radius: 4px; border-left: 3px solid var(--amber);
-        }
-
+        body { margin: 0; background: var(--bg); color: var(--amber); font-family: var(--font-main); height: 100vh; overflow: hidden; display: flex; }
+        .sidebar { width: 260px; background: #000; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; z-index: 100; }
+        .main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+        .btn { background: transparent; border: 1px solid var(--amber); color: var(--amber); padding: 12px; cursor: pointer; font-family: var(--font-title); font-size: 0.7rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; justify-content: center; }
+        .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 15px var(--amber); }
+        .btn-blue { border-color: var(--blue); color: var(--blue); } .btn-green { border-color: var(--green); color: var(--green); } .btn-red { border-color: var(--red); color: var(--red); }
+        .card { background: var(--glass); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
+        input, textarea { background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff; padding: 12px; width: 100%; margin-bottom: 12px; font-family: var(--font-main); border-left: 3px solid var(--amber); }
         .section { display: none; animation: fadeIn 0.4s ease-out; }
         .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .grid-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-box {
-            background: linear-gradient(145deg, #0a0a0a, #111); border: 1px solid #222;
-            padding: 20px; border-radius: 12px; text-align: center; border-bottom: 3px solid var(--amber);
-        }
-        .stat-box b { font-family: var(--font-title); font-size: 1.8rem; display: block; color: #fff; text-shadow: 0 0 10px var(--amber); }
-
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
-        td { background: rgba(255,255,255,0.03); padding: 15px; color: #ccc; border-top: 1px solid #1a1a1a; border-bottom: 1px solid #1a1a1a; }
-
+        td { background: rgba(255,255,255,0.03); padding: 12px; color: #ccc; }
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
-        .toast { background: #000; border: 1px solid var(--green); color: #fff; padding: 15px 25px; margin-top: 10px; border-radius: 4px; box-shadow: 0 0 20px rgba(0,255,0,0.2); animation: slideIn 0.3s; }
-
+        .toast { background: #000; border: 1px solid var(--green); color: #fff; padding: 12px 20px; margin-top: 10px; border-radius: 4px; box-shadow: 0 0 15px rgba(0,255,0,0.2); }
+        .stat-box { background: #0a0a0a; border: 1px solid #222; padding: 20px; border-radius: 12px; text-align: center; border-bottom: 3px solid var(--amber); }
+        .stat-box b { font-family: var(--font-title); font-size: 1.5rem; display: block; color: #fff; }
         @media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { position: absolute; left: 0; top: 0; width: 100%; color: #000; } }
     </style>
 </head>
@@ -80,9 +39,9 @@
 
 <div id="login-screen" style="position:fixed; inset:0; background:#000; z-index:2000; display:flex; justify-content:center; align-items:center;">
     <div style="width:350px; text-align:center;">
-        <h1 style="font-family: var(--font-title); letter-spacing:10px; color:#fff; margin-bottom:40px;">NEXTCOM<span style="color:var(--amber)">OS</span></h1>
-        <div class="card" style="border-color:var(--amber)">
-            <input type="password" id="access-code" placeholder="ENTER ACCESS CODE" style="text-align:center;">
+        <h1 style="font-family: var(--font-title); letter-spacing:8px; color:#fff;">NEXTCOM<span style="color:var(--amber)">OS</span></h1>
+        <div class="card">
+            <input type="password" id="access-code" placeholder="ACCESS CODE" style="text-align:center;">
             <button class="btn" style="width:100%;" onclick="bootSystem()">AUTHENTICATE</button>
         </div>
     </div>
@@ -90,84 +49,76 @@
 
 <div id="app" style="display:none; width:100%; height:100vh;">
     <div class="sidebar">
-        <div style="margin-bottom:30px; border-bottom:1px solid #222; padding-bottom:20px;">
-            <div id="clock" style="font-family:var(--font-title); font-size:1.4rem; color:#fff;">00:00:00</div>
+        <div style="margin-bottom:20px; border-bottom:1px solid #222; padding-bottom:10px;">
+            <div id="clock" style="font-family:var(--font-title); font-size:1.2rem; color:#fff;">00:00:00</div>
             <small id="date-label" style="opacity:0.5;"></small>
         </div>
-        <button class="btn" onclick="nav('dash')"><span>🏠</span> DASHBOARD</button>
-        <button class="btn" onclick="nav('inv')"><span>📦</span> INVENTARIO</button>
-        <button class="btn" onclick="nav('pos')"><span>🛒</span> PUNTO DE VENTA</button>
-        <button class="btn" onclick="nav('taller')"><span>🔧</span> TALLER MASTER</button>
-        <button class="btn" onclick="nav('caja')"><span>💰</span> CAJA / GASTOS</button>
-        <button class="btn btn-blue" onclick="nav('st')"><span>🛰️</span> PEDIDOS ST</button>
-        <button class="btn btn-red" style="margin-top:auto;" onclick="location.reload()"><span>🔒</span> LOGOUT</button>
+        <button class="btn" onclick="nav('dash')">📊 DASHBOARD</button>
+        <button class="btn" onclick="nav('inv')">📦 INVENTARIO</button>
+        <button class="btn" onclick="nav('pos')">🛒 VENTAS (POS)</button>
+        <button class="btn" onclick="nav('taller')">🔧 TALLER / ST</button>
+        <button class="btn" onclick="nav('caja')">💰 CAJA / GASTOS</button>
+        <button class="btn btn-blue" onclick="nav('st')">🛰️ PEDIDOS ST</button>
+        <button class="btn btn-red" style="margin-top:auto;" onclick="location.reload()">🔒 LOGOUT</button>
     </div>
 
     <div class="main">
         <div id="sec-dash" class="section active">
-            <h2 style="font-family:var(--font-title);">[ SYSTEM_OVERVIEW ]</h2>
-            <div class="grid-stats">
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:25px;">
                 <div class="stat-box"><b><span id="kpi-v">$0.00</span></b><small>Ventas Hoy</small></div>
-                <div class="stat-box" style="border-color:var(--green)"><b><span id="kpi-u">$0.00</span></b><small>Utilidad Bruta</small></div>
-                <div class="stat-box" style="border-color:var(--blue)"><b><span id="kpi-t">0</span></b><small>Reparaciones</small></div>
-                <div class="stat-box" style="border-color:var(--red)"><b><span id="kpi-s">0</span></b><small>Stock Alerta</small></div>
+                <div class="stat-box" style="border-color:var(--green)"><b><span id="kpi-u">$0.00</span></b><small>Utilidad</small></div>
+                <div class="stat-box" style="border-color:var(--blue)"><b><span id="kpi-t">0</span></b><small>Taller</small></div>
+                <div class="stat-box" style="border-color:var(--red)"><b><span id="kpi-s">0</span></b><small>Alertas</small></div>
             </div>
             <div style="display:grid; grid-template-columns: 2fr 1fr; gap:20px;">
-                <div class="card"><h3>FLUJO_FINANCIERO</h3><canvas id="mainChart" height="120"></canvas></div>
-                <div class="card"><h3>LOG_SISTEMA</h3><div id="sys-log" style="font-size:0.7rem; height:250px; overflow-y:auto;"></div></div>
+                <div class="card"><canvas id="mainChart" height="120"></canvas></div>
+                <div class="card"><h3>SISTEMA LOG</h3><div id="sys-log" style="font-size:0.7rem; height:220px; overflow-y:auto;"></div></div>
             </div>
         </div>
 
         <div id="sec-inv" class="section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h2 style="font-family:var(--font-title);">[ INVENTORY_DATABASE ]</h2>
-                <button class="btn btn-green" onclick="toggleElement('add-inv')">+ AGREGAR ITEM</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2>INVENTARIO</h2>
+                <button class="btn btn-green" onclick="toggleElement('add-inv')">+ ITEM</button>
             </div>
-            <div id="add-inv" class="card" style="display:none; grid-template-columns:repeat(4, 1fr) 120px; gap:10px;">
-                <input id="inv-n" placeholder="NOMBRE">
-                <input id="inv-c" type="number" placeholder="COSTO $">
-                <input id="inv-p" type="number" placeholder="VENTA $">
-                <input id="inv-s" type="number" placeholder="STOCK">
-                <button class="btn btn-green" onclick="saveInventory()">GUARDAR</button>
+            <div id="add-inv" class="card" style="display:none; grid-template-columns:repeat(4, 1fr) 100px; gap:10px;">
+                <input id="inv-n" placeholder="NOMBRE"><input id="inv-c" type="number" placeholder="COSTO $"><input id="inv-p" type="number" placeholder="VENTA $"><input id="inv-s" type="number" placeholder="STOCK">
+                <button class="btn btn-green" onclick="saveInventory()">OK</button>
             </div>
             <div class="card">
-                <input type="text" placeholder="BUSCAR PRODUCTO..." oninput="filterTable('table-inv', this.value)">
+                <input type="text" placeholder="Filtrar..." oninput="filterTable('table-inv', this.value)">
                 <table>
-                    <thead><tr><th>PRODUCTO</th><th>COSTO</th><th>PRECIO</th><th>STOCK</th><th>ACCIONES</th></tr></thead>
+                    <thead><tr><th>PRODUCTO</th><th>COSTO</th><th>PRECIO</th><th>STOCK</th><th>ACCION</th></tr></thead>
                     <tbody id="table-inv"></tbody>
                 </table>
             </div>
         </div>
 
         <div id="sec-pos" class="section">
-            <h2 style="font-family:var(--font-title);">[ TRANSACTION_TERMINAL ]</h2>
-            <div style="display:grid; grid-template-columns: 1fr 400px; gap:25px;">
+            <div style="display:grid; grid-template-columns: 1fr 380px; gap:20px;">
                 <div>
                     <input id="pos-input" placeholder="BUSCAR PRODUCTO..." oninput="searchPOS(this.value)">
                     <div id="pos-results" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"></div>
                 </div>
                 <div class="card" style="border-color:var(--blue)">
-                    <h3 style="margin-top:0">CARRITO</h3>
-                    <div id="cart-list" style="min-height:300px;"></div>
-                    <div style="display:flex; justify-content:space-between; font-size:2rem; font-family:var(--font-title);">
-                        <span>TOTAL:</span><span id="cart-total">$0.00</span>
-                    </div>
-                    <button class="btn btn-green" style="width:100%; height:60px; margin-top:20px;" onclick="processSale()">FINALIZAR VENTA</button>
+                    <h3>CARRITO</h3>
+                    <div id="cart-list" style="min-height:280px;"></div>
+                    <div style="display:flex; justify-content:space-between; font-size:1.8rem;"><span>TOTAL:</span><span id="cart-total">$0.00</span></div>
+                    <button class="btn btn-green" style="width:100%; height:50px; margin-top:15px;" onclick="processSale()">COBRAR VENTA</button>
                 </div>
             </div>
         </div>
 
         <div id="sec-taller" class="section">
-            <h2 style="font-family:var(--font-title);">[ WORKSHOP_MANAGEMENT ]</h2>
-            <div style="display:grid; grid-template-columns: 350px 1fr; gap:25px;">
+            <div style="display:grid; grid-template-columns: 320px 1fr; gap:20px;">
                 <div class="card">
                     <h3>NUEVA ORDEN</h3>
-                    <input id="o-cli" placeholder="CLIENTE"><input id="o-tel" placeholder="TELÉFONO"><input id="o-mod" placeholder="EQUIPO">
-                    <textarea id="o-fal" placeholder="FALLA" rows="4"></textarea>
-                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;"><input id="o-pre" type="number" placeholder="TOTAL"><input id="o-ant" type="number" placeholder="ANTICIPO"></div>
-                    <button class="btn btn-blue" style="width:100%" onclick="saveOrder()">REGISTRAR E IMPRIMIR</button>
+                    <input id="o-cli" placeholder="CLIENTE"><input id="o-tel" placeholder="TEL"><input id="o-mod" placeholder="EQUIPO">
+                    <textarea id="o-fal" placeholder="FALLA"></textarea>
+                    <div style="display:flex; gap:10px;"><input id="o-pre" type="number" placeholder="PRECIO"><input id="o-ant" type="number" placeholder="ANT."></div>
+                    <button class="btn btn-blue" style="width:100%" onclick="saveOrder()">GUARDAR E IMPRIMIR</button>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
                     <div><h4 style="color:var(--amber)">PENDIENTES</h4><div id="list-pending"></div></div>
                     <div><h4 style="color:var(--green)">LISTOS</h4><div id="list-ready"></div></div>
                 </div>
@@ -175,42 +126,28 @@
         </div>
 
         <div id="sec-caja" class="section">
-            <h2 style="font-family:var(--font-title);">[ FINANCIAL_LOGS ]</h2>
-            <div style="display:grid; grid-template-columns: 350px 1fr; gap:25px;">
-                <div>
-                    <div class="card">
-                        <h3>NUEVO GASTO</h3>
-                        <input id="g-desc" placeholder="DESCRIPCIÓN"><input id="g-monto" type="number" placeholder="MONTO $">
-                        <button class="btn btn-red" style="width:100%" onclick="saveGasto()">REGISTRAR GASTO</button>
-                    </div>
-                    <div class="card" style="text-align:center; border-color:var(--green)">
-                        <small>BALANCE HOY</small>
-                        <div id="caja-neto" style="font-size:3rem; font-family:var(--font-title); color:var(--green);">$0.00</div>
-                        <button class="btn btn-green" style="width:100%; margin-top:20px;" onclick="realizarCierre()">CIERRE DE CAJA</button>
+            <div style="display:grid; grid-template-columns: 320px 1fr; gap:20px;">
+                <div class="card">
+                    <h3>EGRESO</h3>
+                    <input id="g-desc" placeholder="RAZÓN"><input id="g-monto" type="number" placeholder="MONTO $">
+                    <button class="btn btn-red" style="width:100%" onclick="saveGasto()">REGISTRAR</button>
+                    <div style="text-align:center; margin-top:30px;">
+                        <small>CAJA HOY</small><div id="caja-neto" style="font-size:2.5rem; color:var(--green);">$0.00</div>
+                        <button class="btn btn-green" style="width:100%; margin-top:10px;" onclick="realizarCierre()">CERRAR DÍA</button>
                     </div>
                 </div>
                 <div class="card">
-                    <h3>CIERRES ANTERIORES</h3>
-                    <table id="table-cierres">
-                        <thead><tr><th>FECHA</th><th>HORA</th><th>TOTAL</th></tr></thead>
-                        <tbody id="historial-cierres"></tbody>
-                    </table>
+                    <h3>CIERRES</h3>
+                    <table><thead><tr><th>FECHA</th><th>HORA</th><th>TOTAL</th></tr></thead><tbody id="historial-cierres"></tbody></table>
                 </div>
             </div>
         </div>
 
         <div id="sec-st" class="section">
-            <h2 style="font-family:var(--font-title);">[ ST_LOGISTICS ]</h2>
+            <div class="card"><textarea id="st-msg" placeholder="Piezas faltantes..." rows="4"></textarea><button class="btn btn-blue" onclick="savePedido()">AÑADIR A LISTA</button></div>
             <div class="card">
-                <textarea id="st-msg" placeholder="REQUERIMIENTOS..." rows="5"></textarea>
-                <button class="btn btn-blue" onclick="savePedido()">AGREGAR A LISTA</button>
-            </div>
-            <div class="card" style="border-color:var(--green)">
-                <div id="st-lista" style="background:rgba(0,0,0,0.4); padding:20px; min-height:150px; white-space:pre-wrap; margin-bottom:20px;"></div>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn btn-green" style="flex:2" onclick="sendToST()">ENVIAR WHATSAPP</button>
-                    <button class="btn btn-red" style="flex:1" onclick="clearST()">LIMPIAR</button>
-                </div>
+                <div id="st-lista" style="background:rgba(0,0,0,0.3); padding:15px; min-height:100px; white-space:pre-wrap; margin-bottom:15px; border:1px solid #222;"></div>
+                <div style="display:flex; gap:10px;"><button class="btn btn-green" style="flex:2" onclick="sendToST()">ENVIAR WHATSAPP</button><button class="btn btn-red" style="flex:1" onclick="clearST()">LIMPIAR</button></div>
             </div>
         </div>
     </div>
@@ -235,6 +172,12 @@
     const fbApp = initializeApp(firebaseConfig);
     const db = getFirestore(fbApp);
 
+    // EXPORTAR A WINDOW PARA QUE LOS BOTONES HTML FUNCIONEN
+    window.db = db;
+    window.deleteDoc = deleteDoc;
+    window.doc = doc;
+    window.updateDoc = updateDoc;
+
     let localInv = [];
     let cart = [];
     let salesChart = null;
@@ -250,7 +193,7 @@
             document.getElementById('app').style.display='flex';
             startSync();
             initChart();
-        } else { showToast("CÓDIGO INCORRECTO", "var(--red)"); }
+        } else { showToast("ERROR DE ACCESO", "var(--red)"); }
     };
 
     function showToast(msg, color = "var(--green)") {
@@ -260,15 +203,17 @@
         setTimeout(() => t.remove(), 3000);
     }
 
+    // INVENTARIO
     window.saveInventory = async () => {
         const n = document.getElementById('inv-n').value, c = parseFloat(document.getElementById('inv-c').value),
               p = parseFloat(document.getElementById('inv-p').value), s = parseInt(document.getElementById('inv-s').value);
-        if(!n || isNaN(p)) return;
+        if(!n || isNaN(p)) return showToast("FALTAN DATOS", "var(--red)");
         await addDoc(collection(db, "accesorios"), { nombre:n, costo:c||0, pv:p, stock:s||0, ts:Timestamp.now() });
         document.querySelectorAll('#add-inv input').forEach(i => i.value='');
-        showToast("ITEM GUARDADO");
+        showToast("ITEM REGISTRADO");
     };
 
+    // POS
     window.searchPOS = (v) => {
         const res = document.getElementById('pos-results'); res.innerHTML = '';
         if(v.length < 2) return;
@@ -280,16 +225,18 @@
     window.addToCart = (id) => {
         const item = localInv.find(i => i.id === id);
         if(item.stock > 0) { cart.push(item); renderCart(); }
+        else { showToast("SIN STOCK", "var(--red)"); }
     };
 
     function renderCart() {
         const l = document.getElementById('cart-list'); let total = 0; l.innerHTML = '';
         cart.forEach((item, idx) => {
             total += item.pv;
-            l.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${item.nombre}</span><b>$${item.pv}</b><button onclick="cart.splice(${idx},1);renderCart()" style="color:var(--red); background:none; border:none; cursor:pointer;">X</button></div>`;
+            l.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>${item.nombre}</span><b>$${item.pv}</b><button onclick="removeFromCart(${idx})" style="color:var(--red); background:none; border:none; cursor:pointer;">X</button></div>`;
         });
         document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
     }
+    window.removeFromCart = (idx) => { cart.splice(idx,1); renderCart(); };
 
     window.processSale = async () => {
         if(!cart.length) return;
@@ -299,9 +246,10 @@
         cart.forEach(item => batch.update(doc(db, "accesorios", item.id), { stock: item.stock - 1 }));
         await addDoc(collection(db, "ventas"), { total, utilidad, ts: Timestamp.now() });
         await batch.commit();
-        cart = []; renderCart(); showToast("VENTA EXITOSA");
+        cart = []; renderCart(); showToast("VENTA REALIZADA");
     };
 
+    // TALLER
     window.saveOrder = async () => {
         const o = {
             cliente: document.getElementById('o-cli').value, tel: document.getElementById('o-tel').value,
@@ -312,11 +260,17 @@
         };
         if(!o.cliente) return;
         const ref = await addDoc(collection(db, "ordenes"), o);
-        document.getElementById('print-area').innerHTML = `<div style="font-family:sans-serif; text-align:center;"><h2>NEXTCOM</h2><p>ORDEN: #${ref.id.substring(0,6)}</p><p>${o.cliente} - ${o.modelo}</p><h3>TOTAL: $${o.precio}</h3></div>`;
+        document.getElementById('print-area').innerHTML = `<div style="text-align:center;"><h2>NEXTCOM</h2><p>ORDEN: #${ref.id.substring(0,6)}</p><p>${o.cliente}</p><h3>TOTAL: $${o.precio}</h3></div>`;
         window.print();
         document.querySelectorAll('#sec-taller input, #sec-taller textarea').forEach(i => i.value='');
     };
 
+    window.swapOrder = async (id, currentStatus) => {
+        const next = currentStatus === "LISTO" ? "PENDIENTE" : "LISTO";
+        await updateDoc(doc(db, "ordenes", id), { estado: next });
+    };
+
+    // FINANZAS
     window.saveGasto = async () => {
         const d = document.getElementById('g-desc').value, m = parseFloat(document.getElementById('g-monto').value);
         if(d && m) await addDoc(collection(db, "gastos"), { desc: d, monto: m, ts: Timestamp.now() });
@@ -325,32 +279,28 @@
 
     window.realizarCierre = async () => {
         const neto = parseFloat(document.getElementById('caja-neto').innerText.replace('$',''));
-        if(confirm(`¿CERRAR DÍA CON $${neto}?`)) {
-            await addDoc(collection(db, "cierres"), { total: neto, ts: Timestamp.now(), fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString() });
-            const b = writeBatch(db);
-            const v = await getDocs(collection(db, "ventas")); v.forEach(d => b.delete(d.ref));
-            const g = await getDocs(collection(db, "gastos")); g.forEach(d => b.delete(d.ref));
-            await b.commit();
-            showToast("CIERRE COMPLETADO");
-        }
+        if(!confirm(`¿CERRAR DÍA CON $${neto}?`)) return;
+        await addDoc(collection(db, "cierres"), { total: neto, ts: Timestamp.now(), fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString() });
+        const b = writeBatch(db);
+        const v = await getDocs(collection(db, "ventas")); v.forEach(d => b.delete(d.ref));
+        const g = await getDocs(collection(db, "gastos")); g.forEach(d => b.delete(d.ref));
+        await b.commit();
+        showToast("CIERRE COMPLETADO");
     };
 
+    // ST
     window.savePedido = async () => {
         const msg = document.getElementById('st-msg').value;
         if(msg) await addDoc(collection(db, "pedidos_st"), { msg, ts: Timestamp.now() });
         document.getElementById('st-msg').value = '';
     };
-
-    window.sendToST = () => {
-        const t = document.getElementById('st-lista').innerText;
-        window.open(`https://wa.me/50249698555?text=${encodeURIComponent(t)}`);
-    };
-
+    window.sendToST = () => { window.open(`https://wa.me/50249698555?text=${encodeURIComponent(document.getElementById('st-lista').innerText)}`); };
     window.clearST = async () => {
         const snap = await getDocs(collection(db, "pedidos_st"));
         const b = writeBatch(db); snap.forEach(d => b.delete(d.ref)); await b.commit();
     };
 
+    // SYNC
     function startSync() {
         setInterval(() => { 
             document.getElementById('clock').innerText = new Date().toLocaleTimeString(); 
@@ -363,7 +313,7 @@
             let sAlert = 0;
             localInv.forEach(i => {
                 if(i.stock <= 3) sAlert++;
-                t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td><td><button class="btn btn-red" onclick="deleteDoc(doc(db,'accesorios','${i.id}'))">X</button></td></tr>`;
+                t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td><td><button class="btn btn-red" style="padding:5px" onclick="deleteDoc(doc(db,'accesorios','${i.id}'))">X</button></td></tr>`;
             });
             document.getElementById('kpi-s').innerText = sAlert;
         });
@@ -374,7 +324,7 @@
             snap.forEach(d => {
                 const o = d.data(); const ready = o.estado === "LISTO";
                 if(!ready) count++;
-                const h = `<div class="card" style="border-left:4px solid ${ready?'var(--green)':'var(--amber)'}"><b>${o.cliente}</b><br>${o.modelo}<br><button class="btn" style="padding:4px; font-size:0.6rem; margin-top:5px;" onclick="updateDoc(doc(db,'ordenes','${d.id}'), {estado:'${ready?'PENDIENTE':'LISTO'}'})">SWAP</button></div>`;
+                const h = `<div class="card" style="border-left:4px solid ${ready?'var(--green)':'var(--amber)'}"><b>${o.cliente}</b><br><small>${o.modelo}</small><br><button class="btn" style="padding:4px; font-size:0.6rem; margin-top:5px;" onclick="swapOrder('${d.id}', '${o.estado}')">SWAP</button></div>`;
                 if(ready) r.innerHTML += h; else p.innerHTML += h;
             });
             document.getElementById('kpi-t').innerText = count;
@@ -405,11 +355,7 @@
 
     function initChart() {
         const ctx = document.getElementById('mainChart').getContext('2d');
-        salesChart = new Chart(ctx, {
-            type: 'bar',
-            data: { labels: ['Ventas', 'Gastos'], datasets: [{ data: [0, 0], backgroundColor: ['#00ff88', '#ff2a2a'] }] },
-            options: { responsive: true, plugins: { legend: { display: false } } }
-        });
+        salesChart = new Chart(ctx, { type: 'bar', data: { labels: ['Ingresos', 'Egresos'], datasets: [{ data: [0, 0], backgroundColor: ['#00ff88', '#ff2a2a'] }] }, options: { responsive: true, plugins: { legend: { display: false } } } });
     }
 
     window.toggleElement = (id) => { const e = document.getElementById(id); e.style.display = e.style.display === 'none' ? 'grid' : 'none'; };
