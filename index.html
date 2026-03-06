@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM OS v5.0 // FINAL EDITION</title>
+    <title>NEXTCOM OS v5.5 // FULL VERSION</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -12,49 +12,32 @@
             --red: #ff4444; --green: #44ff44; --blue: #33aaff; --white: #ffffff;
             --font: 'Share Tech Mono', monospace;
         }
-
         * { box-sizing: border-box; }
-        body {
-            margin: 0; background: var(--bg); color: var(--amber);
-            font-family: var(--font); height: 100vh; overflow: hidden; display: flex;
-        }
-
-        /* --- UI ELEMENTS --- */
+        body { margin: 0; background: var(--bg); color: var(--amber); font-family: var(--font); height: 100vh; overflow: hidden; display: flex; }
+        
+        /* CRT & UI */
         .crt-overlay { position: fixed; inset: 0; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03)); background-size: 100% 3px, 3px 100%; pointer-events: none; z-index: 999; }
-        
         .sidebar { width: 220px; border-right: 1px solid var(--amber-dim); display: flex; flex-direction: column; padding: 15px; gap: 8px; background: #000; }
-        .main { flex: 1; padding: 25px; overflow-y: auto; position: relative; }
-        
-        .btn { background: transparent; border: 1px solid var(--amber); color: var(--amber); padding: 10px; cursor: pointer; font-family: var(--font); transition: 0.3s; text-transform: uppercase; font-size: 0.85rem; }
+        .main { flex: 1; padding: 20px; overflow-y: auto; }
+        .btn { background: transparent; border: 1px solid var(--amber); color: var(--amber); padding: 10px; cursor: pointer; font-family: var(--font); transition: 0.3s; text-transform: uppercase; font-size: 0.8rem; }
         .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 15px var(--amber); }
-        .btn-blue { border-color: var(--blue); color: var(--blue); }
-        .btn-blue:hover { background: var(--blue); color: #000; }
-        .btn-green { border-color: var(--green); color: var(--green); }
-        .btn-green:hover { background: var(--green); color: #000; }
-
-        input, textarea, select { background: #0a0a0a; border: 1px solid var(--amber-dim); color: var(--amber); padding: 10px; width: 100%; margin-bottom: 10px; font-family: var(--font); }
-
-        /* --- DASHBOARD & CARDS --- */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
-        .card { border: 1px solid var(--amber-dim); padding: 15px; background: rgba(10,10,10,0.8); position: relative; }
-        .kpi { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; padding-bottom: 10px; margin-bottom: 10px; }
+        .btn-blue { border-color: var(--blue); color: var(--blue); } .btn-green { border-color: var(--green); color: var(--green); } .btn-red { border-color: var(--red); color: var(--red); }
+        input, textarea { background: #0a0a0a; border: 1px solid var(--amber-dim); color: var(--amber); padding: 10px; width: 100%; margin-bottom: 10px; font-family: var(--font); }
         
-        /* --- ORDENES ESTILO TALLER --- */
-        .order-item { border-left: 4px solid var(--amber); background: #0f0f0f; padding: 12px; margin-bottom: 10px; transition: 0.2s; }
-        .order-item.terminado { border-left-color: var(--green); }
-        .order-header { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: bold; color: #fff; }
-        .order-detail { font-size: 0.8rem; margin: 5px 0; color: #aaa; }
-        
-        .section { display: none; animation: fadeIn 0.4s ease; }
+        .card { border: 1px solid var(--amber-dim); padding: 15px; background: rgba(10,10,10,0.8); margin-bottom: 15px; }
+        .section { display: none; animation: fadeIn 0.3s; }
         .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 8px; }
+        td { padding: 8px; border-bottom: 1px solid #1a1a1a; }
 
-        /* --- PRINT STYLES --- */
-        @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; color: #000; background: #fff; }
-        }
+        /* Taller Design */
+        .order-card { border-left: 4px solid var(--amber); background: #0a0a0a; padding: 12px; margin-bottom: 10px; }
+        .order-card.listo { border-left-color: var(--green); }
+        
+        @media print { body * { visibility: hidden; } #print-area, #print-area * { visibility: visible; } #print-area { position: absolute; left:0; top:0; width:100%; color:#000; } }
     </style>
 </head>
 <body>
@@ -62,7 +45,7 @@
 <div class="crt-overlay"></div>
 
 <div id="login-screen" style="position:fixed; inset:0; background:#000; z-index:1000; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-    <h1 style="letter-spacing:10px;">NEXTCOM_OS</h1>
+    <h1 style="letter-spacing:5px;">NEXTCOM_OS_v5.5</h1>
     <div style="width:300px; border:1px solid var(--amber); padding:20px;">
         <input type="password" id="pass" placeholder="ACCESS_CODE">
         <button class="btn" style="width:100%" onclick="login()">BOOT_SYSTEM</button>
@@ -72,95 +55,120 @@
 <div id="app" style="display:none; width:100%; height:100vh;">
     <div class="sidebar">
         <div style="text-align:center; padding:10px; border-bottom:1px solid var(--amber-dim); margin-bottom:10px;">
-            <div id="clock" style="font-size:1.2rem; font-weight:bold;">00:00:00</div>
-            <small id="date-now">2026-01-01</small>
+            <div id="clock" style="font-size:1.2rem;">00:00:00</div>
         </div>
         <button class="btn" onclick="nav('dash')">DASHBOARD</button>
         <button class="btn" onclick="nav('inv')">INVENTARIO</button>
-        <button class="btn" onclick="nav('pos')">VENTA RÁPIDA</button>
-        <button class="btn" onclick="nav('orden')">TALLER ST</button>
-        <button class="btn" onclick="nav('caja')">CIERRE CAJA</button>
-        <button class="btn btn-blue" onclick="nav('st')">LOGÍSTICA ST</button>
+        <button class="btn" onclick="nav('pos')">PUNTO_VENTA</button>
+        <button class="btn" onclick="nav('orden')">TALLER_ST</button>
+        <button class="btn" onclick="nav('caja')">CAJA_CIERRE</button>
+        <button class="btn btn-blue" onclick="nav('st')">LOGÍSTICA_ST</button>
         <button class="btn btn-red" style="margin-top:auto;" onclick="location.reload()">OFFLINE</button>
     </div>
 
     <div class="main">
         <div id="sec-dash" class="section active">
             <h2>> SYSTEM_STATUS</h2>
-            <div class="grid">
-                <div class="card">
-                    <div class="kpi"><span>VENTAS_HOY</span><span id="kpi-v" style="color:var(--green);">$0</span></div>
-                    <div class="kpi"><span>EQUIPOS_TALLER</span><span id="kpi-t" style="color:var(--blue);">0</span></div>
-                    <div class="kpi"><span>STOCK_CRÍTICO</span><span id="kpi-s" style="color:var(--red);">0</span></div>
-                </div>
-                <div class="card"><canvas id="chartVentas" height="150"></canvas></div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px;">
+                <div class="card">Ventas Hoy: <span id="kpi-v" style="color:var(--green)">$0</span></div>
+                <div class="card">En Taller: <span id="kpi-t" style="color:var(--blue)">0</span></div>
+                <div class="card">Caja Actual: <span id="kpi-c" style="color:var(--white)">$0</span></div>
             </div>
-            <h3>RECENTS_LOGS</h3>
-            <div id="logs" style="font-size:0.7rem; color:#666; max-height:150px; overflow:auto;"></div>
+            <div class="card"><canvas id="mainChart" height="100"></canvas></div>
         </div>
 
         <div id="sec-inv" class="section">
             <h2>> DATABASE_STOCK</h2>
-            <div class="card" style="margin-bottom:20px; display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:10px;">
-                <input id="inv-n" placeholder="ITEM_NAME">
-                <input id="inv-s" type="number" placeholder="QTY">
-                <input id="inv-p" type="number" placeholder="PRICE">
-                <button class="btn btn-green" onclick="saveInv()">SAVE</button>
+            <div class="card" style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap:10px;">
+                <input id="i-nom" placeholder="PRODUCTO">
+                <input id="i-stock" type="number" placeholder="STOCK">
+                <input id="i-pv" type="number" placeholder="PRECIO">
+                <button class="btn btn-green" onclick="saveInv()">GUARDAR</button>
             </div>
-            <table style="width:100%; border-collapse:collapse;">
-                <thead><tr style="text-align:left; border-bottom:1px solid var(--amber);"><th>ITEM</th><th>QTY</th><th>PRICE</th><th>ACTION</th></tr></thead>
+            <table>
+                <thead><tr><th>ITEM</th><th>STOCK</th><th>PRECIO</th><th>ACCION</th></tr></thead>
                 <tbody id="table-inv"></tbody>
             </table>
         </div>
 
+        <div id="sec-pos" class="section">
+            <h2>> POS_TERMINAL</h2>
+            <div style="display:grid; grid-template-columns: 1fr 350px; gap:20px;">
+                <div>
+                    <input id="pos-search" placeholder="BUSCAR PRODUCTO..." oninput="searchPos()">
+                    <div id="pos-results" class="card" style="min-height:100px;"></div>
+                </div>
+                <div class="card">
+                    <h3>CARRITO</h3>
+                    <div id="cart-list" style="min-height:200px; border-bottom:1px dashed #333; margin-bottom:10px;"></div>
+                    <div style="font-size:1.5rem; display:flex; justify-content:space-between;">
+                        <span>TOTAL:</span><span id="cart-total">$0.00</span>
+                    </div>
+                    <button class="btn btn-green" style="width:100%; margin-top:15px;" onclick="processSale()">FINALIZAR VENTA</button>
+                </div>
+            </div>
+        </div>
+
         <div id="sec-orden" class="section">
             <h2>> SERVICE_CENTER</h2>
-            <div class="grid" style="grid-template-columns: 350px 1fr;">
+            <div style="display:grid; grid-template-columns: 320px 1fr; gap:20px;">
                 <div class="card">
-                    <h3>NEW_ORDER</h3>
+                    <h3>NUEVA ORDEN</h3>
                     <input id="o-cli" placeholder="CLIENTE">
-                    <input id="o-tel" placeholder="TELÉFONO">
                     <input id="o-mod" placeholder="MODELO / EQUIPO">
-                    <textarea id="o-fal" placeholder="FALLA REPORTADA"></textarea>
-                    <div style="display:flex; gap:10px;">
-                        <input id="o-pre" type="number" placeholder="TOTAL $">
-                        <input id="o-ant" type="number" placeholder="ANT $">
-                    </div>
+                    <textarea id="o-fal" placeholder="FALLA"></textarea>
+                    <input id="o-pre" type="number" placeholder="PRECIO TOTAL">
+                    <input id="o-ant" type="number" placeholder="ANTICIPO">
                     <button class="btn btn-blue" style="width:100%" onclick="saveOrder()">REGISTRAR E IMPRIMIR</button>
                 </div>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px;">
-                    <div><h4>PENDING</h4><div id="list-pending"></div></div>
-                    <div><h4>READY</h4><div id="list-ready"></div></div>
+                    <div><h4>PENDIENTES</h4><div id="list-pending"></div></div>
+                    <div><h4>LISTOS</h4><div id="list-ready"></div></div>
                 </div>
             </div>
         </div>
 
         <div id="sec-caja" class="section">
             <h2>> FINANCIAL_CONTROL</h2>
-            <div class="grid">
-                <div class="card" style="text-align:center;">
-                    <h3>BALANCE_ACTUAL</h3>
-                    <div id="caja-total" style="font-size:3rem; color:var(--green);">$0.00</div>
-                    <button class="btn btn-green" style="width:100%; margin-top:20px;" onclick="realizarCierre()">CERRAR CAJA Y REINICIAR</button>
+            <div style="display:grid; grid-template-columns: 350px 1fr; gap:20px;">
+                <div class="card">
+                    <h3>REGISTRAR GASTO</h3>
+                    <input id="g-desc" placeholder="DESCRIPCIÓN">
+                    <input id="g-monto" type="number" placeholder="MONTO $">
+                    <button class="btn btn-red" style="width:100%" onclick="saveGasto()">EGRESO</button>
+                    <hr style="border:0; border-top:1px solid #222; margin:20px 0;">
+                    <div style="text-align:center">
+                        <small>BALANCE HOY</small>
+                        <div id="caja-actual" style="font-size:2.5rem; color:var(--green)">$0.00</div>
+                        <button class="btn btn-green" style="width:100%; margin-top:10px;" onclick="realizarCierre()">CIERRE DE CAJA</button>
+                    </div>
                 </div>
                 <div class="card">
-                    <h3>HISTORY_CIERRES</h3>
-                    <div id="historial-cierres" style="max-height:300px; overflow-y:auto;"></div>
+                    <h3>HISTORIAL DE CIERRES</h3>
+                    <div id="historial-cierres" style="max-height:400px; overflow-y:auto;"></div>
                 </div>
             </div>
         </div>
 
-        <div id="sec-pos" class="section"><h2>> POS_TERMINAL</h2><div class="card" id="pos-root">Cargando interfaz de venta...</div></div>
-        <div id="sec-st" class="section"><h2>> LOGISTICS_ST</h2><div class="card" id="st-root">Cargando panel ST Technology...</div></div>
+        <div id="sec-st" class="section">
+            <h2>> ST_LOGISTICS</h2>
+            <div class="card">
+                <textarea id="st-pedido" placeholder="LISTA DE REPUESTOS PARA PEDIR..." rows="5"></textarea>
+                <button class="btn btn-blue" onclick="savePedido()">AÑADIR A LISTA</button>
+                <button class="btn btn-red" onclick="clearPedidos()">LIMPIAR TODO</button>
+            </div>
+            <div class="card">
+                <h3>PEDIDOS ACUMULADOS</h3>
+                <div id="st-lista" style="white-space:pre-wrap; color:#fff; margin-bottom:15px;"></div>
+                <button class="btn btn-green" style="width:100%" onclick="sendWhatsApp()">ENVIAR A ST (+502 4969 8555)</button>
+            </div>
+        </div>
     </div>
 </div>
 
-<div id="print-area" style="display:none; font-family:sans-serif; padding:20px;">
-    <h2 style="text-align:center">NEXTCOM MULTISERVICIOS</h2>
-    <p>------------------------------------</p>
+<div id="print-area" style="display:none; padding:20px; font-family:sans-serif;">
+    <h2 style="text-align:center;">NEXTCOM MULTISERVICIOS</h2>
     <div id="print-content"></div>
-    <p>------------------------------------</p>
-    <p style="font-size:0.8rem">Garantía válida solo con este ticket.</p>
 </div>
 
 <script type="module">
@@ -179,7 +187,10 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // --- NAVEGACIÓN ---
+    let localInv = [];
+    let cart = [];
+    let salesChart = null;
+
     window.nav = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById('sec-'+id).classList.add('active');
@@ -187,170 +198,177 @@
 
     window.login = () => {
         if(document.getElementById('pass').value === "nextcom2024") {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app').style.display = 'flex';
+            document.getElementById('login-screen').style.display='none';
+            document.getElementById('app').style.display='flex';
             startSystem();
         }
     };
 
-    // --- LÓGICA DE INVENTARIO ---
+    // --- INVENTARIO ---
     window.saveInv = async () => {
-        const n = document.getElementById('inv-n').value;
-        const s = parseInt(document.getElementById('inv-s').value);
-        const p = parseFloat(document.getElementById('inv-p').value);
-        if(n && s >= 0) {
-            await addDoc(collection(db, "accesorios"), { nombre: n, stock: s, pv: p, ts: Timestamp.now() });
-            document.getElementById('inv-n').value = '';
-        }
+        const n = document.getElementById('i-nom').value;
+        const s = parseInt(document.getElementById('i-stock').value);
+        const p = parseFloat(document.getElementById('i-pv').value);
+        if(n) await addDoc(collection(db, "accesorios"), { nombre:n, stock:s, pv:p, ts:Timestamp.now() });
+        document.getElementById('i-nom').value = '';
     };
 
-    // --- LÓGICA DE ÓRDENES (OPTIMIZADA) ---
+    // --- POS ---
+    window.searchPos = () => {
+        const term = document.getElementById('pos-search').value.toLowerCase();
+        const res = document.getElementById('pos-results');
+        res.innerHTML = '';
+        localInv.filter(i => i.nombre.toLowerCase().includes(term)).forEach(i => {
+            res.innerHTML += `<div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #222;">
+                <span>${i.nombre} ($${i.pv})</span>
+                <button class="btn btn-blue" style="padding:2px 8px" onclick="addToCart('${i.id}')">+</button>
+            </div>`;
+        });
+    };
+
+    window.addToCart = (id) => {
+        const item = localInv.find(i => i.id === id);
+        if(item && item.stock > 0) { cart.push(item); renderCart(); }
+    };
+
+    function renderCart() {
+        const list = document.getElementById('cart-list');
+        list.innerHTML = '';
+        let total = 0;
+        cart.forEach((item, idx) => {
+            total += item.pv;
+            list.innerHTML += `<div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                <span>${item.nombre}</span><span>$${item.pv}</span>
+            </div>`;
+        });
+        document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
+    }
+
+    window.processSale = async () => {
+        if(!cart.length) return;
+        const total = cart.reduce((a, b) => a + b.pv, 0);
+        await addDoc(collection(db, "ventas"), { total, ts: Timestamp.now() });
+        cart = []; renderCart();
+        alert("VENTA PROCESADA");
+    };
+
+    // --- TALLER ---
     window.saveOrder = async () => {
-        const data = {
+        const d = {
             cliente: document.getElementById('o-cli').value,
-            tel: document.getElementById('o-tel').value,
             modelo: document.getElementById('o-mod').value,
             falla: document.getElementById('o-fal').value,
             precio: document.getElementById('o-pre').value,
             anticipo: document.getElementById('o-ant').value,
-            estado: "PENDIENTE",
-            ts: Timestamp.now()
+            estado: "RECIBIDO", ts: Timestamp.now()
         };
-        
-        if(data.cliente && data.modelo) {
-            const docRef = await addDoc(collection(db, "ordenes"), data);
-            imprimirTicket(data, docRef.id);
-            limpiarOrden();
+        if(d.cliente) {
+            const docRef = await addDoc(collection(db, "ordenes"), d);
+            document.getElementById('print-content').innerHTML = `
+                <h3>ORDEN DE SERVICIO #${docRef.id.substring(0,6)}</h3>
+                <p>CLIENTE: ${d.cliente}</p><p>EQUIPO: ${d.modelo}</p>
+                <p>FALLA: ${d.falla}</p><p>TOTAL: $${d.precio} | ANTICIPO: $${d.anticipo}</p>
+            `;
+            window.print();
         }
     };
 
-    function imprimirTicket(d, id) {
-        const content = `
-            <b>ORDEN #: ${id.substring(0,6)}</b><br>
-            FECHA: ${new Date().toLocaleString()}<br>
-            CLIENTE: ${d.cliente}<br>
-            EQUIPO: ${d.modelo}<br>
-            FALLA: ${d.falla}<br>
-            TOTAL: $${d.precio} | ANTICIPO: $${d.anticipo}
-        `;
-        document.getElementById('print-content').innerHTML = content;
-        window.print();
-    }
+    window.updateStatus = async (id, s) => { await updateDoc(doc(db, "ordenes", id), { estado: s }); };
 
-    function limpiarOrden() {
-        ['o-cli','o-tel','o-mod','o-fal','o-pre','o-ant'].forEach(id => document.getElementById(id).value = '');
-    }
+    // --- CAJA ---
+    window.saveGasto = async () => {
+        const d = document.getElementById('g-desc').value;
+        const m = parseFloat(document.getElementById('g-monto').value);
+        if(d && m) await addDoc(collection(db, "gastos"), { descripcion: d, monto: m, ts: Timestamp.now() });
+    };
 
-    // --- CIERRE DE CAJA (HISTORIAL COMPLETO) ---
     window.realizarCierre = async () => {
-        const totalVentas = parseFloat(document.getElementById('caja-total').innerText.replace('$',''));
-        if(totalVentas <= 0) return alert("No hay ventas para cerrar");
-
-        if(confirm(`¿Cerrar caja con un total de $${totalVentas}?`)) {
-            await addDoc(collection(db, "cierres"), {
-                total: totalVentas,
+        const val = parseFloat(document.getElementById('caja-actual').innerText.replace('$',''));
+        if(confirm(`CERRAR CAJA: $${val.toFixed(2)}?`)) {
+            await addDoc(collection(db, "cierres"), { 
+                total: val, 
+                ts: Timestamp.now(),
                 fecha: new Date().toLocaleDateString(),
-                hora: new Date().toLocaleTimeString(),
-                ts: Timestamp.now()
+                hora: new Date().toLocaleTimeString()
             });
-
-            // Limpiar ventas actuales
-            const batch = writeBatch(db);
-            const snap = await getDocs(collection(db, "ventas"));
-            snap.forEach(d => batch.delete(d.ref));
-            await batch.commit();
-            alert("Cierre exitoso. El historial ha sido actualizado.");
+            const b = writeBatch(db);
+            const v = await getDocs(collection(db, "ventas")); v.forEach(d => b.delete(d.ref));
+            const g = await getDocs(collection(db, "gastos")); g.forEach(d => b.delete(d.ref));
+            await b.commit();
         }
     };
 
-    // --- SINCRONIZACIÓN CORE ---
-    function startSystem() {
-        // Reloj
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString();
-            document.getElementById('date-now').innerText = new Date().toLocaleDateString();
-        }, 1000);
+    // --- LOGISTICA ---
+    window.savePedido = async () => {
+        const det = document.getElementById('st-pedido').value;
+        if(det) await addDoc(collection(db, "pedidos_st"), { detalle: det, ts: Timestamp.now() });
+        document.getElementById('st-pedido').value = '';
+    };
 
-        // Inventario
+    window.clearPedidos = async () => {
+        const snap = await getDocs(collection(db, "pedidos_st"));
+        const b = writeBatch(db); snap.forEach(d => b.delete(d.ref)); await b.commit();
+    };
+
+    window.sendWhatsApp = () => {
+        const texto = document.getElementById('st-lista').innerText;
+        window.open(`https://wa.me/50249698555?text=${encodeURIComponent(texto)}`);
+    };
+
+    // --- SYSTEM CORE ---
+    function startSystem() {
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+
         onSnapshot(collection(db, "accesorios"), snap => {
-            const tbody = document.getElementById('table-inv');
-            tbody.innerHTML = '';
-            let critico = 0;
-            snap.forEach(d => {
-                const i = d.data();
-                if(i.stock <= 3) critico++;
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${i.nombre}</td>
-                        <td style="color:${i.stock <= 3 ? 'var(--red)' : 'inherit'}">${i.stock}</td>
-                        <td>$${i.pv}</td>
-                        <td><button class="btn" style="padding:2px 5px" onclick="deleteDoc(doc(db,'accesorios','${d.id}'))">X</button></td>
-                    </tr>`;
+            localInv = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            const table = document.getElementById('table-inv'); table.innerHTML = '';
+            localInv.forEach(i => {
+                table.innerHTML += `<tr><td>${i.nombre}</td><td>${i.stock}</td><td>$${i.pv}</td><td><button onclick="deleteDoc(doc(db,'accesorios','${i.id}'))">X</button></td></tr>`;
             });
-            document.getElementById('kpi-s').innerText = critico;
         });
 
-        // Órdenes
         onSnapshot(collection(db, "ordenes"), snap => {
-            const pend = document.getElementById('list-pending');
-            const read = document.getElementById('list-ready');
-            pend.innerHTML = ''; read.innerHTML = '';
-            let tallerCount = 0;
-
+            const p = document.getElementById('list-pending'); const r = document.getElementById('list-ready');
+            p.innerHTML = ''; r.innerHTML = '';
+            let count = 0;
             snap.forEach(d => {
                 const o = d.data();
-                const isReady = o.estado === "LISTO";
-                if(!isReady) tallerCount++;
-                
-                const html = `
-                    <div class="order-item ${isReady ? 'terminado' : ''}">
-                        <div class="order-header">
-                            <span>${o.cliente}</span>
-                            <button class="btn" style="font-size:0.6rem; padding:2px" onclick="updateStatus('${d.id}', '${isReady ? 'PENDIENTE' : 'LISTO'}')">
-                                ${isReady ? 'REABRIR' : 'MARCAR LISTO'}
-                            </button>
-                        </div>
-                        <div class="order-detail">${o.modelo} - ${o.falla}</div>
-                        <div style="font-size:0.7rem; color:var(--green)">TOTAL: $${o.precio}</div>
-                    </div>`;
-                if(isReady) read.innerHTML += html; else pend.innerHTML += html;
+                const ready = o.estado === "LISTO";
+                if(!ready) count++;
+                const html = `<div class="order-card ${ready?'listo':''}">
+                    <b>${o.cliente}</b> - ${o.modelo}
+                    <button class="btn" style="padding:2px; font-size:0.6rem" onclick="updateStatus('${d.id}', '${ready?'RECIBIDO':'LISTO'}')">OK</button>
+                </div>`;
+                if(ready) r.innerHTML += html; else p.innerHTML += html;
             });
-            document.getElementById('kpi-t').innerText = tallerCount;
+            document.getElementById('kpi-t').innerText = count;
         });
 
-        // Ventas y Caja
-        onSnapshot(collection(db, "ventas"), snap => {
-            let total = 0;
-            snap.forEach(d => total += d.data().total);
-            document.getElementById('kpi-v').innerText = `$${total.toFixed(2)}`;
-            document.getElementById('caja-total').innerText = `$${total.toFixed(2)}`;
+        onSnapshot(collection(db, "ventas"), snapV => {
+            onSnapshot(collection(db, "gastos"), snapG => {
+                let v = 0; snapV.forEach(d => v += d.data().total);
+                let g = 0; snapG.forEach(d => g += d.data().monto);
+                document.getElementById('kpi-v').innerText = `$${v.toFixed(2)}`;
+                document.getElementById('kpi-c').innerText = `$${(v-g).toFixed(2)}`;
+                document.getElementById('caja-actual').innerText = `$${(v-g).toFixed(2)}`;
+            });
         });
 
-        // Historial de Cierres
-        onSnapshot(query(collection(db, "cierres"), orderBy("ts", "desc")), snap => {
-            const hist = document.getElementById('historial-cierres');
-            hist.innerHTML = '';
+        onSnapshot(query(collection(db, "cierres"), orderBy("ts", "desc"), limit(10)), snap => {
+            const h = document.getElementById('historial-cierres'); h.innerHTML = '';
             snap.forEach(d => {
                 const c = d.data();
-                hist.innerHTML += `
-                    <div style="border-bottom:1px solid #222; padding:10px 0; display:flex; justify-content:space-between;">
-                        <div>
-                            <div style="font-size:0.8rem; color:#fff;">${c.fecha} - ${c.hora}</div>
-                            <small style="color:var(--amber-dim)">ID: ${d.id.substring(0,8)}</small>
-                        </div>
-                        <div style="color:var(--green); font-weight:bold;">$${c.total.toFixed(2)}</div>
-                    </div>`;
+                h.innerHTML += `<div class="card" style="display:flex; justify-content:space-between;">
+                    <span>${c.fecha} ${c.hora}</span><b style="color:var(--green)">$${c.total.toFixed(2)}</b>
+                </div>`;
             });
         });
+
+        onSnapshot(query(collection(db, "pedidos_st"), orderBy("ts", "asc")), snap => {
+            let txt = ''; snap.forEach(d => txt += `- ${d.data().detalle}\n`);
+            document.getElementById('st-lista').innerText = txt;
+        });
     }
-
-    window.updateStatus = async (id, status) => {
-        await updateDoc(doc(db, "ordenes", id), { estado: status });
-    };
-
-    window.deleteItem = async (col, id) => {
-        if(confirm("¿Eliminar registro?")) await deleteDoc(doc(db, col, id));
-    };
 
 </script>
 </body>
