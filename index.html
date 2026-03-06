@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXTCOM OS v4.5 // FULL CONTROL</title>
+    <title>NEXTCOM OS v4.5 // ANALYTICS EDITION</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -177,7 +177,7 @@
                     <div id="date-display" style="letter-spacing: 5px; margin-top: 10px; opacity: 0.8;">2026-XX-XX</div>
                 </div>
                 <div class="card">
-                    <h3 style="margin-top:0; font-size: 0.9rem;">REPUESTOS_TOP_STOCK</h3>
+                    <h3 style="margin-top:0; font-size: 0.9rem;">RENDIMIENTO_DIARIO (GANANCIAS)</h3>
                     <div style="height: 200px;"><canvas id="mainChart"></canvas></div>
                 </div>
                 <div class="card" style="grid-column: span 2;">
@@ -285,10 +285,11 @@
                     <input id="g-monto" type="number" placeholder="MONTO $">
                     <button class="btn btn-red" id="save-gasto-btn" style="width: 100%;">REGISTRAR EGRESO</button>
                 </div>
-                <div class="card">
-                    <h3>BALANCE DIARIO</h3>
+                <div class="card" style="text-align: center;">
+                    <h3>BALANCE ACTUAL</h3>
                     <div id="c-total" style="font-size: 3rem; color: var(--green);">$0.00</div>
-                    <div style="font-size: 0.8rem; opacity: 0.6;">Ventas acumuladas - Gastos</div>
+                    <div style="font-size: 0.8rem; opacity: 0.6; margin-bottom: 15px;">Ventas acumuladas - Gastos</div>
+                    <button class="btn btn-white" id="close-cash-btn" style="width: 100%; border-color: var(--green); color: var(--green);">REALIZAR CIERRE DE CAJA</button>
                 </div>
             </div>
         </div>
@@ -299,7 +300,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { 
         getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, where,
-        doc, updateDoc, deleteDoc, Timestamp, runTransaction, getDoc 
+        doc, updateDoc, deleteDoc, Timestamp, runTransaction, getDoc, writeBatch, getDocs
     } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -319,6 +320,8 @@
     let salesChart = null;
     let currentReId = null;
     let currentEditId = null;
+    let currentVentas = 0;
+    let currentGastos = 0;
 
     window.nav = (id) => {
         document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
@@ -355,16 +358,16 @@
         onSnapshot(collection(db, "accesorios"), snap => {
             localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             renderInventory();
-            updateChart();
             document.getElementById("dash-alertas").innerText = localAcc.filter(a => a.stock <= 3).length;
         });
+
         onSnapshot(collection(db, "ordenes"), snap => {
             document.getElementById("dash-taller").innerText = snap.docs.filter(d => d.data().estado === "RECIBIDO").length;
             renderOrders(snap);
         });
+
         onSnapshot(query(collection(db, "pedidos_st"), orderBy("ts", "asc")), snap => {
-            let listaHtml = "";
-            let rawText = "";
+            let listaHtml = ""; let rawText = "";
             snap.forEach(d => {
                 listaHtml += `• ${d.data().detalle}\n`;
                 rawText += `${d.data().detalle}\n`;
@@ -373,8 +376,6 @@
             document.getElementById("lista-acumulada").dataset.raw = rawText;
         });
         
-    
-        // Historial de ventas con botón de eliminar
         onSnapshot(query(collection(db, "ventas"), orderBy("ts", "desc"), limit(10)), snap => {
             const h = document.getElementById("sales-history-table");
             h.innerHTML = "";
@@ -386,17 +387,101 @@
                     <td>${v.items_count || 1} item(s)</td>
                     <td style="color:var(--green)">$${v.total.toFixed(2)}</td>
                     <td style="text-align:right">
-                        <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem" 
-                                onclick="deleteItem('ventas','${d.id}')">ELIMINAR</button>
+                        <button class="btn btn-red" style="padding:2px 6px; font-size:0.7rem" onclick="deleteItem('ventas','${d.id}')">ELIMINAR</button>
                     </td>
                 </tr>`;
             });
         });
 
+        // Sync para Gráfico (Últimos 7 cierres)
+        onSnapshot(query(collection(db, "cierres"), orderBy("ts", "desc"), limit(7)), snap => {
+            const data = snap.docs.map(d => ({
+                fecha: d.data().fecha,
+                ganancia: d.data().balance
+            })).reverse();
+            updateChart(data);
+        });
+
         updateCajaRealTime();
     }
 
-    // --- INVENTARIO ---
+    // --- CAJA Y CIERRE ---
+    function updateCajaRealTime() {
+        onSnapshot(collection(db, "ventas"), snapV => {
+            currentVentas = 0; snapV.forEach(d => currentVentas += d.data().total);
+            onSnapshot(collection(db, "gastos"), snapG => {
+                currentGastos = 0; snapG.forEach(d => currentGastos += d.data().monto);
+                document.getElementById("dash-ventas").innerText = `$${currentVentas.toFixed(2)}`;
+                document.getElementById("c-total").innerText = `$${(currentVentas - currentGastos).toFixed(2)}`;
+            });
+        });
+    }
+
+    document.getElementById("close-cash-btn").onclick = async () => {
+        const balance = currentVentas - currentGastos;
+        if(!confirm(`¿CONFIRMAR CIERRE DE CAJA?\nTotal Ventas: $${currentVentas}\nBalance: $${balance}`)) return;
+
+        try {
+            // 1. Guardar histórico de cierre
+            await addDoc(collection(db, "cierres"), {
+                fecha: new Date().toLocaleDateString(),
+                ventas: currentVentas,
+                gastos: currentGastos,
+                balance: balance,
+                ts: Timestamp.now()
+            });
+
+            // 2. Limpiar ventas y gastos actuales (Masivo)
+            const b = writeBatch(db);
+            const vSnap = await getDocs(collection(db, "ventas"));
+            vSnap.forEach(d => b.delete(d.ref));
+            const gSnap = await getDocs(collection(db, "gastos"));
+            gSnap.forEach(d => b.delete(d.ref));
+            
+            await b.commit();
+            logSys("CIERRE DE CAJA EXITOSO - SISTEMA REINICIADO");
+            alert("CAJA CERRADA CON ÉXITO");
+        } catch(e) {
+            console.error(e);
+            alert("ERROR AL CERRAR CAJA");
+        }
+    };
+
+    // --- GRÁFICO LINEAL ---
+    function updateChart(historyData) {
+        const ctx = document.getElementById('mainChart').getContext('2d');
+        const labels = historyData.length ? historyData.map(d => d.fecha) : ['SIN DATOS'];
+        const values = historyData.length ? historyData.map(d => d.ganancia) : [0];
+
+        if (salesChart) salesChart.destroy();
+        salesChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'GANANCIA $',
+                    data: values,
+                    borderColor: '#ff7a00',
+                    backgroundColor: 'rgba(255, 122, 0, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointBackgroundColor: '#fff'
+                }]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#222' }, ticks: { color: '#aaa' } },
+                    x: { grid: { display: false }, ticks: { color: '#aaa' } }
+                },
+                plugins: { legend: { display: false } } 
+            }
+        });
+    }
+
+    // --- RESTO DE FUNCIONALIDADES (ORIGINALES) ---
     function renderInventory() {
         const t = document.getElementById("acc-table"); t.innerHTML = "";
         localAcc.forEach(a => {
@@ -442,7 +527,6 @@
         document.querySelectorAll("#sec-inv input").forEach(i => i.value = "");
     };
 
-    // --- VENTAS ---
     document.getElementById("pos-search").oninput = () => {
         const v = document.getElementById("pos-search").value.toLowerCase();
         if(!v) { document.getElementById("pos-info").innerText = "---"; return; }
@@ -455,18 +539,14 @@
         const id = document.getElementById("pos-info").dataset.currentId;
         const i = localAcc.find(x => x.id === id);
         if(i && i.stock > 0) {
-            cart.push({...i});
-            renderCart();
+            cart.push({...i}); renderCart();
             document.getElementById("pos-search").value = "";
             document.getElementById("pos-info").innerText = "---";
-        } else if(i) {
-            alert("SIN STOCK");
-        }
+        } else if(i) alert("SIN STOCK");
     };
 
     function renderCart() {
-        const container = document.getElementById("cart-items");
-        container.innerHTML = "";
+        const container = document.getElementById("cart-items"); container.innerHTML = "";
         cart.forEach((item, index) => {
             container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
                 <span>> ${item.nombre}</span>
@@ -481,35 +561,22 @@
 
     document.getElementById("process-sale-btn").onclick = async () => {
         if(!cart.length) return;
-        const total = cart.reduce((a, b) => a + b.pv, 0);
-        const itemsCount = cart.length;
-
         try {
             await runTransaction(db, async (transaction) => {
                 for(let item of cart) {
                     const itemRef = doc(db, "accesorios", item.id);
                     const itemSnap = await transaction.get(itemRef);
-                    if (!itemSnap.exists()) throw "Item no existe";
-                    let newStock = itemSnap.data().stock - 1;
-                    transaction.update(itemRef, { stock: newStock });
+                    transaction.update(itemRef, { stock: itemSnap.data().stock - 1 });
                 }
-                const salesRef = collection(db, "ventas");
-                transaction.set(doc(salesRef), { 
-                    total: total, 
-                    items_count: itemsCount,
-                    ts: Timestamp.now() 
+                await addDoc(collection(db, "ventas"), { 
+                    total: cart.reduce((a, b) => a + b.pv, 0), 
+                    items_count: cart.length, ts: Timestamp.now() 
                 });
             });
-            cart = []; 
-            renderCart();
-            logSys("VENTA REALIZADA CON ÉXITO");
-        } catch (e) {
-            console.error(e);
-            alert("Error en la venta: " + e);
-        }
+            cart = []; renderCart(); logSys("VENTA REALIZADA");
+        } catch (e) { alert("Error: " + e); }
     };
 
-    // --- ORDENES ---
     function renderOrders(snap) {
         const rec = document.getElementById("list-recibidos");
         const ter = document.getElementById("list-terminados");
@@ -517,12 +584,10 @@
         snap.forEach(d => {
             const o = d.data();
             const c = `<div class="card" style="font-size:0.8rem">
-                <div style="color:#fff; font-weight:bold">${o.cliente} | ${o.tel || 'S/N'}</div>
-                <div>${o.modelo} - ${o.falla || 'Reparación'}</div>
-                <div style="color:var(--green)">TOTAL: $${o.precio || 0}</div>
+                <div style="color:#fff; font-weight:bold">${o.cliente}</div>
+                <div>${o.modelo} - $${o.precio}</div>
                 <div style="margin-top:8px; display:flex; gap:5px">
                     <button class="btn btn-blue" onclick="toggleStatus('${d.id}','${o.estado}')">ST</button>
-                    <button class="btn btn-white" onclick="editOrder('${d.id}')">EDIT</button>
                     <button class="btn btn-red" onclick="deleteItem('ordenes','${d.id}')">X</button>
                 </div>
             </div>`;
@@ -530,70 +595,29 @@
         });
     }
 
-    window.editOrder = async (id) => {
-        const snap = await getDoc(doc(db, "ordenes", id));
-        const o = snap.data();
-        document.getElementById("o-cliente").value = o.cliente;
-        document.getElementById("o-tel").value = o.tel || "";
-        document.getElementById("o-eq").value = o.modelo;
-        document.getElementById("o-falla").value = o.falla || "";
-        document.getElementById("o-pc").value = o.precio || "";
-        document.getElementById("o-ant").value = o.anticipo || "";
-        await deleteDoc(doc(db, "ordenes", id));
-        logSys("EDITANDO ORDEN...");
-    };
-
     document.getElementById("save-order-btn").onclick = async () => {
         const data = {
             cliente: document.getElementById("o-cliente").value,
-            tel: document.getElementById("o-tel").value,
             modelo: document.getElementById("o-eq").value,
-            falla: document.getElementById("o-falla").value,
             precio: parseFloat(document.getElementById("o-pc").value) || 0,
-            anticipo: parseFloat(document.getElementById("o-ant").value) || 0,
-            estado: "RECIBIDO",
-            ts: Timestamp.now()
+            estado: "RECIBIDO", ts: Timestamp.now()
         };
-        if(!data.cliente) return;
-        await addDoc(collection(db, "ordenes"), data);
+        if(data.cliente) await addDoc(collection(db, "ordenes"), data);
         document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
     };
 
     window.toggleStatus = async (id, s) => { await updateDoc(doc(db, "ordenes", id), { estado: s === "RECIBIDO" ? "TERMINADO" : "RECIBIDO" }); };
 
-    // --- PEDIDOS ST ---
     document.getElementById("save-pedido-btn").onclick = async () => {
         const det = document.getElementById("p-detalle").value;
-        if(!det) return;
-        await addDoc(collection(db, "pedidos_st"), { detalle: det, ts: Timestamp.now() });
+        if(det) await addDoc(collection(db, "pedidos_st"), { detalle: det, ts: Timestamp.now() });
         document.getElementById("p-detalle").value = "";
-    };
-
-    document.getElementById("clear-pedidos-btn").onclick = async () => {
-        if(confirm("¿BORRAR LISTA DE HOY?")) {
-            // Nota: Implementar borrado por bucle si es necesario
-            logSys("ESTA FUNCIÓN REQUIERE BORRADO MASIVO");
-        }
     };
 
     document.getElementById("whatsapp-st-btn").onclick = () => {
         const lista = document.getElementById("lista-acumulada").dataset.raw;
-        if(!lista) { alert("LISTA VACÍA"); return; }
-        window.open(`https://wa.me/50249698555?text=${encodeURIComponent(lista)}`, '_blank');
+        if(lista) window.open(`https://wa.me/50249698555?text=${encodeURIComponent(lista)}`, '_blank');
     };
-
-    // --- CAJA ---
-    function updateCajaRealTime() {
-        const today = new Date(); today.setHours(0,0,0,0);
-        onSnapshot(query(collection(db, "ventas"), where("ts", ">=", Timestamp.fromDate(today))), snapV => {
-            let v = 0; snapV.forEach(d => v += d.data().total);
-            onSnapshot(query(collection(db, "gastos"), where("ts", ">=", Timestamp.fromDate(today))), snapG => {
-                let g = 0; snapG.forEach(d => g += d.data().monto);
-                document.getElementById("dash-ventas").innerText = `$${v.toFixed(2)}`;
-                document.getElementById("c-total").innerText = `$${(v - g).toFixed(2)}`;
-            });
-        });
-    }
 
     document.getElementById("save-gasto-btn").onclick = async () => {
         const d = document.getElementById("g-desc").value;
@@ -602,8 +626,7 @@
         document.getElementById("g-desc").value = ""; document.getElementById("g-monto").value = "";
     };
 
-    // --- UTILIDADES ---
-    window.deleteItem = async (col, id) => { if(confirm("¿ELIMINAR REGISTRO?")) await deleteDoc(doc(db, col, id)); };
+    window.deleteItem = async (col, id) => { if(confirm("¿ELIMINAR?")) await deleteDoc(doc(db, col, id)); };
 
     function logSys(msg) {
         const log = document.getElementById("sys-log");
@@ -622,19 +645,6 @@
         await updateDoc(ref, { stock: s.data().stock + q });
         document.getElementById("reorder-modal").style.display = "none";
     };
-
-    function updateChart() {
-        const ctx = document.getElementById('mainChart').getContext('2d');
-        if (salesChart) salesChart.destroy();
-        salesChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: localAcc.slice(0,5).map(a => a.nombre),
-                datasets: [{ label: 'STOCK', data: localAcc.slice(0,5).map(a => a.stock), backgroundColor: '#ff7a00' }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-        });
-    }
 
     document.getElementById("logout-btn").onclick = () => { localStorage.removeItem("nextcom_auth"); location.reload(); };
     document.getElementById("close-reorder-btn").onclick = () => document.getElementById("reorder-modal").style.display = "none";
