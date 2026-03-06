@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXTCOM OS v3.8 // ST TECHNOLOGY EDITION</title>
+    <title>NEXTCOM OS v3.9 // INVENTORY OPTIMIZED</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -24,14 +24,9 @@
         }
 
         body {
-            margin: 0;
-            background: var(--bg);
-            color: var(--amber);
-            font-family: 'Share Tech Mono', monospace;
-            overflow: hidden;
-            height: 100vh;
-            width: 100vw;
-            display: flex;
+            margin: 0; background: var(--bg); color: var(--amber);
+            font-family: 'Share Tech Mono', monospace; overflow: hidden;
+            height: 100vh; width: 100vw; display: flex;
         }
 
         /* --- EFECTOS CRT --- */
@@ -39,18 +34,14 @@
             position: fixed; inset: 0;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%),
                         linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-            background-size: 100% 3px, 3px 100%;
-            pointer-events: none; z-index: 99999;
+            background-size: 100% 3px, 3px 100%; pointer-events: none; z-index: 99999;
         }
-
         .scanline {
             position: fixed; inset: 0;
             background: linear-gradient(to bottom, transparent, var(--crt-glow) 50%, transparent);
-            background-size: 100% 8px;
-            animation: scan 10s linear infinite;
+            background-size: 100% 8px; animation: scan 10s linear infinite;
             pointer-events: none; z-index: 100000;
         }
-
         @keyframes scan { from { transform: translateY(-100%); } to { transform: translateY(100%); } }
 
         /* --- LOGIN --- */
@@ -63,13 +54,11 @@
         /* --- LAYOUT --- */
         #boot { position: fixed; inset: 0; background: #000; z-index: 10001; padding: var(--padd-main); display: none; flex-direction: column; font-size: 1rem; }
         #app { display: none; height: 100vh; width: 100%; flex-direction: row; }
-
         .sidebar {
             width: 240px; border-right: 1px solid var(--amber-dim);
             padding: var(--padd-card); background: #000;
             display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
         }
-
         .main { flex: 1; padding: var(--padd-main); overflow-y: auto; background: var(--bg); box-sizing: border-box; }
 
         /* --- BOTONES --- */
@@ -97,9 +86,15 @@
         .card { border: 1px solid var(--amber-dim); padding: var(--padd-card); margin-bottom: 15px; background: rgba(10,10,10,0.5); }
         .grid-responsive { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--gap-grid); }
         
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 10px; color: #fff; font-size: 0.8rem; }
-        td { padding: 10px; border-bottom: 1px solid #1a1a1a; font-size: 0.9rem; }
+        /* --- TABLAS --- */
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: rgba(0,0,0,0.3); }
+        th { text-align: left; border-bottom: 2px solid var(--amber); padding: 12px; color: #fff; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 12px; border-bottom: 1px solid #1a1a1a; font-size: 0.9rem; vertical-align: middle; }
+        
+        .stock-badge { padding: 2px 6px; border: 1px solid; font-weight: bold; }
+        .stock-low { border-color: var(--red); color: var(--red); animation: blink 1.5s infinite; }
+        .stock-ok { border-color: var(--green); color: var(--green); }
+        @keyframes blink { 50% { opacity: 0.5; } }
 
         .section { display: none; }
         .active { display: block; animation: fadeIn 0.3s; }
@@ -145,7 +140,7 @@
 
 <div id="app">
     <div class="sidebar">
-        <div style="font-weight: bold; color:#fff; margin-bottom: 10px;">NEXTCOM_OS_v3.8</div>
+        <div style="font-weight: bold; color:#fff; margin-bottom: 10px;">NEXTCOM_OS_v3.9</div>
         <button class="btn" onclick="nav('dash')">01_DASHBOARD</button>
         <button class="btn" onclick="nav('inv')">02_INVENTARIO</button>
         <button class="btn" onclick="nav('pos')">03_POS_VENTA</button>
@@ -161,7 +156,7 @@
             <div class="grid-responsive">
                 <div class="card" style="text-align: center;">
                     <div id="clock" style="font-size: 3rem; color:#fff">00:00:00</div>
-                    <div id="date-display">2024-XX-XX</div>
+                    <div id="date-display">2026-XX-XX</div>
                 </div>
                 <div class="card">
                     <h3 style="margin-top:0">ESTADO_STOCK</h3>
@@ -175,20 +170,41 @@
         </div>
 
         <div id="sec-inv" class="section">
-            <h2>> INVENTARIO</h2>
-            <div class="card">
-                <input id="a-nom" placeholder="DESCRIPCIÓN">
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
-                    <input id="a-stock" type="number" placeholder="CANT">
-                    <input id="a-costo" type="number" placeholder="COSTO $">
-                    <input id="a-pv" type="number" placeholder="VENTA $">
+            <h2>> GESTIÓN_DE_INVENTARIO</h2>
+            <div class="card" style="border-left: 4px solid var(--green);">
+                <div style="margin-bottom: 10px; font-size: 0.8rem; color: var(--green);">[+] REGISTRAR_NUEVO_PRODUCTO</div>
+                <input id="a-nom" placeholder="DESCRIPCIÓN DEL ARTÍCULO / MODELO">
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label style="font-size: 0.7rem; display: block; margin-bottom: 4px;">CANTIDAD</label>
+                        <input id="a-stock" type="number" placeholder="0">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; display: block; margin-bottom: 4px;">COSTO $</label>
+                        <input id="a-costo" type="number" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label style="font-size: 0.7rem; display: block; margin-bottom: 4px;">PRECIO VENTA $</label>
+                        <input id="a-pv" type="number" placeholder="0.00">
+                    </div>
                 </div>
-                <button class="btn btn-green" id="save-inv-btn" style="width: 100%;">REGISTRAR_ITEM</button>
+                <button class="btn btn-green" id="save-inv-btn" style="width: 100%; margin-top: 5px; letter-spacing: 2px; font-weight: bold;">GUARDAR EN BASE DE DATOS</button>
             </div>
-            <table>
-                <thead><tr><th>ITEM</th><th>STOCK</th><th>DATA</th><th style="text-align:right">OP</th></tr></thead>
-                <tbody id="acc-table"></tbody>
-            </table>
+            
+            <div class="table-wrap" style="background: rgba(10,10,10,0.8); border: 1px solid var(--amber-dim);">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">PRODUCTO_ITEM</th>
+                            <th style="text-align: center;">STOCK</th>
+                            <th style="text-align: center;">ENT/SAL</th>
+                            <th style="text-align: center;">P_VENTA</th>
+                            <th style="text-align: right;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="acc-table"></tbody>
+                </table>
+            </div>
         </div>
 
         <div id="sec-pos" class="section">
@@ -231,20 +247,13 @@
         <div id="sec-pedidos" class="section">
             <h2>> PEDIDOS: ST TECHNOLOGY LIMITED</h2>
             <div class="card" style="border-color: var(--blue);">
-                <h3 style="color: var(--blue); margin-top:0">NUEVA SOLICITUD DE PEDIDO</h3>
-                <textarea id="p-detalle" placeholder="LISTA DE REPUESTOS O PRODUCTOS (Ej: 2 Pantallas iPhone 11, 1 Batería S20...)" rows="4"></textarea>
+                <textarea id="p-detalle" placeholder="LISTA DE REPUESTOS O PRODUCTOS..." rows="4"></textarea>
                 <div style="display: flex; gap:10px;">
-                    <button class="btn btn-blue" id="save-pedido-btn" style="flex:1">REGISTRAR EN BITÁCORA</button>
-                    <button class="btn btn-green" id="whatsapp-st-btn" style="flex:1">CONSULTAR A ST (+502)</button>
+                    <button class="btn btn-blue" id="save-pedido-btn" style="flex:1">REGISTRAR BITÁCORA</button>
+                    <button class="btn btn-green" id="whatsapp-st-btn" style="flex:1">CONSULTAR ST (+502)</button>
                 </div>
             </div>
-            <div class="table-wrap">
-                <h3>HISTORIAL DE PEDIDOS SOLICITADOS</h3>
-                <table>
-                    <thead><tr><th>FECHA</th><th>DETALLE DEL PEDIDO</th><th style="text-align:right">ACCIONES</th></tr></thead>
-                    <tbody id="pedidos-table"></tbody>
-                </table>
-            </div>
+            <tbody id="pedidos-table"></tbody>
         </div>
 
         <div id="sec-admin" class="section">
@@ -261,12 +270,9 @@
                     <div style="color:var(--green)">VENTAS: <span id="c-ventas">$0.00</span></div>
                     <div style="color:var(--red)">GASTOS: <span id="c-egresos">$0.00</span></div>
                     <div style="font-size: 1.5rem; color:#fff; border-top: 1px solid #333; margin-top: 10px;">TOTAL: <span id="c-total">$0.00</span></div>
-                    <button class="btn btn-white" id="btn-cerrar-caja" style="width: 100%; margin-top:15px;">CERRAR_DÍA</button>
                 </div>
             </div>
-            <tbody id="historial-cierres"></tbody>
         </div>
-
     </div>
 </div>
 
@@ -294,13 +300,11 @@
     let salesChart = null;
     let currentReId = null;
 
-    // --- NAVEGACIÓN ---
     window.nav = (id) => {
         document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
         document.getElementById("sec-" + id).classList.add("active");
     };
 
-    // --- LOGIN ---
     document.getElementById("login-btn").onclick = () => {
         if(document.getElementById("user-id").value === "admin" && document.getElementById("user-pass").value === "nextcom2024") {
             localStorage.setItem("nextcom_auth", "true");
@@ -314,46 +318,37 @@
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("boot").style.display = "flex";
         const log = document.getElementById("boot-log");
-        const lines = ["> KERNEL_3.8_LOAD", "> CONNECTING_DB...", "> MODULES_OK.", "> WELCOME_NEXTCOM."];
-        for(let l of lines) { log.innerHTML += `<div>${l}</div>`; await new Promise(r => setTimeout(r, 250)); }
+        const lines = ["> KERNEL_3.9_LOAD", "> SYNC_INVENTORY...", "> MODULES_OK.", "> READY."];
+        for(let l of lines) { log.innerHTML += `<div>${l}</div>`; await new Promise(r => setTimeout(r, 200)); }
         document.getElementById("boot").style.display = "none";
         document.getElementById("app").style.display = "flex";
         initSync();
     }
 
-    // --- PEDIDOS ST TECHNOLOGY ---
-    document.getElementById("whatsapp-st-btn").onclick = () => {
-        const detalle = document.getElementById("p-detalle").value;
-        if(!detalle) { alert("INGRESE EL DETALLE DEL PEDIDO"); return; }
-        const msg = `Buen día ST Technology Limited, necesito cotizar lo siguiente:\n\n${detalle}`;
-        window.open(`https://wa.me/50249698555?text=${encodeURIComponent(msg)}`, '_blank');
-    };
-
-    document.getElementById("save-pedido-btn").onclick = async () => {
-        const det = document.getElementById("p-detalle").value;
-        if(!det) return;
-        await addDoc(collection(db, "pedidos_st"), { detalle: det, ts: Timestamp.now() });
-        document.getElementById("p-detalle").value = "";
-        logSys("PEDIDO REGISTRADO EN BITÁCORA");
-    };
-
-    function renderPedidos(snap) {
-        const table = document.getElementById("pedidos-table");
-        table.innerHTML = "";
-        snap.forEach(d => {
-            const p = d.data();
-            const fecha = p.ts ? p.ts.toDate().toLocaleDateString() : "---";
-            table.innerHTML += `<tr>
-                <td>${fecha}</td>
-                <td>${p.detalle}</td>
-                <td style="text-align:right">
-                    <button class="btn btn-red" style="padding:4px 8px" onclick="deleteItem('pedidos_st','${d.id}')">X</button>
+    // --- INVENTARIO (LÓGICA MEJORADA) ---
+    function renderInventory() {
+        const t = document.getElementById("acc-table");
+        t.innerHTML = "";
+        localAcc.forEach(a => {
+            const isLow = a.stock <= 3;
+            t.innerHTML += `<tr>
+                <td style="color:#fff; font-weight:bold;">${a.nombre}</td>
+                <td style="text-align: center;">
+                    <span class="stock-badge ${isLow ? 'stock-low' : 'stock-ok'}">${a.stock}</span>
+                </td>
+                <td style="text-align: center; font-size: 0.75rem; opacity: 0.8;">
+                    <span style="color:var(--green)">↑${a.entradas}</span> <span style="color:var(--red)">↓${a.salidas}</span>
+                </td>
+                <td style="text-align: center; color: var(--blue);">$${a.pv}</td>
+                <td style="text-align: right;">
+                    <button class="btn btn-blue" style="padding:4px 8px; font-size:0.7rem;" onclick="openReorder('${a.id}','${a.nombre}')">RE-STOCK</button>
+                    <button class="btn btn-red" style="padding:4px 8px; font-size:0.7rem;" onclick="deleteItem('accesorios','${a.id}')">ELIM</button>
                 </td>
             </tr>`;
         });
     }
 
-    // --- FUNCIONES CORE ---
+    // --- MANTENIMIENTO DE FUNCIONES ---
     function initSync() {
         onSnapshot(collection(db, "accesorios"), snap => {
             localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -361,24 +356,10 @@
             updateChart();
         });
         onSnapshot(query(collection(db, "ordenes"), orderBy("ts", "desc")), snap => renderOrders(snap));
-        onSnapshot(query(collection(db, "pedidos_st"), orderBy("ts", "desc"), limit(10)), snap => renderPedidos(snap));
-        updateCajaRealTime();
-    }
-
-    function renderInventory() {
-        const t = document.getElementById("acc-table");
-        t.innerHTML = "";
-        localAcc.forEach(a => {
-            t.innerHTML += `<tr>
-                <td>${a.nombre}</td>
-                <td style="color:${a.stock <= 3 ? 'var(--red)' : '#fff'}">${a.stock}</td>
-                <td style="font-size:0.7rem">E:${a.entradas} S:${a.salidas}</td>
-                <td style="text-align:right">
-                    <button class="btn btn-blue" style="padding:4px" onclick="openReorder('${a.id}','${a.nombre}')">+</button>
-                    <button class="btn btn-red" style="padding:4px" onclick="deleteItem('accesorios','${a.id}')">X</button>
-                </td>
-            </tr>`;
+        onSnapshot(query(collection(db, "pedidos_st"), orderBy("ts", "desc"), limit(5)), snap => {
+            const p = document.getElementById("pedidos-table"); if(p) p.innerHTML = "";
         });
+        updateCajaRealTime();
     }
 
     window.openReorder = (id, n) => {
@@ -388,10 +369,12 @@
 
     document.getElementById("confirm-reorder-btn").onclick = async () => {
         const q = parseInt(document.getElementById("re-qty").value);
+        if(!q) return;
         const ref = doc(db, "accesorios", currentReId);
         const s = await getDoc(ref);
         await updateDoc(ref, { stock: s.data().stock + q, entradas: (s.data().entradas || 0) + q });
         document.getElementById("reorder-modal").style.display = "none";
+        logSys(`STOCK ACTUALIZADO: ${s.data().nombre}`);
     };
 
     document.getElementById("save-inv-btn").onclick = async () => {
@@ -402,14 +385,14 @@
             nombre: nom, stock: stock, cost: parseFloat(document.getElementById("a-costo").value) || 0,
             pv: parseFloat(document.getElementById("a-pv").value) || 0, entradas: stock, salidas: 0, ts: Timestamp.now() 
         });
-        document.getElementById("a-nom").value = "";
+        document.getElementById("a-nom").value = ""; document.getElementById("a-stock").value = "";
     };
 
-    // --- POS ---
+    // --- POS & ORDENES ---
     document.getElementById("pos-search").oninput = () => {
         const v = document.getElementById("pos-search").value.toLowerCase();
         const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
-        document.getElementById("pos-info").innerText = i ? `${i.nombre} | $${i.pv}` : "NO ENCONTRADO";
+        document.getElementById("pos-info").innerText = i ? `${i.nombre} | $${i.pv}` : "---";
     };
 
     document.getElementById("add-to-cart-btn").onclick = () => {
@@ -434,10 +417,9 @@
             t.set(doc(collection(db, "ventas")), { total: total, ts: Timestamp.now() });
         });
         cart = []; document.getElementById("cart-items").innerHTML = ""; document.getElementById("cart-total").innerText = "0.00";
-        alert("VENTA OK");
+        alert("VENTA REGISTRADA");
     };
 
-    // --- ORDENES ---
     function renderOrders(snap) {
         const rec = document.getElementById("list-recibidos");
         const ter = document.getElementById("list-terminados");
@@ -447,7 +429,7 @@
             const c = `<div class="card" style="font-size:0.8rem">
                 <div style="color:#fff">${o.cliente}</div><div>${o.modelo} | $${o.saldo}</div>
                 <div style="margin-top:8px">
-                    <button class="btn btn-blue" style="padding:3px" onclick="toggleStatus('${d.id}','${o.estado}')">MOD</button>
+                    <button class="btn btn-blue" style="padding:3px" onclick="toggleStatus('${d.id}','${o.estado}')">EST</button>
                     <button class="btn btn-white" style="padding:3px" onclick="editOrder('${d.id}')">EDIT</button>
                     <button class="btn btn-red" style="padding:3px" onclick="deleteItem('ordenes','${d.id}')">X</button>
                 </div>
@@ -481,6 +463,18 @@
         document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
     };
 
+    // --- PEDIDOS ST ---
+    document.getElementById("whatsapp-st-btn").onclick = () => {
+        const det = document.getElementById("p-detalle").value;
+        const msg = `Buen día ST Technology Limited, necesito:\n\n${det}`;
+        window.open(`https://wa.me/50249698555?text=${encodeURIComponent(msg)}`, '_blank');
+    };
+
+    document.getElementById("save-pedido-btn").onclick = async () => {
+        const det = document.getElementById("p-detalle").value;
+        if(det) await addDoc(collection(db, "pedidos_st"), { detalle: det, ts: Timestamp.now() });
+    };
+
     // --- CAJA ---
     function updateCajaRealTime() {
         const today = new Date(); today.setHours(0,0,0,0);
@@ -497,8 +491,8 @@
     }
 
     function calcNeto() {
-        const v = parseFloat(document.getElementById("c-ventas").innerText.replace('$',''));
-        const g = parseFloat(document.getElementById("c-egresos").innerText.replace('$',''));
+        const v = parseFloat(document.getElementById("c-ventas").innerText.replace('$','')) || 0;
+        const g = parseFloat(document.getElementById("c-egresos").innerText.replace('$','')) || 0;
         document.getElementById("c-total").innerText = `$${(v - g).toFixed(2)}`;
     }
 
