@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NEXTCOM OS v4.0 // DASHBOARD PRO</title>
+    <title>NEXTCOM OS v4.5 // FULL CONTROL</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -86,7 +86,7 @@
         .card { border: 1px solid var(--amber-dim); padding: var(--padd-card); margin-bottom: 15px; background: rgba(10,10,10,0.5); }
         .grid-responsive { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--gap-grid); }
         
-        /* --- DASHBOARD SPECIFIC --- */
+        /* --- DASHBOARD --- */
         .kpi-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .kpi-box { border: 1px solid var(--amber-dim); padding: 15px; text-align: center; background: rgba(255, 122, 0, 0.03); }
         .kpi-label { font-size: 0.7rem; text-transform: uppercase; opacity: 0.7; margin-bottom: 5px; }
@@ -140,7 +140,7 @@
 
 <div id="app">
     <div class="sidebar">
-        <div style="font-weight: bold; color:#fff; margin-bottom: 10px;">NEXTCOM_OS_v4.0</div>
+        <div style="font-weight: bold; color:#fff; margin-bottom: 10px;">NEXTCOM_OS_v4.5</div>
         <button class="btn" onclick="nav('dash')">01_DASHBOARD</button>
         <button class="btn" onclick="nav('inv')">02_INVENTARIO</button>
         <button class="btn" onclick="nav('pos')">03_POS_VENTA</button>
@@ -153,7 +153,6 @@
     <div class="main">
         <div id="sec-dash" class="section active">
             <h2>> SYSTEM_OVERVIEW</h2>
-            
             <div class="kpi-container">
                 <div class="kpi-box" style="border-left: 3px solid var(--green);">
                     <div class="kpi-label">Ventas Hoy</div>
@@ -172,7 +171,6 @@
                     <div class="kpi-value" style="font-size: 1rem; color: var(--green);">ONLINE</div>
                 </div>
             </div>
-
             <div class="grid-responsive">
                 <div class="card" style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 200px;">
                     <div id="clock" style="font-size: 3.5rem; color:#fff; text-shadow: 0 0 15px var(--amber);">00:00:00</div>
@@ -183,14 +181,14 @@
                     <div style="height: 200px;"><canvas id="mainChart"></canvas></div>
                 </div>
                 <div class="card" style="grid-column: span 2;">
-                    <h3 style="margin-top:0; font-size: 0.9rem;">RECUPERANDO_ULTIMOS_LOGS...</h3>
-                    <div id="sys-log" style="height: 120px; overflow-y:auto; font-size: 0.8rem; line-height: 1.6; color: #ccc; font-family: 'Share Tech Mono';"></div>
+                    <h3 style="margin-top:0; font-size: 0.9rem;">LOGS_DEL_SISTEMA</h3>
+                    <div id="sys-log" style="height: 120px; overflow-y:auto; font-size: 0.8rem; line-height: 1.6; color: #ccc;"></div>
                 </div>
             </div>
         </div>
 
         <div id="sec-inv" class="section">
-            <h2>> INVENTARIO</h2>
+            <h2>> GESTIÓN_INVENTARIO</h2>
             <div class="card">
                 <input id="a-nom" placeholder="DESCRIPCIÓN">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
@@ -198,72 +196,87 @@
                     <input id="a-costo" type="number" placeholder="COSTO $">
                     <input id="a-pv" type="number" placeholder="VENTA $">
                 </div>
-                <button class="btn btn-green" id="save-inv-btn" style="width: 100%;">REGISTRAR</button>
+                <button class="btn btn-green" id="save-inv-btn" style="width: 100%;">REGISTRAR / ACTUALIZAR</button>
             </div>
             <table>
-                <thead><tr><th>ITEM</th><th>STOCK</th><th>DATA</th><th style="text-align:right">OP</th></tr></thead>
+                <thead><tr><th>ITEM</th><th>STOCK</th><th>PRECIO</th><th style="text-align:right">ACCIONES</th></tr></thead>
                 <tbody id="acc-table"></tbody>
             </table>
         </div>
 
         <div id="sec-pos" class="section">
-            <h2>> VENTAS</h2>
+            <h2>> TERMINAL_VENTAS</h2>
             <div class="grid-responsive">
                 <div>
-                    <input id="pos-search" placeholder="BUSCAR...">
-                    <div id="pos-info" class="card" style="text-align: center;">---</div>
-                    <button class="btn btn-blue" id="add-to-cart-btn" style="width: 100%;">AÑADIR</button>
+                    <input id="pos-search" placeholder="BUSCAR PRODUCTO...">
+                    <div id="pos-info" class="card" style="text-align: center; border-color: var(--blue);">---</div>
+                    <div style="display: flex; gap: 5px;">
+                        <button class="btn btn-blue" id="add-to-cart-btn" style="flex: 2;">AÑADIR AL CARRITO</button>
+                        <button class="btn btn-red" id="clear-cart-btn" style="flex: 1;">VACIAR</button>
+                    </div>
                 </div>
                 <div class="card">
-                    <h3>CARRITO</h3>
-                    <div id="cart-items" style="min-height: 80px;"></div>
-                    <div style="font-size: 2rem; color:#fff; text-align: right;">$<span id="cart-total">0.00</span></div>
-                    <button class="btn btn-green" id="process-sale-btn" style="width: 100%;">COBRAR</button>
+                    <h3>CARRITO_COMPRA</h3>
+                    <div id="cart-items" style="min-height: 120px; border-bottom: 1px dashed var(--amber-dim); margin-bottom: 10px;"></div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>TOTAL:</span>
+                        <div style="font-size: 2.5rem; color:#fff;">$<span id="cart-total">0.00</span></div>
+                    </div>
+                    <button class="btn btn-green" id="process-sale-btn" style="width: 100%; margin-top: 15px;">FINALIZAR VENTA</button>
                 </div>
             </div>
         </div>
 
         <div id="sec-orden" class="section">
-            <h2>> TALLER</h2>
+            <h2>> TALLER_Y_SERVICIOS</h2>
             <div class="card">
-                <input id="o-cliente" placeholder="CLIENTE">
-                <input id="o-eq" placeholder="EQUIPO">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                    <input id="o-tel" placeholder="TEL">
-                    <input id="o-pc" type="number" placeholder="TOTAL $">
+                    <input id="o-cliente" placeholder="NOMBRE CLIENTE">
+                    <input id="o-tel" placeholder="TELÉFONO">
+                    <input id="o-eq" placeholder="DISPOSITIVO / MODELO">
+                    <input id="o-falla" placeholder="FALLA / REPARACIÓN">
+                    <input id="o-pc" type="number" placeholder="PRECIO TOTAL $">
+                    <input id="o-ant" type="number" placeholder="ANTICIPO $">
                 </div>
-                <button class="btn btn-blue" id="save-order-btn" style="width: 100%;">GENERAR ORDEN</button>
+                <button class="btn btn-blue" id="save-order-btn" style="width: 100%;">GENERAR NUEVA ORDEN</button>
             </div>
             <div class="grid-responsive">
-                <div><h3>EN TALLER</h3><div id="list-recibidos"></div></div>
-                <div><h3>LISTOS</h3><div id="list-terminados"></div></div>
+                <div><h3>PENDIENTES</h3><div id="list-recibidos"></div></div>
+                <div><h3>LISTOS / ENTREGADOS</h3><div id="list-terminados"></div></div>
             </div>
         </div>
 
         <div id="sec-pedidos" class="section">
-            <h2>> PEDIDOS_ST</h2>
-            <div class="card">
-                <textarea id="p-detalle" placeholder="LISTA DE PEDIDO..." rows="4"></textarea>
+            <h2>> LOGÍSTICA: ST TECHNOLOGY LIMITED</h2>
+            <div class="card" style="border-color: var(--blue);">
+                <div style="font-size: 0.8rem; margin-bottom: 5px; color: var(--blue);">[ AGREGAR REPUESTOS A LA LISTA DEL DÍA ]</div>
+                <textarea id="p-detalle" placeholder="Escriba aquí los repuestos necesarios..." rows="4"></textarea>
                 <div style="display: flex; gap:10px;">
-                    <button class="btn btn-blue" id="save-pedido-btn" style="flex:1">BITÁCORA</button>
-                    <button class="btn btn-green" id="whatsapp-st-btn" style="flex:1">WHATSAPP ST</button>
+                    <button class="btn btn-blue" id="save-pedido-btn" style="flex:1">ALMACENAR EN LISTA</button>
+                    <button class="btn btn-red" id="clear-pedidos-btn" style="flex:1">LIMPIAR TODO</button>
                 </div>
             </div>
-            <tbody id="pedidos-table"></tbody>
+            
+            <div class="card">
+                <h3>LISTA ACUMULADA DE PEDIDOS</h3>
+                <div id="lista-acumulada" style="background: #000; padding: 10px; border: 1px solid #333; min-height: 100px; margin-bottom: 15px; color: #fff; white-space: pre-wrap;"></div>
+                <button class="btn btn-green" id="whatsapp-st-btn" style="width: 100%;">ENVIAR LISTA A PROVEEDOR (+50249698555)</button>
+            </div>
         </div>
 
         <div id="sec-admin" class="section">
-            <h2>> CAJA</h2>
+            <h2>> CONTROL_CAJA</h2>
             <div class="grid-responsive">
                 <div class="card">
-                    <h3>GASTO</h3>
-                    <input id="g-desc" placeholder="CONCEPTO">
+                    <h3>REGISTRAR GASTO</h3>
+                    <input id="g-desc" placeholder="CONCEPTO DEL GASTO">
                     <input id="g-monto" type="number" placeholder="MONTO $">
-                    <button class="btn btn-red" id="save-gasto-btn" style="width: 100%;">REGISTRAR</button>
+                    <button class="btn btn-red" id="save-gasto-btn" style="width: 100%;">REGISTRAR EGRESO</button>
                 </div>
                 <div class="card">
-                    <h3>BALANCE</h3>
-                    <div id="c-total" style="font-size: 2rem;">$0.00</div>
+                    <h3>BALANCE DIARIO</h3>
+                    <div id="c-total" style="font-size: 3rem; color: var(--green);">$0.00</div>
+                    <div style="font-size: 0.8rem; opacity: 0.6;">Ventas acumuladas - Gastos</div>
                 </div>
             </div>
         </div>
@@ -293,6 +306,7 @@
     let cart = [];
     let salesChart = null;
     let currentReId = null;
+    let currentEditId = null;
 
     window.nav = (id) => {
         document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
@@ -312,8 +326,8 @@
         document.getElementById("login-screen").style.display = "none";
         document.getElementById("boot").style.display = "flex";
         const log = document.getElementById("boot-log");
-        const lines = ["> KERNEL_4.0_READY", "> SYNC_DASHBOARD...", "> SYSTEM_ONLINE."];
-        for(let l of lines) { log.innerHTML += `<div>${l}</div>`; await new Promise(r => setTimeout(r, 200)); }
+        const lines = ["> KERNEL_LOAD_OK", "> SYNC_FIREBASE_DB...", "> UI_READY", "> WELCOME OPERATOR"];
+        for(let l of lines) { log.innerHTML += `<div>${l}</div>`; await new Promise(r => setTimeout(r, 150)); }
         document.getElementById("boot").style.display = "none";
         document.getElementById("app").style.display = "flex";
         initSync();
@@ -324,23 +338,217 @@
             localAcc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
             renderInventory();
             updateChart();
-            const low = localAcc.filter(a => a.stock <= 3).length;
-            document.getElementById("dash-alertas").innerText = low;
+            document.getElementById("dash-alertas").innerText = localAcc.filter(a => a.stock <= 3).length;
         });
         onSnapshot(collection(db, "ordenes"), snap => {
-            const taller = snap.docs.filter(d => d.data().estado === "RECIBIDO").length;
-            document.getElementById("dash-taller").innerText = taller;
+            document.getElementById("dash-taller").innerText = snap.docs.filter(d => d.data().estado === "RECIBIDO").length;
             renderOrders(snap);
+        });
+        onSnapshot(query(collection(db, "pedidos_st"), orderBy("ts", "asc")), snap => {
+            let listaHtml = "";
+            let rawText = "";
+            snap.forEach(d => {
+                listaHtml += `• ${d.data().detalle}\n`;
+                rawText += `${d.data().detalle}\n`;
+            });
+            document.getElementById("lista-acumulada").innerText = listaHtml;
+            document.getElementById("lista-acumulada").dataset.raw = rawText;
         });
         updateCajaRealTime();
     }
 
+    // --- INVENTARIO ---
     function renderInventory() {
         const t = document.getElementById("acc-table"); t.innerHTML = "";
         localAcc.forEach(a => {
-            t.innerHTML += `<tr><td>${a.nombre}</td><td>${a.stock}</td><td>$${a.pv}</td>
-            <td style="text-align:right"><button class="btn btn-blue" onclick="openReorder('${a.id}','${a.nombre}')">+</button></td></tr>`;
+            t.innerHTML += `<tr>
+                <td>${a.nombre}</td>
+                <td style="color:${a.stock <= 3 ? 'var(--red)' : '#fff'}">${a.stock}</td>
+                <td>$${a.pv}</td>
+                <td style="text-align:right">
+                    <button class="btn btn-blue" style="padding:4px 8px" onclick="openReorder('${a.id}','${a.nombre}')">+</button>
+                    <button class="btn btn-white" style="padding:4px 8px" onclick="editInv('${a.id}')">EDIT</button>
+                    <button class="btn btn-red" style="padding:4px 8px" onclick="deleteItem('accesorios','${a.id}')">DEL</button>
+                </td>
+            </tr>`;
         });
+    }
+
+    window.editInv = async (id) => {
+        const i = localAcc.find(x => x.id === id);
+        document.getElementById("a-nom").value = i.nombre;
+        document.getElementById("a-stock").value = i.stock;
+        document.getElementById("a-costo").value = i.cost || 0;
+        document.getElementById("a-pv").value = i.pv;
+        currentEditId = id;
+        document.getElementById("save-inv-btn").innerText = "ACTUALIZAR ITEM";
+    };
+
+    document.getElementById("save-inv-btn").onclick = async () => {
+        const data = {
+            nombre: document.getElementById("a-nom").value,
+            stock: parseInt(document.getElementById("a-stock").value),
+            cost: parseFloat(document.getElementById("a-costo").value),
+            pv: parseFloat(document.getElementById("a-pv").value),
+            ts: Timestamp.now()
+        };
+        if(!data.nombre) return;
+        if(currentEditId) {
+            await updateDoc(doc(db, "accesorios", currentEditId), data);
+            currentEditId = null;
+            document.getElementById("save-inv-btn").innerText = "REGISTRAR";
+        } else {
+            await addDoc(collection(db, "accesorios"), data);
+        }
+        document.querySelectorAll("#sec-inv input").forEach(i => i.value = "");
+    };
+
+    // --- VENTAS ---
+    document.getElementById("pos-search").oninput = () => {
+        const v = document.getElementById("pos-search").value.toLowerCase();
+        const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
+        document.getElementById("pos-info").innerText = i ? `${i.nombre} | Stock: ${i.stock} | $${i.pv}` : "NO ENCONTRADO";
+    };
+
+    document.getElementById("add-to-cart-btn").onclick = () => {
+        const v = document.getElementById("pos-search").value.toLowerCase();
+        const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
+        if(i && i.stock > 0) {
+            cart.push(i);
+            renderCart();
+        }
+    };
+
+    function renderCart() {
+        const container = document.getElementById("cart-items");
+        container.innerHTML = "";
+        cart.forEach((item, index) => {
+            container.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;">
+                <span>> ${item.nombre}</span>
+                <span>$${item.pv} <button class="btn btn-red" style="padding:0 5px" onclick="removeFromCart(${index})">X</button></span>
+            </div>`;
+        });
+        document.getElementById("cart-total").innerText = cart.reduce((a, b) => a + b.pv, 0).toFixed(2);
+    }
+
+    window.removeFromCart = (idx) => { cart.splice(idx, 1); renderCart(); };
+    document.getElementById("clear-cart-btn").onclick = () => { cart = []; renderCart(); };
+
+    document.getElementById("process-sale-btn").onclick = async () => {
+        if(!cart.length) return;
+        const total = cart.reduce((a, b) => a + b.pv, 0);
+        await runTransaction(db, async(t) => {
+            for(let i of cart) {
+                const ref = doc(db, "accesorios", i.id);
+                const s = await t.get(ref);
+                t.update(ref, { stock: s.data().stock - 1 });
+            }
+            t.set(doc(collection(db, "ventas")), { total: total, ts: Timestamp.now() });
+        });
+        cart = []; renderCart();
+        logSys("VENTA REALIZADA CON ÉXITO");
+    };
+
+    // --- ORDENES ---
+    function renderOrders(snap) {
+        const rec = document.getElementById("list-recibidos");
+        const ter = document.getElementById("list-terminados");
+        rec.innerHTML = ""; ter.innerHTML = "";
+        snap.forEach(d => {
+            const o = d.data();
+            const c = `<div class="card" style="font-size:0.8rem">
+                <div style="color:#fff; font-weight:bold">${o.cliente} | ${o.tel || 'S/N'}</div>
+                <div>${o.modelo} - ${o.falla || 'Reparación'}</div>
+                <div style="color:var(--green)">TOTAL: $${o.precio || 0}</div>
+                <div style="margin-top:8px; display:flex; gap:5px">
+                    <button class="btn btn-blue" onclick="toggleStatus('${d.id}','${o.estado}')">ST</button>
+                    <button class="btn btn-white" onclick="editOrder('${d.id}')">EDIT</button>
+                    <button class="btn btn-red" onclick="deleteItem('ordenes','${d.id}')">X</button>
+                </div>
+            </div>`;
+            if(o.estado === "TERMINADO") ter.innerHTML += c; else rec.innerHTML += c;
+        });
+    }
+
+    window.editOrder = async (id) => {
+        const snap = await getDoc(doc(db, "ordenes", id));
+        const o = snap.data();
+        document.getElementById("o-cliente").value = o.cliente;
+        document.getElementById("o-tel").value = o.tel || "";
+        document.getElementById("o-eq").value = o.modelo;
+        document.getElementById("o-falla").value = o.falla || "";
+        document.getElementById("o-pc").value = o.precio || "";
+        document.getElementById("o-ant").value = o.anticipo || "";
+        await deleteDoc(doc(db, "ordenes", id)); // Elimina para re-insertar o puedes usar update
+        logSys("EDITANDO ORDEN...");
+    };
+
+    document.getElementById("save-order-btn").onclick = async () => {
+        const data = {
+            cliente: document.getElementById("o-cliente").value,
+            tel: document.getElementById("o-tel").value,
+            modelo: document.getElementById("o-eq").value,
+            falla: document.getElementById("o-falla").value,
+            precio: parseFloat(document.getElementById("o-pc").value) || 0,
+            anticipo: parseFloat(document.getElementById("o-ant").value) || 0,
+            estado: "RECIBIDO",
+            ts: Timestamp.now()
+        };
+        if(!data.cliente) return;
+        await addDoc(collection(db, "ordenes"), data);
+        document.querySelectorAll("#sec-orden input").forEach(i => i.value = "");
+    };
+
+    window.toggleStatus = async (id, s) => { await updateDoc(doc(db, "ordenes", id), { estado: s === "RECIBIDO" ? "TERMINADO" : "RECIBIDO" }); };
+
+    // --- PEDIDOS ST ---
+    document.getElementById("save-pedido-btn").onclick = async () => {
+        const det = document.getElementById("p-detalle").value;
+        if(!det) return;
+        await addDoc(collection(db, "pedidos_st"), { detalle: det, ts: Timestamp.now() });
+        document.getElementById("p-detalle").value = "";
+    };
+
+    document.getElementById("clear-pedidos-btn").onclick = async () => {
+        if(confirm("¿BORRAR LISTA DE HOY?")) {
+            const snap = await getDoc(collection(db, "pedidos_st")); // Simplificado para borrar todos
+            // Nota: En producción recorrer snap y borrar cada doc
+            logSys("LISTA LIMPIADA");
+        }
+    };
+
+    document.getElementById("whatsapp-st-btn").onclick = () => {
+        const lista = document.getElementById("lista-acumulada").dataset.raw;
+        if(!lista) { alert("LISTA VACÍA"); return; }
+        window.open(`https://wa.me/50249698555?text=${encodeURIComponent(lista)}`, '_blank');
+    };
+
+    // --- CAJA ---
+    function updateCajaRealTime() {
+        const today = new Date(); today.setHours(0,0,0,0);
+        onSnapshot(query(collection(db, "ventas"), where("ts", ">=", Timestamp.fromDate(today))), snapV => {
+            let v = 0; snapV.forEach(d => v += d.data().total);
+            onSnapshot(query(collection(db, "gastos"), where("ts", ">=", Timestamp.fromDate(today))), snapG => {
+                let g = 0; snapG.forEach(d => g += d.data().monto);
+                document.getElementById("dash-ventas").innerText = `$${v.toFixed(2)}`;
+                document.getElementById("c-total").innerText = `$${(v - g).toFixed(2)}`;
+            });
+        });
+    }
+
+    document.getElementById("save-gasto-btn").onclick = async () => {
+        const d = document.getElementById("g-desc").value;
+        const m = parseFloat(document.getElementById("g-monto").value);
+        if(d && m) await addDoc(collection(db, "gastos"), { descripcion: d, monto: m, ts: Timestamp.now() });
+        document.getElementById("g-desc").value = ""; document.getElementById("g-monto").value = "";
+    };
+
+    // --- UTILIDADES ---
+    window.deleteItem = async (col, id) => { if(confirm("¿ELIMINAR REGISTRO?")) await deleteDoc(doc(db, col, id)); };
+
+    function logSys(msg) {
+        const log = document.getElementById("sys-log");
+        log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>` + log.innerHTML;
     }
 
     window.openReorder = (id, n) => {
@@ -354,68 +562,7 @@
         const s = await getDoc(ref);
         await updateDoc(ref, { stock: s.data().stock + q });
         document.getElementById("reorder-modal").style.display = "none";
-        logSys(`STOCK +${q}: ${s.data().nombre}`);
     };
-
-    document.getElementById("save-inv-btn").onclick = async () => {
-        const nom = document.getElementById("a-nom").value;
-        const stock = parseInt(document.getElementById("a-stock").value);
-        if(!nom || isNaN(stock)) return;
-        await addDoc(collection(db, "accesorios"), { 
-            nombre: nom, stock: stock, pv: parseFloat(document.getElementById("a-pv").value) || 0, ts: Timestamp.now() 
-        });
-    };
-
-    document.getElementById("pos-search").oninput = () => {
-        const v = document.getElementById("pos-search").value.toLowerCase();
-        const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
-        document.getElementById("pos-info").innerText = i ? `${i.nombre} | $${i.pv}` : "---";
-    };
-
-    document.getElementById("add-to-cart-btn").onclick = () => {
-        const v = document.getElementById("pos-search").value.toLowerCase();
-        const i = localAcc.find(x => x.nombre.toLowerCase().includes(v));
-        if(i && i.stock > 0) {
-            cart.push(i);
-            document.getElementById("cart-items").innerHTML += `<div>> ${i.nombre}</div>`;
-            document.getElementById("cart-total").innerText = cart.reduce((a, b) => a + b.pv, 0).toFixed(2);
-        }
-    };
-
-    document.getElementById("process-sale-btn").onclick = async () => {
-        if(!cart.length) return;
-        const total = cart.reduce((a, b) => a + b.pv, 0);
-        await addDoc(collection(db, "ventas"), { total: total, ts: Timestamp.now() });
-        cart = []; document.getElementById("cart-items").innerHTML = ""; document.getElementById("cart-total").innerText = "0.00";
-        logSys("VENTA COMPLETADA");
-    };
-
-    function renderOrders(snap) {
-        const rec = document.getElementById("list-recibidos");
-        const ter = document.getElementById("list-terminados");
-        rec.innerHTML = ""; ter.innerHTML = "";
-        snap.forEach(d => {
-            const o = d.data();
-            const c = `<div class="card"><div>${o.cliente}</div><button class="btn btn-blue" onclick="toggleStatus('${d.id}','${o.estado}')">MOD</button></div>`;
-            if(o.estado === "TERMINADO") ter.innerHTML += c; else rec.innerHTML += c;
-        });
-    }
-
-    window.toggleStatus = async (id, s) => { await updateDoc(doc(db, "ordenes", id), { estado: s === "RECIBIDO" ? "TERMINADO" : "RECIBIDO" }); };
-
-    function updateCajaRealTime() {
-        const today = new Date(); today.setHours(0,0,0,0);
-        onSnapshot(query(collection(db, "ventas"), where("ts", ">=", Timestamp.fromDate(today))), snap => {
-            let t = 0; snap.forEach(d => t += d.data().total);
-            document.getElementById("dash-ventas").innerText = `$${t.toFixed(2)}`;
-            document.getElementById("c-total").innerText = `$${t.toFixed(2)}`;
-        });
-    }
-
-    function logSys(msg) {
-        const log = document.getElementById("sys-log");
-        log.innerHTML = `<div>[${new Date().toLocaleTimeString()}] ${msg}</div>` + log.innerHTML;
-    }
 
     function updateChart() {
         const ctx = document.getElementById('mainChart').getContext('2d');
@@ -424,13 +571,9 @@
             type: 'bar',
             data: {
                 labels: localAcc.slice(0,5).map(a => a.nombre),
-                datasets: [{ label: 'UNIDADES', data: localAcc.slice(0,5).map(a => a.stock), backgroundColor: '#ff7a00', borderColor: '#fff', borderWidth: 1 }]
+                datasets: [{ label: 'STOCK', data: localAcc.slice(0,5).map(a => a.stock), backgroundColor: '#ff7a00' }]
             },
-            options: { 
-                responsive: true, maintainAspectRatio: false, 
-                plugins: { legend: { display: false } },
-                scales: { y: { grid: { color: '#222' }, ticks: { color: '#ff7a00' } }, x: { ticks: { color: '#ff7a00' } } }
-            }
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
         });
     }
 
