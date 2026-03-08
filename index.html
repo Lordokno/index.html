@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM OS v10.5 // PDF & WHATSAPP</title>
+    <title>NEXTCOM OS v11.0 // FACTURACIÓN & HISTORIAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -106,7 +106,7 @@
                 <div>
                     <div class="card">
                         <h3 style="color:var(--blue)">DATOS DEL CLIENTE</h3>
-                        <input id="f-nombre" placeholder="Nombre Completo">
+                        <input id="f-id" type="hidden"> <input id="f-nombre" placeholder="Nombre Completo">
                         <input id="f-moto" placeholder="Modelo de Moto / Placa">
                         <input id="f-tel" placeholder="Número de WhatsApp">
                     </div>
@@ -121,24 +121,34 @@
                     </div>
                 </div>
                 <div>
-                    <div class="card" style="min-height:500px; display:flex; flex-direction:column;">
-                        <h3 style="color:var(--green)">DETALLE DE FACTURA ELECTRÓNICA</h3>
+                    <div class="card" style="min-height:450px; display:flex; flex-direction:column;">
+                        <h3 style="color:var(--green)">DETALLE DE FACTURA</h3>
                         <table style="flex:1;">
                             <thead><tr><th>DESCRIPCIÓN</th><th>CANT.</th><th>PRECIO</th><th>SUBTOTAL</th><th></th></tr></thead>
                             <tbody id="f-list"></tbody>
                         </table>
                         <div style="border-top:2px solid var(--amber); padding-top:15px; margin-top:auto;">
                             <div style="display:flex; justify-content:space-between; font-size:1.5rem; font-family:var(--font-title);">
-                                <span>TOTAL A PAGAR:</span>
+                                <span>TOTAL:</span>
                                 <span id="f-total" style="color:var(--green)">$0.00</span>
                             </div>
-                            <div style="display:flex; gap:10px; margin-top:15px;">
-                                <button class="btn btn-green" style="flex:1; height:60px;" onclick="generatePDF()">💾 DESCARGAR PDF</button>
-                                <button class="btn btn-blue" style="flex:1; height:60px; border-color:var(--green); color:var(--green);" onclick="sendFacturaWhatsApp()">📱 ENVIAR POR WHATSAPP</button>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:15px;">
+                                <button class="btn btn-blue" onclick="saveFacturaDB()">💾 GUARDAR EN SISTEMA</button>
+                                <button class="btn btn-green" onclick="generatePDF()">📄 DESCARGAR PDF</button>
+                                <button class="btn btn-blue" style="border-color:var(--green); color:var(--green);" onclick="sendFacturaWhatsApp()">📱 WHATSAPP</button>
                             </div>
+                            <button class="btn btn-red" style="width:100%; margin-top:10px;" onclick="resetFacturaForm()">LIMPIAR FORMULARIO</button>
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="card" style="margin-top:20px;">
+                <h3 style="color:var(--blue)">BÓVEDA DE FACTURAS GUARDADAS</h3>
+                <table>
+                    <thead><tr><th>FECHA</th><th>CLIENTE</th><th>MOTO</th><th>TOTAL</th><th>ACCIONES</th></tr></thead>
+                    <tbody id="f-history-list"></tbody>
+                </table>
             </div>
         </div>
 
@@ -186,7 +196,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, doc, updateDoc, deleteDoc, Timestamp, getDocs, writeBatch, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, doc, updateDoc, deleteDoc, Timestamp, getDocs, writeBatch, where, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
@@ -229,7 +239,7 @@
         setTimeout(() => t.remove(), 3000);
     }
 
-    // --- SECCIÓN FACTURACIÓN ---
+    // --- SECCIÓN FACTURACIÓN (NUEVA LÓGICA DE PERSISTENCIA Y EDICIÓN) ---
     window.searchFactura = (v) => {
         const res = document.getElementById('f-results'); res.innerHTML = '';
         if(v.length < 2) return;
@@ -271,6 +281,69 @@
 
     window.removeItemFactura = (idx) => { facturaItems.splice(idx, 1); renderFactura(); };
 
+    window.saveFacturaDB = async () => {
+        const id = document.getElementById('f-id').value;
+        const fData = {
+            cliente: document.getElementById('f-nombre').value,
+            moto: document.getElementById('f-moto').value,
+            tel: document.getElementById('f-tel').value,
+            items: facturaItems,
+            total: parseFloat(document.getElementById('f-total').innerText.replace('$', '')),
+            ts: Timestamp.now(),
+            fecha: new Date().toLocaleDateString()
+        };
+
+        if(!fData.cliente) { showToast("NOMBRE REQUERIDO", "var(--red)"); return; }
+
+        if(id) {
+            await updateDoc(doc(db, "facturas_guardadas", id), fData);
+            showToast("FACTURA ACTUALIZADA");
+        } else {
+            await addDoc(collection(db, "facturas_guardadas"), fData);
+            showToast("FACTURA GUARDADA");
+        }
+        resetFacturaForm();
+    };
+
+    window.editFactura = (id, dataStr) => {
+        const data = JSON.parse(decodeURIComponent(dataStr));
+        document.getElementById('f-id').value = id;
+        document.getElementById('f-nombre').value = data.cliente;
+        document.getElementById('f-moto').value = data.moto;
+        document.getElementById('f-tel').value = data.tel;
+        facturaItems = data.items;
+        renderFactura();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    window.resetFacturaForm = () => {
+        document.getElementById('f-id').value = '';
+        document.getElementById('f-nombre').value = '';
+        document.getElementById('f-moto').value = '';
+        document.getElementById('f-tel').value = '';
+        facturaItems = [];
+        renderFactura();
+    };
+
+    onSnapshot(query(collection(db, "facturas_guardadas"), orderBy("ts", "desc")), snap => {
+        const list = document.getElementById('f-history-list'); list.innerHTML = '';
+        snap.forEach(d => {
+            const f = d.data();
+            const dataStr = encodeURIComponent(JSON.stringify(f));
+            list.innerHTML += `<tr>
+                <td>${f.fecha}</td>
+                <td>${f.cliente}</td>
+                <td>${f.moto}</td>
+                <td>$${f.total.toFixed(2)}</td>
+                <td>
+                    <button class="btn btn-blue" style="padding:4px; display:inline;" onclick="editFactura('${d.id}', '${dataStr}')">EDITAR</button>
+                    <button class="btn btn-red" style="padding:4px; display:inline;" onclick="deleteDoc(doc(db,'facturas_guardadas','${d.id}'))">X</button>
+                </td>
+            </tr>`;
+        });
+    });
+
+    // --- GENERACIÓN PDF & WHATSAPP ---
     window.generatePDF = () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
@@ -300,18 +373,14 @@
         const cliente = document.getElementById('f-nombre').value;
         const moto = document.getElementById('f-moto').value;
         const total = document.getElementById('f-total').innerText;
-
         if(!tel) { showToast("INGRESE UN NÚMERO", "var(--red)"); return; }
-
-        let msg = `*NEXTCOM MULTISERVICIOS*%0A`;
-        msg += `Hola *${cliente}*, adjuntamos el detalle de servicio para su moto *${moto}*:%0A%0A`;
+        let msg = `*NEXTCOM MULTISERVICIOS*%0AHola *${cliente}*, detalle de *${moto}*:%0A%0A`;
         facturaItems.forEach(i => { msg += `- ${i.nombre} (x${i.cant}): $${(i.precio * i.cant).toFixed(2)}%0A`; });
-        msg += `%0A*TOTAL A PAGAR: ${total}*%0A%0A_En un momento le adjuntamos el PDF de su factura._`;
-
+        msg += `%0A*TOTAL: ${total}*%0A%0A_Enviando PDF..._`;
         window.open(`https://wa.me/${tel}?text=${msg}`);
     };
 
-    // --- SISTEMA CORE ---
+    // --- SISTEMA CORE (MANTENIDO) ---
     window.saveInventory = async () => {
         const n = document.getElementById('inv-n').value, p = parseFloat(document.getElementById('inv-p').value), s = parseInt(document.getElementById('inv-s').value);
         if(!n || isNaN(p)) return;
