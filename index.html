@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM OS v10.0 // PDF INVOICE PRO</title>
+    <title>NEXTCOM OS v10.5 // PDF & WHATSAPP</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -108,7 +108,7 @@
                         <h3 style="color:var(--blue)">DATOS DEL CLIENTE</h3>
                         <input id="f-nombre" placeholder="Nombre Completo">
                         <input id="f-moto" placeholder="Modelo de Moto / Placa">
-                        <input id="f-tel" placeholder="Número de Teléfono">
+                        <input id="f-tel" placeholder="Número de WhatsApp">
                     </div>
                     <div class="card">
                         <h3 style="color:var(--amber)">AÑADIR A LISTA</h3>
@@ -132,7 +132,10 @@
                                 <span>TOTAL A PAGAR:</span>
                                 <span id="f-total" style="color:var(--green)">$0.00</span>
                             </div>
-                            <button class="btn btn-green" style="width:100%; height:60px; margin-top:15px; font-size:1rem;" onclick="generatePDF()">💾 GENERAR Y DESCARGAR PDF</button>
+                            <div style="display:flex; gap:10px; margin-top:15px;">
+                                <button class="btn btn-green" style="flex:1; height:60px;" onclick="generatePDF()">💾 DESCARGAR PDF</button>
+                                <button class="btn btn-blue" style="flex:1; height:60px; border-color:var(--green); color:var(--green);" onclick="sendFacturaWhatsApp()">📱 ENVIAR POR WHATSAPP</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -198,15 +201,9 @@
     const db = getFirestore(fbApp);
     window.db = db; window.deleteDoc = deleteDoc; window.doc = doc; window.updateDoc = updateDoc;
 
-    let localInv = []; 
-    let cart = []; 
-    let facturaItems = [];
-    let salesChart = null;
-    let currentPage = 1; 
-    let itemsPerPage = 10; 
-    let filteredInv = [];
+    let localInv = []; let cart = []; let facturaItems = []; let salesChart = null;
+    let currentPage = 1; let itemsPerPage = 10; let filteredInv = [];
 
-    // --- NAVEGACIÓN ---
     window.nav = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById('sec-'+id).classList.add('active');
@@ -232,7 +229,7 @@
         setTimeout(() => t.remove(), 3000);
     }
 
-    // --- LÓGICA DE FACTURACIÓN (PDF) ---
+    // --- SECCIÓN FACTURACIÓN ---
     window.searchFactura = (v) => {
         const res = document.getElementById('f-results'); res.innerHTML = '';
         if(v.length < 2) return;
@@ -282,86 +279,60 @@
         const tel = document.getElementById('f-tel').value || "N/A";
         const fecha = new Date().toLocaleDateString();
 
-        // Diseño del Header
-        doc.setFillColor(0, 0, 0);
-        doc.rect(0, 0, 210, 40, 'F');
-        doc.setTextColor(255, 157, 0);
-        doc.setFontSize(22);
-        doc.text("NEXTCOM MULTISERVICIOS", 15, 25);
-        doc.setFontSize(10);
-        doc.setTextColor(255, 255, 255);
-        doc.text("Especialistas en Electrónica y Mecánica de Motos", 15, 32);
+        doc.setFillColor(0, 0, 0); doc.rect(0, 0, 210, 40, 'F');
+        doc.setTextColor(255, 157, 0); doc.setFontSize(22); doc.text("NEXTCOM MULTISERVICIOS", 15, 25);
+        doc.setFontSize(10); doc.setTextColor(255, 255, 255); doc.text("Especialistas en Mecánica de Motos", 15, 32);
+        doc.setTextColor(0, 0, 0); doc.setFontSize(12); doc.text(`FECHA: ${fecha}`, 150, 50);
+        doc.setFont("helvetica", "bold"); doc.text("DATOS DEL CLIENTE:", 15, 50);
+        doc.setFont("helvetica", "normal"); doc.text(`Nombre: ${cliente}`, 15, 57); doc.text(`Moto: ${moto}`, 15, 64); doc.text(`Tel: ${tel}`, 15, 71);
 
-        // Datos del Cliente
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(12);
-        doc.text(`FECHA: ${fecha}`, 150, 50);
-        doc.setFont("helvetica", "bold");
-        doc.text("DATOS DEL CLIENTE:", 15, 50);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Nombre: ${cliente}`, 15, 57);
-        doc.text(`Moto: ${moto}`, 15, 64);
-        doc.text(`Teléfono: ${tel}`, 15, 71);
-
-        // Tabla de productos
         const body = facturaItems.map(i => [i.nombre, i.cant, `$${i.precio.toFixed(2)}`, `$${(i.cant * i.precio).toFixed(2)}`]);
-        doc.autoTable({
-            startY: 80,
-            head: [['Descripción', 'Cant.', 'Precio Unit.', 'Subtotal']],
-            body: body,
-            headStyles: { fillColor: [255, 157, 0] },
-            theme: 'striped'
-        });
+        doc.autoTable({ startY: 80, head: [['Descripción', 'Cant.', 'Precio Unit.', 'Subtotal']], body: body, headStyles: { fillColor: [255, 157, 0] }});
 
-        // Total
         const finalY = doc.lastAutoTable.finalY + 10;
-        doc.setFontSize(14);
-        doc.setFont("helvetica", "bold");
-        doc.text(`TOTAL A PAGAR: $${document.getElementById('f-total').innerText.replace('$', '')}`, 140, finalY);
-
-        // Pie de página
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "italic");
-        doc.text("Gracias por su confianza. Garantía en mano de obra por 15 días.", 15, finalY + 20);
-
-        doc.save(`Factura_${cliente}_${fecha}.pdf`);
-        showToast("PDF GENERADO");
+        doc.setFont("helvetica", "bold"); doc.text(`TOTAL: $${document.getElementById('f-total').innerText.replace('$', '')}`, 140, finalY);
+        doc.save(`Factura_${cliente}.pdf`);
+        showToast("PDF DESCARGADO");
     };
 
-    // --- RESTO DEL SISTEMA (MANTENIMIENTO DE CÓDIGO ANTERIOR) ---
-    // (Funciones de inventario, pos, taller y caja resumidas para espacio pero operativas)
+    window.sendFacturaWhatsApp = () => {
+        const tel = document.getElementById('f-tel').value;
+        const cliente = document.getElementById('f-nombre').value;
+        const moto = document.getElementById('f-moto').value;
+        const total = document.getElementById('f-total').innerText;
 
+        if(!tel) { showToast("INGRESE UN NÚMERO", "var(--red)"); return; }
+
+        let msg = `*NEXTCOM MULTISERVICIOS*%0A`;
+        msg += `Hola *${cliente}*, adjuntamos el detalle de servicio para su moto *${moto}*:%0A%0A`;
+        facturaItems.forEach(i => { msg += `- ${i.nombre} (x${i.cant}): $${(i.precio * i.cant).toFixed(2)}%0A`; });
+        msg += `%0A*TOTAL A PAGAR: ${total}*%0A%0A_En un momento le adjuntamos el PDF de su factura._`;
+
+        window.open(`https://wa.me/${tel}?text=${msg}`);
+    };
+
+    // --- SISTEMA CORE ---
     window.saveInventory = async () => {
-        const n = document.getElementById('inv-n').value, c = parseFloat(document.getElementById('inv-c').value),
-              p = parseFloat(document.getElementById('inv-p').value), s = parseInt(document.getElementById('inv-s').value);
+        const n = document.getElementById('inv-n').value, p = parseFloat(document.getElementById('inv-p').value), s = parseInt(document.getElementById('inv-s').value);
         if(!n || isNaN(p)) return;
-        await addDoc(collection(db, "accesorios"), { nombre:n, costo:c||0, pv:p, stock:s||0, ts:Timestamp.now() });
+        await addDoc(collection(db, "accesorios"), { nombre:n, costo:parseFloat(document.getElementById('inv-c').value)||0, pv:p, stock:s||0, ts:Timestamp.now() });
         document.querySelectorAll('#add-inv input').forEach(i => i.value='');
     };
 
     window.editStock = async (id, current) => {
         const newVal = prompt("NUEVO STOCK:", current);
-        if(newVal !== null) { await updateDoc(doc(db, "accesorios", id), { stock: parseInt(newVal) }); showToast("STOCK ACTUALIZADO"); }
+        if(newVal !== null) await updateDoc(doc(db, "accesorios", id), { stock: parseInt(newVal) });
     };
 
-    window.filterTablePaginated = (v) => {
-        filteredInv = localInv.filter(i => i.nombre.toLowerCase().includes(v.toLowerCase()));
-        currentPage = 1; renderInventory();
-    };
-
-    window.changePage = (dir) => {
-        const maxPage = Math.ceil(filteredInv.length / itemsPerPage);
-        if (currentPage + dir > 0 && currentPage + dir <= maxPage) { currentPage += dir; renderInventory(); }
-    };
+    window.filterTablePaginated = (v) => { filteredInv = localInv.filter(i => i.nombre.toLowerCase().includes(v.toLowerCase())); currentPage = 1; renderInventory(); };
+    window.changePage = (dir) => { if (currentPage + dir > 0 && currentPage + dir <= Math.ceil(filteredInv.length / itemsPerPage)) { currentPage += dir; renderInventory(); } };
 
     function renderInventory() {
         const t = document.getElementById('table-inv'); t.innerHTML = '';
-        const start = (currentPage - 1) * itemsPerPage;
-        const pageItems = filteredInv.slice(start, start + itemsPerPage);
-        pageItems.forEach(i => {
+        filteredInv.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage).forEach(i => {
             t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td><td><button class="btn btn-blue" style="padding:4px;display:inline" onclick="editStock('${i.id}',${i.stock})">E</button> <button class="btn btn-red" style="padding:4px;display:inline" onclick="deleteDoc(doc(db,'accesorios','${i.id}'))">X</button></td></tr>`;
         });
-        document.getElementById('page-info').innerText = `PÁGINA ${currentPage} DE ${Math.ceil(filteredInv.length / itemsPerPage) || 1}`;
+        document.getElementById('page-info').innerText = `PÁGINA ${currentPage}`;
     }
 
     window.searchPOS = (v) => {
@@ -372,54 +343,38 @@
         });
     };
 
-    window.addToCart = (id) => {
-        const item = localInv.find(i => i.id === id);
-        if(item.stock > 0) { cart.push(item); renderCart(); }
-    };
-
+    window.addToCart = (id) => { const item = localInv.find(i => i.id === id); if(item.stock > 0) { cart.push(item); renderCart(); } };
     function renderCart() {
         const l = document.getElementById('cart-list'); let total = 0; l.innerHTML = '';
-        cart.forEach((item, idx) => {
-            total += item.pv;
-            l.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.nombre}</span><b>$${item.pv}</b><button onclick="removeFromCart(${idx})" style="color:var(--red); background:none; border:none; cursor:pointer;">X</button></div>`;
-        });
+        cart.forEach((item, idx) => { total += item.pv; l.innerHTML += `<div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>${item.nombre}</span><b>$${item.pv}</b><button onclick="removeFromCart(${idx})" style="color:var(--red); background:none; border:none; cursor:pointer;">X</button></div>`; });
         document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
     }
     window.removeFromCart = (idx) => { cart.splice(idx,1); renderCart(); };
 
     window.processSale = async () => {
         if(!cart.length) return;
-        const total = cart.reduce((a,b) => a+b.pv, 0);
-        const u = total - cart.reduce((a,b) => a+(b.costo||0), 0);
-        const prods = cart.map(i => i.nombre).join(", ");
-        const batch = writeBatch(db);
-        const fecha = new Date().toISOString().split('T')[0];
+        const total = cart.reduce((a,b) => a+b.pv, 0), u = total - cart.reduce((a,b) => a+(b.costo||0), 0);
+        const batch = writeBatch(db); const fecha = new Date().toISOString().split('T')[0];
         cart.forEach(item => batch.update(doc(db, "accesorios", item.id), { stock: item.stock - 1 }));
-        await addDoc(collection(db, "ventas"), { productos: prods, total, utilidad: u, ts: Timestamp.now(), hora: new Date().toLocaleTimeString(), fecha, archivado: false });
-        await batch.commit();
-        cart = []; renderCart(); showToast("VENTA EXITOSA");
+        await addDoc(collection(db, "ventas"), { productos: cart.map(i => i.nombre).join(", "), total, utilidad: u, ts: Timestamp.now(), hora: new Date().toLocaleTimeString(), fecha, archivado: false });
+        await batch.commit(); cart = []; renderCart(); showToast("VENTA EXITOSA");
     };
 
     window.saveGasto = async () => {
         const d = document.getElementById('g-desc').value, m = parseFloat(document.getElementById('g-monto').value);
-        if(d && m) {
-            const fecha = new Date().toISOString().split('T')[0];
-            await addDoc(collection(db, "gastos"), { desc: d, monto: m, ts: Timestamp.now(), hora: new Date().toLocaleTimeString(), fecha, archivado: false });
-        }
+        if(d && m) await addDoc(collection(db, "gastos"), { desc: d, monto: m, ts: Timestamp.now(), hora: new Date().toLocaleTimeString(), fecha: new Date().toISOString().split('T')[0], archivado: false });
         document.getElementById('g-desc').value = ''; document.getElementById('g-monto').value = '';
     };
 
     window.realizarCierre = async () => {
         const neto = parseFloat(document.getElementById('caja-neto').innerText.replace('$',''));
         if(!confirm(`¿CIERRE POR $${neto}?`)) return;
-        await addDoc(collection(db, "cierres"), { total: neto, ts: Timestamp.now(), fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString() });
         const batch = writeBatch(db);
         const vSnap = await getDocs(query(collection(db, "ventas"), where("archivado", "==", false)));
         const gSnap = await getDocs(query(collection(db, "gastos"), where("archivado", "==", false)));
         vSnap.forEach(d => batch.update(d.ref, { archivado: true }));
         gSnap.forEach(d => batch.update(d.ref, { archivado: true }));
-        await batch.commit();
-        showToast("CIERRE COMPLETADO");
+        await batch.commit(); showToast("CIERRE COMPLETADO");
     };
 
     window.filterReportsByDate = async (selectedDate) => {
@@ -432,46 +387,24 @@
     };
 
     window.saveOrder = async () => {
-        const o = {
-            cliente: document.getElementById('o-cli').value, tel: document.getElementById('o-tel').value,
-            modelo: document.getElementById('o-mod').value, falla: document.getElementById('o-fal').value,
-            precio: parseFloat(document.getElementById('o-pre').value)||0, anticipo: parseFloat(document.getElementById('o-ant').value)||0,
-            estado: "PENDIENTE", ts: Timestamp.now()
-        };
+        const o = { cliente: document.getElementById('o-cli').value, tel: document.getElementById('o-tel').value, modelo: document.getElementById('o-mod').value, falla: document.getElementById('o-fal').value, precio: parseFloat(document.getElementById('o-pre').value)||0, anticipo: parseFloat(document.getElementById('o-ant').value)||0, estado: "PENDIENTE", ts: Timestamp.now() };
         if(o.cliente) await addDoc(collection(db, "ordenes"), o);
         document.querySelectorAll('#sec-taller input, #sec-taller textarea').forEach(i => i.value='');
     };
 
-    window.swapOrder = async (id, currentStatus) => {
-        const next = currentStatus === "LISTO" ? "PENDIENTE" : "LISTO";
-        await updateDoc(doc(db, "ordenes", id), { estado: next });
-    };
+    window.swapOrder = async (id, currentStatus) => { await updateDoc(doc(db, "ordenes", id), { estado: currentStatus === "LISTO" ? "PENDIENTE" : "LISTO" }); };
 
     function startSync() {
-        setInterval(() => { 
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString(); 
-            document.getElementById('date-label').innerText = new Date().toLocaleDateString();
-        }, 1000);
-
-        onSnapshot(collection(db, "accesorios"), snap => {
-            localInv = snap.docs.map(d => ({id:d.id, ...d.data()}));
-            filteredInv = [...localInv]; renderInventory();
-            let sAlert = 0; localInv.forEach(i => { if(i.stock <= 3) sAlert++; });
-            document.getElementById('kpi-s').innerText = sAlert;
-        });
-
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); document.getElementById('date-label').innerText = new Date().toLocaleDateString(); }, 1000);
+        onSnapshot(collection(db, "accesorios"), snap => { localInv = snap.docs.map(d => ({id:d.id, ...d.data()})); filteredInv = [...localInv]; renderInventory(); });
         onSnapshot(collection(db, "ordenes"), snap => {
-            const p = document.getElementById('list-pending'), r = document.getElementById('list-ready');
-            p.innerHTML = ''; r.innerHTML = ''; let count = 0;
+            const p = document.getElementById('list-pending'), r = document.getElementById('list-ready'); p.innerHTML = ''; r.innerHTML = '';
             snap.forEach(d => {
                 const o = d.data(); const ready = o.estado === "LISTO";
-                if(!ready) count++;
                 const h = `<div class="card" style="border-left:5px solid ${ready?'var(--green)':'var(--amber)'}; padding:15px; margin-bottom:12px;"><b>${o.cliente}</b><br><small>${o.modelo}</small><br><small>${o.tel}</small><div style="display:flex; gap:10px; margin-top:12px;"><button class="btn" style="flex:1; padding:6px;" onclick="swapOrder('${d.id}', '${o.estado}')">MOVER</button><button class="btn btn-red" style="padding:6px 15px;" onclick="deleteDoc(doc(db,'ordenes','${d.id}'))">X</button></div></div>`;
                 if(ready) r.innerHTML += h; else p.innerHTML += h;
             });
-            document.getElementById('kpi-t').innerText = count;
         });
-
         onSnapshot(query(collection(db, "ventas"), where("archivado", "==", false)), snapV => {
             onSnapshot(query(collection(db, "gastos"), where("archivado", "==", false)), snapG => {
                 let v = 0, u = 0, g = 0;
@@ -490,6 +423,12 @@
     }
 
     window.toggleElement = (id) => { const e = document.getElementById(id); e.style.display = e.style.display === 'none' ? 'grid' : 'none'; };
+    window.savePedido = async () => { const msg = document.getElementById('st-msg').value; if(msg) await addDoc(collection(db, "pedidos_st"), { msg, ts: Timestamp.now() }); document.getElementById('st-msg').value = ''; };
+    window.sendToST = () => { let t = "PEDIDO NEXTCOM:\n"; document.querySelectorAll('.st-item-text').forEach(el => t += el.innerText + "\n"); window.open(`https://wa.me/50249698555?text=${encodeURIComponent(t)}`); };
+    onSnapshot(query(collection(db, "pedidos_st"), orderBy("ts", "asc")), snap => {
+        const box = document.getElementById('st-lista-box'); box.innerHTML = '';
+        snap.forEach(d => { box.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:8px; margin-bottom:5px; border:1px solid #222;"><span class="st-item-text">• ${d.data().msg}</span><button class="btn btn-red" style="padding:2px 8px; margin:0;" onclick="deleteDoc(doc(db,'pedidos_st','${d.id}'))">X</button></div>`; });
+    });
 </script>
 </body>
 </html>
