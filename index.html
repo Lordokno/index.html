@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM MULTI-OS // SEGMENTED SYSTEM</title>
+    <title>NEXTCOM OS // Taller de Motos Juancho</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -56,10 +56,7 @@
             <div id="clock" style="font-family:var(--font-title); font-size:1.2rem; color:#fff;">00:00:00</div>
             <div id="user-display" class="user-badge">SISTEMA</div>
         </div>
-        
-        <div id="nav-container">
-            </div>
-
+        <div id="nav-container"></div>
         <button class="btn btn-red" style="margin-top:auto;" onclick="location.reload()">🔒 LOGOUT</button>
     </div>
 
@@ -75,16 +72,11 @@
         </div>
 
         <div id="sec-inv" class="section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h2>CATÁLOGO DE INVENTARIO</h2><button class="btn btn-green" onclick="toggleElement('add-inv')">+ NUEVO ITEM</button></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h2>CATÁLOGO INVENTARIO</h2><button class="btn btn-green" onclick="toggleElement('add-inv')">+ NUEVO ITEM</button></div>
             <div id="add-inv" class="card" style="display:none; grid-template-columns:repeat(4, 1fr) 100px; gap:10px;"><input id="inv-n" placeholder="NOMBRE"><input id="inv-c" type="number" placeholder="COSTO $"><input id="inv-p" type="number" placeholder="VENTA $"><input id="inv-s" type="number" placeholder="STOCK"><button class="btn btn-green" onclick="saveInventory()">OK</button></div>
             <div class="card">
                 <input type="text" id="search-inv" placeholder="Filtrar..." oninput="filterTablePaginated(this.value)">
                 <table><thead><tr><th>PRODUCTO</th><th>COSTO</th><th>PRECIO</th><th>STOCK</th><th>ACCION</th></tr></thead><tbody id="table-inv"></tbody></table>
-                <div style="display:flex; justify-content:center; gap:20px; align-items:center; margin-top:15px;">
-                    <button class="btn" style="width:100px" onclick="changePage(-1)">ANTERIOR</button>
-                    <span id="page-info">PÁGINA 1</span>
-                    <button class="btn" style="width:100px" onclick="changePage(1)">SIGUIENTE</button>
-                </div>
             </div>
         </div>
 
@@ -104,35 +96,53 @@
         <div id="sec-factura" class="section">
             <div style="display:grid; grid-template-columns: 350px 1fr; gap:20px;">
                 <div>
-                    <div class="card">
-                        <h3 style="color:var(--blue)">DATOS CLIENTE</h3>
-                        <input id="f-id" type="hidden"><input id="f-nombre" placeholder="Nombre"><input id="f-moto" placeholder="Moto / Placa"><input id="f-tel" placeholder="WhatsApp">
+                    <div class="card" style="border-top: 4px solid var(--blue);">
+                        <h3 style="color:var(--blue); font-family: var(--font-title); font-size: 0.9rem;">DATOS DEL CLIENTE</h3>
+                        <input id="f-id" type="hidden">
+                        <input id="f-nombre" placeholder="Nombre Completo">
+                        <input id="f-moto" placeholder="Modelo / Placa de Moto">
+                        <input id="f-tel" placeholder="WhatsApp (Ej: 503...)">
                     </div>
                     <div class="card">
-                        <input id="f-search" placeholder="Buscar en inventario..." oninput="searchFactura(this.value)"><div id="f-results"></div>
-                        <hr style="border:0; border-top:1px solid #333;">
-                        <input id="f-manual-n" placeholder="Servicio Manual"><input id="f-manual-p" type="number" placeholder="Precio $">
-                        <button class="btn btn-blue" onclick="addManualFactura()">+ AÑADIR</button>
+                        <h3 style="color:var(--amber); font-size: 0.9rem;">AGREGAR TRABAJOS</h3>
+                        <input id="f-search" placeholder="Buscar Repuestos..." oninput="searchFactura(this.value)">
+                        <div id="f-results" style="max-height: 120px; overflow-y: auto;"></div>
+                        <hr style="border:0; border-top:1px solid #333; margin: 15px 0;">
+                        <input id="f-manual-n" placeholder="Mano de Obra / Otros">
+                        <input id="f-manual-p" type="number" placeholder="Precio $">
+                        <button class="btn btn-blue" onclick="addManualFactura()">+ AGREGAR A LISTA</button>
                     </div>
                 </div>
                 <div>
-                    <div class="card" style="min-height:450px; display:flex; flex-direction:column;">
-                        <h3 style="color:var(--green)">DETALLE DE FACTURA</h3>
-                        <table style="flex:1;"><thead><tr><th>DESCRIPCIÓN</th><th>CANT.</th><th>PRECIO</th><th>SUBTOTAL</th><th></th></tr></thead><tbody id="f-list"></tbody></table>
+                    <div class="card" style="min-height:480px; display:flex; flex-direction:column; border-top: 4px solid var(--green);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <h2 style="font-family: var(--font-title); color: #fff; margin:0;">Taller Juancho</h2>
+                            <span id="edit-indicator" style="color: var(--blue); font-size: 0.7rem; display:none;">● MODO EDICIÓN ACTIVO</span>
+                        </div>
+                        <table style="flex:1; margin-top:20px;">
+                            <thead><tr><th>DESCRIPCIÓN</th><th>CANT.</th><th>PRECIO</th><th>SUBTOTAL</th><th></th></tr></thead>
+                            <tbody id="f-list"></tbody>
+                        </table>
                         <div style="border-top:2px solid var(--amber); padding-top:15px;">
-                            <div style="display:flex; justify-content:space-between; font-size:1.5rem;"><span>TOTAL:</span><span id="f-total" style="color:var(--green)">$0.00</span></div>
-                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:15px;">
-                                <button class="btn btn-blue" onclick="saveFacturaDB()">💾 GUARDAR</button>
-                                <button class="btn btn-green" onclick="generatePDF()">📄 PDF</button>
-                                <button class="btn btn-blue" style="border-color:var(--green); color:var(--green);" onclick="sendFacturaWhatsApp()">📱 WHATSAPP</button>
+                            <div style="display:flex; justify-content:space-between; font-size:1.8rem; font-family: var(--font-title);">
+                                <span>TOTAL:</span><span id="f-total" style="color:var(--green)">$0.00</span>
                             </div>
+                            <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:15px;">
+                                <button class="btn btn-blue" id="btn-save-factura" onclick="saveFacturaDB()">💾 GUARDAR</button>
+                                <button class="btn btn-green" onclick="generatePDF()">📄 PDF PROFESIONAL</button>
+                                <button class="btn btn-blue" style="border-color:var(--green); color:var(--green);" onclick="sendFacturaWhatsApp()">📱 ENVIAR WHATSAPP</button>
+                            </div>
+                            <button class="btn btn-red" style="margin-top:10px;" onclick="resetFacturaForm()">CANCELAR / LIMPIAR</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <h3 style="color:var(--blue)">BÓVEDA DE FACTURAS</h3>
-                <table><thead><tr><th>FECHA</th><th>CLIENTE</th><th>MOTO</th><th>TOTAL</th><th>ACCIONES</th></tr></thead><tbody id="f-history-list"></tbody></table>
+            <div class="card" style="margin-top:20px;">
+                <h3 style="color:var(--blue); font-family: var(--font-title);">BÓVEDA DE FACTURAS (MOTOS)</h3>
+                <table>
+                    <thead><tr><th>FECHA</th><th>CLIENTE</th><th>MOTO</th><th>TOTAL</th><th>ACCIONES</th></tr></thead>
+                    <tbody id="f-history-list"></tbody>
+                </table>
             </div>
         </div>
 
@@ -152,7 +162,6 @@
                     <div class="card"><h3>GASTO</h3><input id="g-desc" placeholder="CONCEPTO"><input id="g-monto" type="number" placeholder="MONTO $"><button class="btn btn-red" onclick="saveGasto()">EGRESO</button></div>
                     <div class="card" style="text-align:center; border-color:var(--green)"><small>NETO HOY</small><div id="caja-neto" style="font-size:2.8rem; color:var(--green);">$0.00</div><button class="btn btn-green" onclick="realizarCierre()">CIERRE</button></div>
                 </div>
-                <div class="card" style="height:500px; overflow-y:auto;"><h3>HISTORIAL GASTOS</h3><table><thead><tr><th>HORA</th><th>CONCEPTO</th><th>MONTO</th></tr></thead><tbody id="logs-gastos"></tbody></table></div>
             </div>
         </div>
     </div>
@@ -162,7 +171,7 @@
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, Timestamp, getDocs, writeBatch, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, limit, doc, updateDoc, deleteDoc, Timestamp, getDocs, writeBatch, where } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
@@ -181,18 +190,9 @@
     let activeCollection = "accesorios"; 
     let localInv = []; let facturaItems = []; let cart = [];
 
-    // --- SISTEMA DE USUARIOS ---
     const users = {
-        "nextcom2024": { 
-            name: "TALLER CELULARES", 
-            col: "accesorios", 
-            menu: ["dash", "inv", "pos", "taller", "caja"] 
-        },
-        "juan2026": { 
-            name: "TALLER MOTOS", 
-            col: "accesorios_motos", 
-            menu: ["dash", "inv", "pos", "factura"] 
-        }
+        "nextcom2024": { name: "TALLER CELULARES", col: "accesorios", menu: ["dash", "inv", "pos", "taller", "caja"] },
+        "juan2026": { name: "TALLER MOTOS JUANCHO", col: "accesorios_motos", menu: ["dash", "inv", "pos", "factura"] }
     };
 
     window.bootSystem = () => {
@@ -206,18 +206,13 @@
             renderMenu();
             startSync();
             initChart();
-        } else {
-            showToast("CLAVE INCORRECTA", "var(--red)");
-        }
+        } else { showToast("CLAVE INCORRECTA", "var(--red)"); }
     };
 
     function renderMenu() {
-        const nav = document.getElementById('nav-container');
-        nav.innerHTML = '';
+        const nav = document.getElementById('nav-container'); nav.innerHTML = '';
         const labels = { dash: "📊 DASHBOARD", inv: "📦 INVENTARIO", pos: "🛒 VENTAS POS", taller: "🔧 TALLER / ST", caja: "💰 CAJA / LOGS", factura: "📄 FACTURACIÓN" };
-        currentUser.menu.forEach(m => {
-            nav.innerHTML += `<button class="btn" onclick="nav('${m}')">${labels[m]}</button>`;
-        });
+        currentUser.menu.forEach(m => { nav.innerHTML += `<button class="btn" onclick="nav('${m}')">${labels[m]}</button>`; });
     }
 
     window.nav = (id) => {
@@ -225,26 +220,12 @@
         document.getElementById('sec-'+id).classList.add('active');
     };
 
-    // --- LOGICA DE INVENTARIO ADAPTATIVA ---
-    window.saveInventory = async () => {
-        const n = document.getElementById('inv-n').value, p = parseFloat(document.getElementById('inv-p').value), s = parseInt(document.getElementById('inv-s').value);
-        if(!n || isNaN(p)) return;
-        await addDoc(collection(db, activeCollection), { 
-            nombre: n, 
-            costo: parseFloat(document.getElementById('inv-c').value) || 0, 
-            pv: p, 
-            stock: s || 0, 
-            ts: Timestamp.now() 
-        });
-        document.querySelectorAll('#add-inv input').forEach(i => i.value = '');
-    };
-
-    // --- LOGICA FACTURACION (MOTOS) ---
+    // --- LOGICA FACTURACION MOTOS JUANCHO ---
     window.searchFactura = (v) => {
         const res = document.getElementById('f-results'); res.innerHTML = '';
         if(v.length < 2) return;
         localInv.filter(i => i.nombre.toLowerCase().includes(v.toLowerCase())).forEach(i => {
-            res.innerHTML += `<div style="padding:8px; border-bottom:1px solid #222; cursor:pointer;" onclick="addItemFactura('${i.nombre}', ${i.pv})">${i.nombre} - $${i.pv}</div>`;
+            res.innerHTML += `<div style="padding:8px; border-bottom:1px solid #222; cursor:pointer; font-size:0.8rem" onclick="addItemFactura('${i.nombre}', ${i.pv})">${i.nombre} - $${i.pv}</div>`;
         });
     };
 
@@ -252,6 +233,12 @@
         const exist = facturaItems.find(i => i.nombre === n);
         if(exist) exist.cant++; else facturaItems.push({ nombre: n, precio: p, cant: 1 });
         renderFactura(); document.getElementById('f-results').innerHTML = '';
+    };
+
+    window.addManualFactura = () => {
+        const n = document.getElementById('f-manual-n').value, p = parseFloat(document.getElementById('f-manual-p').value);
+        if(n && p) { facturaItems.push({ nombre: n, precio: p, cant: 1 }); renderFactura(); }
+        document.getElementById('f-manual-n').value = ''; document.getElementById('f-manual-p').value = '';
     };
 
     function renderFactura() {
@@ -264,73 +251,135 @@
     }
 
     window.saveFacturaDB = async () => {
-        const fData = { cliente: document.getElementById('f-nombre').value, moto: document.getElementById('f-moto').value, tel: document.getElementById('f-tel').value, items: facturaItems, total: parseFloat(document.getElementById('f-total').innerText.replace('$', '')), ts: Timestamp.now(), fecha: new Date().toLocaleDateString() };
+        const id = document.getElementById('f-id').value;
+        const fData = { 
+            cliente: document.getElementById('f-nombre').value, 
+            moto: document.getElementById('f-moto').value, 
+            tel: document.getElementById('f-tel').value, 
+            items: facturaItems, 
+            total: parseFloat(document.getElementById('f-total').innerText.replace('$', '')), 
+            ts: Timestamp.now(), 
+            fecha: new Date().toLocaleDateString() 
+        };
+
         if(!fData.cliente) return showToast("FALTA NOMBRE", "var(--red)");
-        await addDoc(collection(db, "facturas_motos"), fData);
-        showToast("FACTURA GUARDADA");
+
+        if(id) {
+            await updateDoc(doc(db, "facturas_motos", id), fData);
+            showToast("FACTURA ACTUALIZADA");
+        } else {
+            await addDoc(collection(db, "facturas_motos"), fData);
+            showToast("FACTURA GUARDADA EN BÓVEDA");
+        }
         resetFacturaForm();
     };
 
-    function resetFacturaForm() { 
-        document.querySelectorAll('#sec-factura input').forEach(i => i.value = ''); 
-        facturaItems = []; renderFactura(); 
-    }
+    window.editFactura = (id, dataStr) => {
+        const data = JSON.parse(decodeURIComponent(dataStr));
+        document.getElementById('f-id').value = id;
+        document.getElementById('f-nombre').value = data.cliente;
+        document.getElementById('f-moto').value = data.moto;
+        document.getElementById('f-tel').value = data.tel;
+        facturaItems = data.items;
+        renderFactura();
+        document.getElementById('edit-indicator').style.display = 'block';
+        document.getElementById('btn-save-factura').innerText = "💾 ACTUALIZAR";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-    // --- FUNCIONES COMUNES ---
-    function showToast(msg, color = "var(--green)") {
-        const t = document.createElement('div'); t.className = 'toast'; t.style.borderColor = color; t.innerText = msg;
-        document.getElementById('toast-container').appendChild(t); setTimeout(() => t.remove(), 3000);
-    }
+    window.resetFacturaForm = () => {
+        document.getElementById('f-id').value = '';
+        document.querySelectorAll('#sec-factura input').forEach(i => i.value = '');
+        facturaItems = []; renderFactura();
+        document.getElementById('edit-indicator').style.display = 'none';
+        document.getElementById('btn-save-factura').innerText = "💾 GUARDAR";
+    };
 
-    function startSync() {
-        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+    // --- PDF PROFESIONAL TALLER JUANCHO ---
+    window.generatePDF = () => {
+        const { jsPDF } = window.jspdf; const doc = new jsPDF();
+        const cliente = document.getElementById('f-nombre').value || "Cliente General";
+        const moto = document.getElementById('f-moto').value || "N/A";
         
-        // Sincronizar Inventario según taller activo
-        onSnapshot(collection(db, activeCollection), snap => {
-            localInv = snap.docs.map(d => ({id:d.id, ...d.data()}));
-            renderInventory();
+        // Cabecera Estilizada
+        doc.setFillColor(30, 30, 30); doc.rect(0, 0, 210, 45, 'F');
+        doc.setTextColor(255, 157, 0); doc.setFontSize(24); doc.text("TALLER DE MOTOS JUANCHO", 15, 25);
+        doc.setFontSize(10); doc.setTextColor(200, 200, 200); doc.text("Servicio Técnico Especializado - El Salvador", 15, 33);
+        
+        // Info Cliente
+        doc.setTextColor(0, 0, 0); doc.setFontSize(12); doc.setFont("helvetica", "bold");
+        doc.text("DATOS DE SERVICIO:", 15, 60);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Cliente: ${cliente}`, 15, 68); doc.text(`Vehículo: ${moto}`, 15, 75); doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 140, 68);
+
+        // Tabla
+        doc.autoTable({
+            startY: 85,
+            head: [['DESCRIPCIÓN', 'CANT', 'P. UNIT', 'TOTAL']],
+            body: facturaItems.map(i => [i.nombre, i.cant, `$${i.precio}`, `$${(i.cant * i.precio).toFixed(2)}`]),
+            headStyles: { fillColor: [255, 157, 0] },
+            theme: 'striped'
         });
 
-        // Sincronizar Facturas (solo motos)
+        const finalY = doc.lastAutoTable.finalY + 15;
+        doc.setFontSize(16); doc.text(`TOTAL A PAGAR: ${document.getElementById('f-total').innerText}`, 120, finalY);
+        doc.save(`Factura_Juancho_${cliente}.pdf`);
+    };
+
+    window.sendFacturaWhatsApp = () => {
+        const tel = document.getElementById('f-tel').value;
+        const cliente = document.getElementById('f-nombre').value;
+        const total = document.getElementById('f-total').innerText;
+        if(!tel) return showToast("INGRESE WHATSAPP", "var(--red)");
+        const msg = `*TALLER DE MOTOS JUANCHO*%0AHola *${cliente}*, tu moto está lista. Detalle total: *${total}*. Adjunto factura en breve.`;
+        window.open(`https://wa.me/${tel}?text=${msg}`);
+    };
+
+    // --- CORE & SYNC ---
+    function startSync() {
+        setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
+        onSnapshot(collection(db, activeCollection), snap => {
+            localInv = snap.docs.map(d => ({id:d.id, ...d.data()}));
+            const t = document.getElementById('table-inv'); if(t) {
+                t.innerHTML = ''; localInv.forEach(i => {
+                    t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td><td><button class="btn btn-red" style="padding:4px;" onclick="deleteDoc(doc(db,'${activeCollection}','${i.id}'))">X</button></td></tr>`;
+                });
+            }
+        });
+
         if(currentUser.name.includes("MOTOS")) {
-            onSnapshot(query(collection(db, "facturas_motos"), orderBy("ts", "desc"), limit(10)), snap => {
+            onSnapshot(query(collection(db, "facturas_motos"), orderBy("ts", "desc")), snap => {
                 const h = document.getElementById('f-history-list'); if(!h) return;
                 h.innerHTML = '';
                 snap.forEach(d => {
-                    const f = d.data();
-                    h.innerHTML += `<tr><td>${f.fecha}</td><td>${f.cliente}</td><td>${f.moto}</td><td>$${f.total}</td><td><button class="btn btn-red" style="padding:4px;" onclick="deleteDoc(doc(db,'facturas_motos','${d.id}'))">X</button></td></tr>`;
+                    const f = d.data(); const ds = encodeURIComponent(JSON.stringify(f));
+                    h.innerHTML += `<tr><td>${f.fecha}</td><td>${f.cliente}</td><td>${f.moto}</td><td>$${f.total.toFixed(2)}</td><td>
+                        <button class="btn btn-blue" style="padding:4px; display:inline;" onclick="editFactura('${d.id}', '${ds}')">EDITAR</button>
+                        <button class="btn btn-red" style="padding:4px; display:inline;" onclick="deleteDoc(doc(db,'facturas_motos','${d.id}'))">X</button>
+                    </td></tr>`;
                 });
             });
         }
     }
 
-    window.renderInventory = () => {
-        const t = document.getElementById('table-inv'); t.innerHTML = '';
-        localInv.forEach(i => {
-            t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td><td><button class="btn btn-red" style="padding:4px;" onclick="deleteDoc(doc(db,'${activeCollection}','${i.id}'))">X</button></td></tr>`;
-        });
+    window.saveInventory = async () => {
+        const n = document.getElementById('inv-n').value, p = parseFloat(document.getElementById('inv-p').value), s = parseInt(document.getElementById('inv-s').value);
+        if(!n || isNaN(p)) return;
+        await addDoc(collection(db, activeCollection), { nombre: n, costo: parseFloat(document.getElementById('inv-c').value) || 0, pv: p, stock: s || 0, ts: Timestamp.now() });
+        document.querySelectorAll('#add-inv input').forEach(i => i.value = '');
     };
 
-    window.toggleElement = (id) => { const e = document.getElementById(id); e.style.display = e.style.display === 'none' ? 'grid' : 'none'; };
+    function showToast(msg, color = "var(--green)") {
+        const t = document.createElement('div'); t.className = 'toast'; t.style.borderColor = color; t.innerText = msg;
+        document.getElementById('toast-container').appendChild(t); setTimeout(() => t.remove(), 3000);
+    }
 
     function initChart() {
         const ctx = document.getElementById('mainChart').getContext('2d');
-        new Chart(ctx, { type: 'line', data: { labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie'], datasets: [{ label: 'Ventas', data: [12, 19, 3, 5, 2], borderColor: '#00ff88', tension: 0.4 }] }, options: { plugins: { legend: { display: false } } } });
+        new Chart(ctx, { type: 'line', data: { labels: ['Lun', 'Mar', 'Mie', 'Jue', 'Vie'], datasets: [{ label: 'Ventas', data: [5, 12, 8, 15, 10], borderColor: '#ff9d00', tension: 0.4 }] }, options: { plugins: { legend: { display: false } } } });
     }
 
-    // --- PDF & WHATSAPP ---
-    window.generatePDF = () => {
-        const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.text("NEXTCOM MOTOS - FACTURA", 10, 10);
-        doc.autoTable({ head: [['Item', 'Cant', 'Subtotal']], body: facturaItems.map(i => [i.nombre, i.cant, i.precio * i.cant]) });
-        doc.save("factura.pdf");
-    };
-
-    window.sendFacturaWhatsApp = () => {
-        const tel = document.getElementById('f-tel').value;
-        const msg = `Hola, envío detalle de servicio NEXTCOM: Total ${document.getElementById('f-total').innerText}`;
-        window.open(`https://wa.me/${tel}?text=${encodeURIComponent(msg)}`);
-    };
+    window.toggleElement = (id) => { const e = document.getElementById(id); e.style.display = e.style.display === 'none' ? 'grid' : 'none'; };
 
 </script>
 </body>
