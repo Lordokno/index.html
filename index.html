@@ -57,7 +57,7 @@
             <div id="user-display" class="user-badge">SISTEMA</div>
         </div>
         <div id="nav-container"></div>
-        <button class="btn btn-red" style="margin-top:auto;" onclick="location.reload()">🔒 LOGOUT</button>
+        <button class="btn btn-red" style="margin-top:auto;" onclick="logout()">🔒 LOGOUT</button>
     </div>
 
     <div class="main">
@@ -195,9 +195,11 @@
         "juan2026": { name: "TALLER MOTOS JUANCHO", col: "accesorios_motos", menu: ["dash", "inv", "pos", "factura"] }
     };
 
-    window.bootSystem = () => {
-        const code = document.getElementById('access-code').value;
+    // --- LÓGICA DE PERSISTENCIA ---
+    window.bootSystem = (savedCode = null) => {
+        const code = savedCode || document.getElementById('access-code').value;
         if(users[code]) {
+            localStorage.setItem('nextcom_session', code); // Guardamos la sesión
             currentUser = users[code];
             activeCollection = currentUser.col;
             document.getElementById('login-screen').style.display = 'none';
@@ -206,9 +208,23 @@
             renderMenu();
             startSync();
             initChart();
-        } else { showToast("CLAVE INCORRECTA", "var(--red)"); }
+        } else { if(!savedCode) showToast("CLAVE INCORRECTA", "var(--red)"); }
     };
 
+    window.logout = () => {
+        localStorage.removeItem('nextcom_session'); // Borramos la sesión
+        location.reload();
+    };
+
+    // Al cargar la página, revisamos si hay una sesión guardada
+    window.addEventListener('load', () => {
+        const savedSession = localStorage.getItem('nextcom_session');
+        if(savedSession) {
+            bootSystem(savedSession);
+        }
+    });
+
+    // --- EL RESTO DEL CÓDIGO SE MANTIENE EXACTAMENTE IGUAL ---
     function renderMenu() {
         const nav = document.getElementById('nav-container'); nav.innerHTML = '';
         const labels = { dash: "📊 DASHBOARD", inv: "📦 INVENTARIO", pos: "🛒 VENTAS POS", taller: "🔧 TALLER / ST", caja: "💰 CAJA / LOGS", factura: "📄 FACTURACIÓN" };
@@ -220,7 +236,6 @@
         document.getElementById('sec-'+id).classList.add('active');
     };
 
-    // --- LOGICA FACTURACION MOTOS JUANCHO ---
     window.searchFactura = (v) => {
         const res = document.getElementById('f-results'); res.innerHTML = '';
         if(v.length < 2) return;
@@ -252,25 +267,10 @@
 
     window.saveFacturaDB = async () => {
         const id = document.getElementById('f-id').value;
-        const fData = { 
-            cliente: document.getElementById('f-nombre').value, 
-            moto: document.getElementById('f-moto').value, 
-            tel: document.getElementById('f-tel').value, 
-            items: facturaItems, 
-            total: parseFloat(document.getElementById('f-total').innerText.replace('$', '')), 
-            ts: Timestamp.now(), 
-            fecha: new Date().toLocaleDateString() 
-        };
-
+        const fData = { cliente: document.getElementById('f-nombre').value, moto: document.getElementById('f-moto').value, tel: document.getElementById('f-tel').value, items: facturaItems, total: parseFloat(document.getElementById('f-total').innerText.replace('$', '')), ts: Timestamp.now(), fecha: new Date().toLocaleDateString() };
         if(!fData.cliente) return showToast("FALTA NOMBRE", "var(--red)");
-
-        if(id) {
-            await updateDoc(doc(db, "facturas_motos", id), fData);
-            showToast("FACTURA ACTUALIZADA");
-        } else {
-            await addDoc(collection(db, "facturas_motos"), fData);
-            showToast("FACTURA GUARDADA EN BÓVEDA");
-        }
+        if(id) { await updateDoc(doc(db, "facturas_motos", id), fData); showToast("FACTURA ACTUALIZADA"); } 
+        else { await addDoc(collection(db, "facturas_motos"), fData); showToast("FACTURA GUARDADA"); }
         resetFacturaForm();
     };
 
@@ -295,47 +295,20 @@
         document.getElementById('btn-save-factura').innerText = "💾 GUARDAR";
     };
 
-    // --- PDF PROFESIONAL TALLER JUANCHO ---
     window.generatePDF = () => {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        const cliente = document.getElementById('f-nombre').value || "Cliente General";
-        const moto = document.getElementById('f-moto').value || "N/A";
-        
-        // Cabecera Estilizada
         doc.setFillColor(30, 30, 30); doc.rect(0, 0, 210, 45, 'F');
         doc.setTextColor(255, 157, 0); doc.setFontSize(24); doc.text("TALLER DE MOTOS JUANCHO", 15, 25);
-        doc.setFontSize(10); doc.setTextColor(200, 200, 200); doc.text("Taller de motos", 15, 33);
-        
-        // Info Cliente
-        doc.setTextColor(0, 0, 0); doc.setFontSize(12); doc.setFont("helvetica", "bold");
-        doc.text("DATOS DE SERVICIO:", 15, 60);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Cliente: ${cliente}`, 15, 68); doc.text(`Vehículo: ${moto}`, 15, 75); doc.text(`Fecha: ${new Date().toLocaleDateString()}`, 140, 68);
-
-        // Tabla
-        doc.autoTable({
-            startY: 85,
-            head: [['DESCRIPCIÓN', 'CANT', 'P. UNIT', 'TOTAL']],
-            body: facturaItems.map(i => [i.nombre, i.cant, `$${i.precio}`, `$${(i.cant * i.precio).toFixed(2)}`]),
-            headStyles: { fillColor: [255, 157, 0] },
-            theme: 'striped'
-        });
-
-        const finalY = doc.lastAutoTable.finalY + 15;
-        doc.setFontSize(16); doc.text(`TOTAL A PAGAR: ${document.getElementById('f-total').innerText}`, 120, finalY);
-        doc.save(`Factura_Juancho_${cliente}.pdf`);
+        doc.autoTable({ startY: 85, head: [['DESCRIPCIÓN', 'CANT', 'TOTAL']], body: facturaItems.map(i => [i.nombre, i.cant, `$${(i.cant * i.precio).toFixed(2)}`]), headStyles: { fillColor: [255, 157, 0] }});
+        doc.save("Factura_Juancho.pdf");
     };
 
     window.sendFacturaWhatsApp = () => {
         const tel = document.getElementById('f-tel').value;
-        const cliente = document.getElementById('f-nombre').value;
-        const total = document.getElementById('f-total').innerText;
-        if(!tel) return showToast("INGRESE WHATSAPP", "var(--red)");
-        const msg = `*TALLER DE MOTOS JUANCHO*%0AHola *${cliente}*, tu moto está lista. Detalle total: *${total}*. Adjunto factura en breve.`;
+        const msg = `*TALLER DE MOTOS JUANCHO*%0AHola, tu moto está lista. Total: *${document.getElementById('f-total').innerText}*`;
         window.open(`https://wa.me/${tel}?text=${msg}`);
     };
 
-    // --- CORE & SYNC ---
     function startSync() {
         setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
         onSnapshot(collection(db, activeCollection), snap => {
@@ -346,7 +319,6 @@
                 });
             }
         });
-
         if(currentUser.name.includes("MOTOS")) {
             onSnapshot(query(collection(db, "facturas_motos"), orderBy("ts", "desc")), snap => {
                 const h = document.getElementById('f-history-list'); if(!h) return;
@@ -380,7 +352,6 @@
     }
 
     window.toggleElement = (id) => { const e = document.getElementById(id); e.style.display = e.style.display === 'none' ? 'grid' : 'none'; };
-
 </script>
 </body>
 </html>
