@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM OS v9.0 // ARCHIVE & CALENDAR</title>
+    <title>NEXTCOM OS v9.5 // PRODUCT REPORTS</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -31,7 +31,7 @@
         .active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         table { width: 100%; border-collapse: separate; border-spacing: 0 8px; font-size: 0.85rem; }
-        td { background: rgba(255,255,255,0.03); padding: 12px; color: #ccc; }
+        td { background: rgba(255,255,255,0.03); padding: 12px; color: #ccc; vertical-align: top; }
         th { text-align: left; padding: 10px; color: var(--amber); border-bottom: 1px solid var(--border); }
         .taller-col { height: 550px; overflow-y: auto; padding-right: 10px; border: 1px solid #111; border-radius: 8px; }
         #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; }
@@ -128,11 +128,11 @@
             </div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
-                <div class="card" style="height:400px; overflow-y:auto;">
-                    <h3 style="color:var(--green)">VENTAS DEL DÍA</h3>
-                    <table><thead><tr><th>HORA</th><th>TOTAL</th><th>UTILIDAD</th></tr></thead><tbody id="rep-ventas"></tbody></table>
+                <div class="card" style="height:450px; overflow-y:auto;">
+                    <h3 style="color:var(--green)">VENTAS DETALLADAS</h3>
+                    <table><thead><tr><th>HORA</th><th>PRODUCTOS</th><th>TOTAL</th><th>UTIL.</th></tr></thead><tbody id="rep-ventas"></tbody></table>
                 </div>
-                <div class="card" style="height:400px; overflow-y:auto;">
+                <div class="card" style="height:450px; overflow-y:auto;">
                     <h3 style="color:var(--red)">GASTOS DEL DÍA</h3>
                     <table><thead><tr><th>HORA</th><th>CONCEPTO</th><th>MONTO</th></tr></thead><tbody id="rep-gastos"></tbody></table>
                 </div>
@@ -174,7 +174,6 @@
     let localInv = []; let cart = []; let salesChart = null;
     let currentPage = 1; let itemsPerPage = 10; let filteredInv = [];
 
-    // --- FUNCIONES CORE (IGUALES) ---
     window.nav = (id) => {
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         document.getElementById('sec-'+id).classList.add('active');
@@ -200,7 +199,7 @@
         setTimeout(() => t.remove(), 3000);
     }
 
-    // --- INVENTARIO & POS ---
+    // --- INVENTARIO ---
     window.saveInventory = async () => {
         const n = document.getElementById('inv-n').value, c = parseFloat(document.getElementById('inv-c').value),
               p = parseFloat(document.getElementById('inv-p').value), s = parseInt(document.getElementById('inv-s').value);
@@ -236,6 +235,7 @@
         document.getElementById('page-info').innerText = `PÁGINA ${currentPage} DE ${Math.ceil(filteredInv.length / itemsPerPage) || 1}`;
     }
 
+    // --- POS & VENTAS ---
     window.searchPOS = (v) => {
         const res = document.getElementById('pos-results'); res.innerHTML = '';
         if(v.length < 2) return;
@@ -263,15 +263,27 @@
         if(!cart.length) return;
         const total = cart.reduce((a,b) => a+b.pv, 0);
         const utilidad = total - cart.reduce((a,b) => a+(b.costo||0), 0);
+        const productosVendidos = cart.map(i => i.nombre).join(", "); // Se guardan los nombres
+        
         const batch = writeBatch(db);
         const fecha = new Date().toISOString().split('T')[0];
         cart.forEach(item => batch.update(doc(db, "accesorios", item.id), { stock: item.stock - 1 }));
-        await addDoc(collection(db, "ventas"), { total, utilidad, ts: Timestamp.now(), hora: new Date().toLocaleTimeString(), fecha: fecha, archivado: false });
+        
+        await addDoc(collection(db, "ventas"), { 
+            productos: productosVendidos,
+            total, 
+            utilidad, 
+            ts: Timestamp.now(), 
+            hora: new Date().toLocaleTimeString(), 
+            fecha: fecha, 
+            archivado: false 
+        });
+        
         await batch.commit();
         cart = []; renderCart(); showToast("VENTA EXITOSA");
     };
 
-    // --- CAJA & CIERRE ---
+    // --- CAJA & REPORTES ---
     window.saveGasto = async () => {
         const d = document.getElementById('g-desc').value, m = parseFloat(document.getElementById('g-monto').value);
         if(d && m) {
@@ -283,54 +295,40 @@
 
     window.realizarCierre = async () => {
         const neto = parseFloat(document.getElementById('caja-neto').innerText.replace('$',''));
-        if(!confirm(`¿CONFIRMAR CIERRE POR $${neto}? LOS DATOS SE GUARDARÁN EN EL HISTORIAL.`)) return;
-        
-        const fechaHoy = new Date().toISOString().split('T')[0];
+        if(!confirm(`¿CONFIRMAR CIERRE POR $${neto}?`)) return;
         await addDoc(collection(db, "cierres"), { total: neto, ts: Timestamp.now(), fecha: new Date().toLocaleDateString(), hora: new Date().toLocaleTimeString() });
-        
-        // NO BORRAR, SOLO MARCAR COMO ARCHIVADO
         const batch = writeBatch(db);
         const vSnap = await getDocs(query(collection(db, "ventas"), where("archivado", "==", false)));
         const gSnap = await getDocs(query(collection(db, "gastos"), where("archivado", "==", false)));
-        
         vSnap.forEach(d => batch.update(d.ref, { archivado: true }));
         gSnap.forEach(d => batch.update(d.ref, { archivado: true }));
-        
         await batch.commit();
-        showToast("CIERRE COMPLETADO Y ARCHIVADO");
+        showToast("CIERRE COMPLETADO");
     };
 
-    // --- REPORTES FILTRADOS ---
     window.filterReportsByDate = async (selectedDate) => {
-        const rv = document.getElementById('rep-ventas'); rv.innerHTML = 'Cargando...';
-        const rg = document.getElementById('rep-gastos'); rg.innerHTML = 'Cargando...';
-        const rr = document.getElementById('rep-reparaciones'); rr.innerHTML = 'Cargando...';
+        const rv = document.getElementById('rep-ventas'); rv.innerHTML = '...';
+        const rg = document.getElementById('rep-gastos'); rg.innerHTML = '...';
+        const rr = document.getElementById('rep-reparaciones'); rr.innerHTML = '...';
 
-        // Ventas
-        const qV = query(collection(db, "ventas"), where("fecha", "==", selectedDate));
-        const sV = await getDocs(qV);
+        const sV = await getDocs(query(collection(db, "ventas"), where("fecha", "==", selectedDate)));
         rv.innerHTML = '';
         sV.forEach(d => {
             const data = d.data();
-            rv.innerHTML += `<tr><td>${data.hora}</td><td>$${data.total.toFixed(2)}</td><td>$${data.utilidad.toFixed(2)}</td></tr>`;
+            rv.innerHTML += `<tr><td>${data.hora}</td><td style="font-size:0.7rem; color:var(--blue)">${data.productos || 'Sin datos'}</td><td>$${data.total.toFixed(2)}</td><td style="color:var(--green)">$${data.utilidad.toFixed(2)}</td></tr>`;
         });
 
-        // Gastos
-        const qG = query(collection(db, "gastos"), where("fecha", "==", selectedDate));
-        const sG = await getDocs(qG);
+        const sG = await getDocs(query(collection(db, "gastos"), where("fecha", "==", selectedDate)));
         rg.innerHTML = '';
         sG.forEach(d => {
             const data = d.data();
             rg.innerHTML += `<tr><td>${data.hora}</td><td>${data.desc}</td><td>$${data.monto.toFixed(2)}</td></tr>`;
         });
 
-        // Reparaciones Listas
-        const qR = query(collection(db, "ordenes"), where("estado", "==", "LISTO"));
-        const sR = await getDocs(qR);
+        const sR = await getDocs(query(collection(db, "ordenes"), where("estado", "==", "LISTO")));
         rr.innerHTML = '';
         sR.forEach(d => {
             const data = d.data();
-            // Filtramos por fecha local de la orden (aproximada por el timestamp si no tiene campo fecha)
             const fOrden = data.ts.toDate().toISOString().split('T')[0];
             if(fOrden === selectedDate) {
                 rr.innerHTML += `<tr><td>${data.modelo}</td><td>${data.cliente}</td><td>$${data.precio}</td><td>$${data.anticipo}</td></tr>`;
@@ -367,29 +365,35 @@
         onSnapshot(collection(db, "accesorios"), snap => {
             localInv = snap.docs.map(d => ({id:d.id, ...d.data()}));
             filteredInv = [...localInv]; renderInventory();
+            let sAlert = 0; localInv.forEach(i => { if(i.stock <= 3) sAlert++; });
+            document.getElementById('kpi-s').innerText = sAlert;
         });
 
         onSnapshot(collection(db, "ordenes"), snap => {
             const p = document.getElementById('list-pending'), r = document.getElementById('list-ready');
-            p.innerHTML = ''; r.innerHTML = '';
+            p.innerHTML = ''; r.innerHTML = ''; let count = 0;
             snap.forEach(d => {
                 const o = d.data(); const ready = o.estado === "LISTO";
+                if(!ready) count++;
                 const h = `<div class="card" style="border-left:5px solid ${ready?'var(--green)':'var(--amber)'}; padding:15px; margin-bottom:12px;"><b>${o.cliente}</b><br><small>${o.modelo}</small><br><small>${o.tel}</small><div style="display:flex; gap:10px; margin-top:12px;"><button class="btn" style="flex:1; padding:6px;" onclick="swapOrder('${d.id}', '${o.estado}')">MOVER</button><button class="btn btn-red" style="padding:6px 15px;" onclick="deleteDoc(doc(db,'ordenes','${d.id}'))">X</button></div></div>`;
                 if(ready) r.innerHTML += h; else p.innerHTML += h;
             });
+            document.getElementById('kpi-t').innerText = count;
         });
 
-        // Caja solo muestra lo NO archivado (lo del día actual antes del cierre)
         onSnapshot(query(collection(db, "ventas"), where("archivado", "==", false)), snapV => {
             onSnapshot(query(collection(db, "gastos"), where("archivado", "==", false)), snapG => {
-                let v = 0, g = 0;
+                let v = 0, u = 0, g = 0;
                 const lg = document.getElementById('logs-gastos'); lg.innerHTML = '';
-                snapV.forEach(d => v += d.data().total);
+                snapV.forEach(d => { v += d.data().total; u += d.data().utilidad; });
                 snapG.forEach(d => {
                     const data = d.data(); g += data.monto;
                     lg.innerHTML += `<tr><td>${data.hora}</td><td>${data.desc}</td><td>$${data.monto.toFixed(2)}</td></tr>`;
                 });
+                document.getElementById('kpi-v').innerText = `$${v.toFixed(2)}`;
+                document.getElementById('kpi-u').innerText = `$${u.toFixed(2)}`;
                 document.getElementById('caja-neto').innerText = `$${(v-g).toFixed(2)}`;
+                if(salesChart) { salesChart.data.datasets[0].data = [v, g]; salesChart.update(); }
             });
         });
     }
@@ -400,6 +404,27 @@
     }
 
     window.toggleElement = (id) => { const e = document.getElementById(id); e.style.display = e.style.display === 'none' ? 'grid' : 'none'; };
+    window.savePedido = async () => {
+        const msg = document.getElementById('st-msg').value;
+        if(msg) await addDoc(collection(db, "pedidos_st"), { msg, ts: Timestamp.now() });
+        document.getElementById('st-msg').value = '';
+    };
+    window.clearST = async () => {
+        if(!confirm("¿VACIAR LISTA?")) return;
+        const snap = await getDocs(collection(db, "pedidos_st"));
+        const b = writeBatch(db); snap.forEach(d => b.delete(d.ref)); await b.commit();
+    };
+    window.sendToST = () => { 
+        let t = "PEDIDO NEXTCOM:\n";
+        document.querySelectorAll('.st-item-text').forEach(el => t += el.innerText + "\n");
+        window.open(`https://wa.me/50249698555?text=${encodeURIComponent(t)}`); 
+    };
+    onSnapshot(query(collection(db, "pedidos_st"), orderBy("ts", "asc")), snap => {
+        const box = document.getElementById('st-lista-box'); box.innerHTML = '';
+        snap.forEach(d => {
+            box.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; background:#111; padding:8px; margin-bottom:5px; border:1px solid #222;"><span class="st-item-text">• ${d.data().msg}</span><button class="btn btn-red" style="padding:2px 8px; margin:0;" onclick="deleteDoc(doc(db,'pedidos_st','${d.id}'))">X</button></div>`;
+        });
+    });
 </script>
 </body>
 </html>
