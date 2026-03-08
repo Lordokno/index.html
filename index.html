@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXTCOM OS // Multi-User System</title>
+    <title>NEXTCOM OS // Multi-User Enterprise</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -11,22 +11,21 @@
     <style>
         :root {
             --amber: #ff9d00; --bg: #020202; --red: #ff2a2a; --green: #00ff88; --blue: #00d9ff;
-            --blue-royal: #0066ff; --white: #f0f0f0;
             --glass: rgba(15, 15, 15, 0.9); --border: rgba(255, 157, 0, 0.2);
-            --font-main: 'Share Tech Mono', monospace;
-            --font-title: 'Orbitron', sans-serif;
+            --font-main: 'Share Tech Mono', monospace; --font-title: 'Orbitron', sans-serif;
         }
         * { box-sizing: border-box; outline: none; }
-        body { margin: 0; background: var(--bg); color: var(--white); font-family: var(--font-main); height: 100vh; overflow: hidden; display: flex; }
+        body { margin: 0; background: var(--bg); color: #fff; font-family: var(--font-main); height: 100vh; overflow: hidden; display: flex; }
         
         /* Temas Dinámicos */
-        body.sandra-theme { --amber: var(--blue-royal); --border: rgba(0, 102, 255, 0.4); }
-        body.motos-theme { --amber: #ff9d00; }
+        body.sandra-theme { --amber: #0066ff; --border: rgba(0, 102, 255, 0.4); }
+        body.motos-theme { --amber: #ff9d00; --border: rgba(255, 157, 0, 0.4); }
 
         .sidebar { width: 260px; background: #000; border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 20px; z-index: 100; }
-        .main { flex: 1; padding: 30px; overflow-y: auto; position: relative; }
+        .main { flex: 1; padding: 30px; overflow-y: auto; }
         .btn { background: transparent; border: 1px solid var(--amber); color: var(--amber); padding: 12px; cursor: pointer; font-family: var(--font-title); font-size: 0.7rem; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; justify-content: center; width: 100%; text-transform: uppercase; }
         .btn:hover { background: var(--amber); color: #000; box-shadow: 0 0 15px var(--amber); }
+        .btn-red { border-color: var(--red); color: var(--red); }
         .card { background: var(--glass); border: 1px solid var(--border); border-radius: 8px; padding: 20px; margin-bottom: 20px; backdrop-filter: blur(10px); }
         input, textarea, select { background: rgba(0,0,0,0.5); border: 1px solid #333; color: #fff; padding: 12px; width: 100%; margin-bottom: 12px; font-family: var(--font-main); border-left: 3px solid var(--amber); }
         .section { display: none; animation: fadeIn 0.4s ease-out; }
@@ -43,7 +42,7 @@
 
 <div id="login-screen" style="position:fixed; inset:0; background:#000; z-index:2000; display:flex; justify-content:center; align-items:center;">
     <div style="width:350px; text-align:center;">
-        <h1 style="font-family: var(--font-title); letter-spacing:8px; color:#fff;">NEXTCOM<span style="color:var(--amber)" id="os-logo">OS</span></h1>
+        <h1 style="font-family: var(--font-title); letter-spacing:8px; color:#fff;">NEXTCOM<span id="logo-accent" style="color:var(--amber)">OS</span></h1>
         <div class="card">
             <input type="password" id="access-code" placeholder="ACCESS CODE" style="text-align:center;">
             <button class="btn" onclick="bootSystem()">AUTHENTICATE</button>
@@ -55,25 +54,20 @@
     <div class="sidebar">
         <div style="margin-bottom:20px; border-bottom:1px solid #222; padding-bottom:10px;">
             <div id="clock" style="font-family:var(--font-title); font-size:1.2rem; color:#fff;">00:00:00</div>
-            <div id="user-display" style="font-size: 0.6rem; background: var(--amber); color: #000; padding: 2px 8px; border-radius: 10px; font-family: var(--font-title);">SISTEMA</div>
+            <div id="user-display" style="font-size: 0.6rem; background: var(--amber); color: #000; padding: 2px 8px; border-radius: 10px; font-family: var(--font-title); text-align:center;">SISTEMA</div>
         </div>
         <div id="nav-container"></div>
-        <button class="btn" style="border-color:var(--red); color:var(--red); margin-top:auto;" onclick="logout()">🔒 LOGOUT</button>
+        <button class="btn btn-red" style="margin-top:auto;" onclick="logout()">🔒 LOGOUT</button>
     </div>
 
     <div class="main">
-        <div id="sec-dash" class="section">
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:15px; margin-bottom:25px;">
-                <div class="card" style="text-align:center;"><b><span id="kpi-v">$0.00</span></b><br><small>Ventas Hoy</small></div>
-                <div class="card" style="text-align:center; border-color:var(--green)"><b><span id="kpi-u">$0.00</span></b><br><small>Utilidad</small></div>
-            </div>
-            <div class="card"><h3>FLUJO FINANCIERO</h3><canvas id="mainChart" height="100"></canvas></div>
-        </div>
-
         <div id="sec-inv" class="section">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h2>CATÁLOGO DE PRODUCTOS</h2><button class="btn" style="width:150px; border-color:var(--green); color:var(--green)" onclick="toggleElement('add-inv')">+ NUEVO</button></div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h2 id="inv-title">CATÁLOGO</h2>
+                <button class="btn" style="width:150px; border-color:var(--green); color:var(--green)" onclick="toggleElement('add-inv')">+ NUEVO</button>
+            </div>
             <div id="add-inv" class="card" style="display:none; grid-template-columns:repeat(4, 1fr) 100px; gap:10px;">
-                <input id="inv-n" placeholder="NOMBRE"><input id="inv-c" type="number" placeholder="COSTO $"><input id="inv-p" type="number" placeholder="VENTA $"><input id="inv-s" type="number" placeholder="STOCK"><button class="btn btn-green" onclick="saveInventory()">OK</button>
+                <input id="inv-n" placeholder="NOMBRE"><input id="inv-c" type="number" placeholder="COSTO $"><input id="inv-p" type="number" placeholder="VENTA $"><input id="inv-s" type="number" placeholder="STOCK"><button class="btn" onclick="saveInventory()">OK</button>
             </div>
             <div class="card"><table><thead><tr><th>PRODUCTO</th><th>COSTO</th><th>PRECIO</th><th>STOCK</th><th>ACCION</th></tr></thead><tbody id="table-inv"></tbody></table></div>
         </div>
@@ -81,30 +75,45 @@
         <div id="sec-factura" class="section">
             <div style="display:grid; grid-template-columns: 350px 1fr; gap:20px;">
                 <div>
-                    <div class="card"><h3>CLIENTE</h3><input id="f-nombre" placeholder="Nombre"><input id="f-moto" placeholder="Moto/Placa"><input id="f-tel" placeholder="WhatsApp"></div>
-                    <div class="card"><h3>AÑADIR TRABAJO</h3><input id="f-manual-n" placeholder="Servicio"><input id="f-manual-p" type="number" placeholder="Precio $"><button class="btn" onclick="addManualFactura()">+ AÑADIR</button></div>
+                    <div class="card">
+                        <h3>DATOS CLIENTE</h3>
+                        <input id="f-nombre" placeholder="Nombre Completo">
+                        <input id="f-moto" placeholder="Moto / Placa">
+                        <input id="f-tel" placeholder="WhatsApp">
+                    </div>
+                    <div class="card">
+                        <h3>BUSCAR REPUESTOS</h3>
+                        <input id="f-search" placeholder="Buscar en inventario..." oninput="searchFactura(this.value)">
+                        <div id="f-results" style="max-height:150px; overflow-y:auto; background:rgba(0,0,0,0.3)"></div>
+                        <hr style="border:0; border-top:1px solid #333; margin:10px 0;">
+                        <input id="f-manual-n" placeholder="Mano de Obra"><input id="f-manual-p" type="number" placeholder="Precio $">
+                        <button class="btn" onclick="addManualFactura()">+ AÑADIR SERVICIO</button>
+                    </div>
                 </div>
-                <div class="card">
-                    <h2>FACTURA: TALLER JUANCHO</h2>
-                    <table><thead><tr><th>DESC</th><th>CANT</th><th>TOTAL</th><th></th></tr></thead><tbody id="f-list"></tbody></table>
-                    <div style="font-size:2rem; margin-top:20px;">TOTAL: <span id="f-total">$0.00</span></div>
-                    <button class="btn btn-green" onclick="generatePDFJuancho()">📄 GENERAR PDF PROFESIONAL</button>
+                <div class="card" style="border-top:4px solid var(--green)">
+                    <h2 style="font-family:var(--font-title)">TALLER JUANCHO</h2>
+                    <table style="margin-top:20px;"><thead><tr><th>DESC</th><th>CANT</th><th>SUBTOTAL</th><th></th></tr></thead><tbody id="f-list"></tbody></table>
+                    <div style="font-size:2.5rem; margin-top:20px; font-family:var(--font-title); color:var(--green)">TOTAL: <span id="f-total">$0.00</span></div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
+                        <button class="btn" style="border-color:var(--blue); color:var(--blue)" onclick="generatePDFJuancho()">📄 GENERAR PDF</button>
+                        <button class="btn btn-red" onclick="resetFactura()">LIMPIAR</button>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div id="sec-encomiendas" class="section">
-            <h2 style="font-family: var(--font-title); border-bottom: 2px solid var(--amber); padding-bottom: 10px;">SANDRA EXPRESS // CARGA USA</h2>
+            <h2 style="font-family: var(--font-title); border-bottom: 2px solid var(--amber); padding-bottom:10px;">SANDRA EXPRESS // CARGA USA</h2>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                <div class="card"><h3>REMITENTE (SV)</h3><input id="e-rem-nom" placeholder="Nombre"><input id="e-rem-tel" placeholder="Tel SV"></div>
-                <div class="card"><h3>DESTINATARIO (USA)</h3><input id="e-des-nom" placeholder="Nombre Recibe"><input id="e-des-tel" placeholder="Tel USA"><select id="e-des-est"></select></div>
+                <div class="card"><h3>REMITENTE (SV)</h3><input id="e-rem-nom" placeholder="Nombre"><input id="e-rem-tel" placeholder="Teléfono"><textarea id="e-rem-dir" placeholder="Dirección SV"></textarea></div>
+                <div class="card"><h3>DESTINATARIO (USA)</h3><input id="e-des-nom" placeholder="Nombre Recibe"><input id="e-des-tel" placeholder="Tel USA"><textarea id="e-des-dir" placeholder="Dirección USA"></textarea><select id="e-des-est"></select></div>
             </div>
-            <div class="card" style="display:grid; grid-template-columns: 2fr 1fr 150px; gap:10px;">
-                <input id="e-desc" placeholder="Contenido"><input id="e-pack" placeholder="# Paquete"><button class="btn" onclick="addPack()">AGREGAR</button>
+            <div class="card" style="display:grid; grid-template-columns: 2fr 1fr 1fr 1fr 150px; gap:10px;">
+                <input id="e-desc" placeholder="Contenido"><input id="e-cant" type="number" placeholder="Cant"><input id="e-peso" type="number" placeholder="Lbs"><input id="e-pack" placeholder="# Paquete"><button class="btn" onclick="addPack()">+ AGREGAR</button>
             </div>
             <div class="card">
-                <button class="btn" style="border-color:var(--green); color:var(--green)" onclick="generateSandraPDF()">📄 GENERAR ETIQUETAS (2 POR PÁGINA)</button>
-                <table><thead><tr><th># PACK</th><th>REMITENTE</th><th>RECIBE</th><th>ESTADO</th><th>ACCION</th></tr></thead><tbody id="e-table-list"></tbody></table>
+                <button class="btn" style="border-color:var(--green); color:var(--green); margin-bottom:15px;" onclick="generateSandraPDF()">📄 GENERAR ETIQUETAS (2 POR PÁGINA)</button>
+                <table><thead><tr><th>#</th><th>RECIBE</th><th>ESTADO</th><th>PESO</th><th>ACCION</th></tr></thead><tbody id="e-table-list"></tbody></table>
             </div>
         </div>
     </div>
@@ -134,35 +143,31 @@
     let facturaItems = [];
 
     const users = {
-        "nextcom2024": { name: "NEXTCOM SV", theme: "default", col: "accesorios", menu: ["dash", "inv"] },
-        "juan2026": { name: "TALLER JUANCHO", theme: "motos", col: "accesorios_motos", menu: ["dash", "inv", "factura"] },
+        "juan2026": { name: "TALLER JUANCHO", theme: "motos", col: "accesorios_motos", menu: ["inv", "factura"] },
         "sandraexpress2026": { name: "SANDRA EXPRESS", theme: "sandra", col: "encomiendas", menu: ["encomiendas"] }
     };
+
+    const estadosColor = { "California": "#ff4444", "Texas": "#44ff44", "Florida": "#4444ff", "New York": "#ffff44", "Virginia": "#ff44ff", "Maryland": "#44ffff" };
 
     window.bootSystem = (savedCode = null) => {
         const code = savedCode || document.getElementById('access-code').value;
         if(users[code]) {
             localStorage.setItem('nextcom_session', code);
             currentUser = users[code];
-            
-            // Aplicar Temas
-            document.body.className = '';
-            if(currentUser.theme !== 'default') document.body.classList.add(currentUser.theme + '-theme');
-            
+            document.body.className = currentUser.theme + '-theme';
             document.getElementById('login-screen').style.display = 'none';
             document.getElementById('app').style.display = 'flex';
             document.getElementById('user-display').innerText = currentUser.name;
-            
             renderMenu();
             if(currentUser.theme === 'sandra') initEstados();
             startSync();
-        }
+        } else if(!savedCode) alert("CÓDIGO INCORRECTO");
     };
 
     function renderMenu() {
-        const navCont = document.getElementById('nav-container'); navCont.innerHTML = '';
-        const labels = { dash: "📊 DASH", inv: "📦 INV", factura: "📄 FACTURA", encomiendas: "🚚 ENVÍOS" };
-        currentUser.menu.forEach(m => { navCont.innerHTML += `<button class="btn" onclick="nav('${m}')">${labels[m]}</button>`; });
+        const nav = document.getElementById('nav-container'); nav.innerHTML = '';
+        const labels = { inv: "📦 INVENTARIO", factura: "📄 FACTURA", encomiendas: "🚚 ENCOMIENDAS" };
+        currentUser.menu.forEach(m => nav.innerHTML += `<button class="btn" onclick="nav('${m}')">${labels[m]}</button>`);
         nav(currentUser.menu[0]);
     }
 
@@ -171,60 +176,108 @@
         document.getElementById('sec-'+id).classList.add('active');
     };
 
-    // --- LÓGICA TALLERES (JUANCHO / NEXTCOM) ---
-    window.editStock = async (id, current) => {
-        const n = prompt("NUEVO STOCK:", current);
-        if(n !== null) await updateDoc(doc(db, currentUser.col, id), { stock: parseInt(n) });
+    // --- FUNCIONES TALLER JUANCHO ---
+    window.searchFactura = (v) => {
+        const res = document.getElementById('f-results'); res.innerHTML = '';
+        if(v.length < 2) return;
+        localInv.filter(i => i.nombre.toLowerCase().includes(v.toLowerCase())).forEach(i => {
+            res.innerHTML += `<div style="padding:10px; border-bottom:1px solid #222; cursor:pointer;" onclick="addItemFactura('${i.nombre}', ${i.pv})">${i.nombre} - $${i.pv}</div>`;
+        });
     };
+
+    window.addItemFactura = (n, p) => {
+        const exist = facturaItems.find(i => i.nombre === n);
+        if(exist) exist.cant++; else facturaItems.push({nombre: n, precio: p, cant: 1});
+        renderFactura(); document.getElementById('f-results').innerHTML = '';
+    };
+
+    window.addManualFactura = () => {
+        const n = document.getElementById('f-manual-n').value, p = parseFloat(document.getElementById('f-manual-p').value);
+        if(n && p) { facturaItems.push({nombre: n, precio: p, cant: 1}); renderFactura(); }
+    };
+
+    function renderFactura() {
+        const t = document.getElementById('f-list'); t.innerHTML = ''; let total = 0;
+        facturaItems.forEach((item, idx) => {
+            const sub = item.precio * item.cant; total += sub;
+            t.innerHTML += `<tr><td>${item.nombre}</td><td>${item.cant}</td><td>$${sub.toFixed(2)}</td><td><button class="btn btn-red" style="padding:2px; margin:0;" onclick="facturaItems.splice(${idx},1);renderFactura();">X</button></td></tr>`;
+        });
+        document.getElementById('f-total').innerText = `$${total.toFixed(2)}`;
+    }
 
     window.generatePDFJuancho = () => {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
-        doc.setFillColor(30,30,30); doc.rect(0,0,210,40,'F');
-        doc.setTextColor(255,157,0); doc.text("TALLER DE MOTOS JUANCHO", 15, 20);
-        doc.setFontSize(10); doc.setTextColor(255); doc.text("Técnico: 76625704", 15, 30);
-        doc.autoTable({ startY: 50, head: [['SERVICIO', 'TOTAL']], body: facturaItems.map(i => [i.nombre, `$${i.precio}`]) });
+        const cliente = document.getElementById('f-nombre').value || "Cliente";
+        doc.setFillColor(30,30,30); doc.rect(0,0,210,45,'F');
+        doc.setTextColor(255,157,0); doc.setFontSize(22); doc.text("TALLER DE MOTOS JUANCHO", 15, 20);
+        doc.setFontSize(10); doc.setTextColor(255); doc.text("Contacto Técnico: 76625704", 15, 30);
+        doc.setTextColor(0); doc.text(`CLIENTE: ${cliente.toUpperCase()} | MOTO: ${document.getElementById('f-moto').value}`, 15, 55);
+        doc.autoTable({ startY: 65, head: [['DESCRIPCIÓN', 'CANT', 'TOTAL']], body: facturaItems.map(i => [i.nombre, i.cant, `$${(i.cant*i.precio).toFixed(2)}`]), headStyles: {fillColor: [255, 157, 0]} });
         doc.text("Gracias por su preferencia, los esperamos nuevamente.", 105, doc.lastAutoTable.finalY + 20, {align:"center"});
-        doc.save("Factura_Juancho.pdf");
+        doc.save(`Factura_Juancho_${cliente}.pdf`);
     };
 
-    // --- LÓGICA ENCOMIENDAS (SANDRA) ---
+    // --- FUNCIONES SANDRA EXPRESS ---
     function initEstados() {
-        const sel = document.getElementById('e-des-est'); if(!sel) return;
-        ["California", "Texas", "Florida", "New York", "Virginia", "Maryland"].forEach(e => {
-            sel.innerHTML += `<option value="${e}">${e}</option>`;
-        });
+        const sel = document.getElementById('e-des-est'); sel.innerHTML = '<option value="">Estado...</option>';
+        Object.keys(estadosColor).forEach(e => sel.innerHTML += `<option value="${e}">${e}</option>`);
     }
+
+    window.addPack = async () => {
+        const pack = {
+            remitente: document.getElementById('e-rem-nom').value, rem_tel: document.getElementById('e-rem-tel').value, rem_dir: document.getElementById('e-rem-dir').value,
+            recibe: document.getElementById('e-des-nom').value, des_tel: document.getElementById('e-des-tel').value, des_dir: document.getElementById('e-des-dir').value,
+            estado: document.getElementById('e-des-est').value, desc: document.getElementById('e-desc').value, peso: document.getElementById('e-peso').value, n_pack: document.getElementById('e-pack').value, ts: Timestamp.now()
+        };
+        await addDoc(collection(db, "encomiendas"), pack);
+        showToast("PAQUETE REGISTRADO");
+    };
 
     window.generateSandraPDF = () => {
         const { jsPDF } = window.jspdf; const doc = new jsPDF();
         localEnc.forEach((item, i) => {
             if (i > 0 && i % 2 === 0) doc.addPage();
-            const y = (i % 2) * 140 + 10;
-            doc.setFillColor(0, 102, 255); doc.rect(10, y, 190, 15, 'F');
-            doc.setTextColor(255); doc.text(`SANDRA EXPRESS - ${item.estado}`, 105, y+10, {align:"center"});
-            doc.setTextColor(0); doc.text(`RECIBE: ${item.recibe}`, 15, y+30);
-            doc.text(`PAQUETE: ${item.n_pack}`, 15, y+40);
+            const yOff = (i % 2) * 140 + 10;
+            const color = estadosColor[item.estado] || "#000000";
+            doc.setDrawColor(200); doc.rect(10, yOff, 190, 130);
+            doc.setFillColor(color); doc.rect(10, yOff, 190, 15, 'F');
+            doc.setTextColor(255); doc.setFontSize(16); doc.text(`SANDRA EXPRESS - ${item.estado.toUpperCase()}`, 105, yOff+10, {align:"center"});
+            doc.setTextColor(0); doc.setFontSize(12); doc.text(`DESTINATARIO: ${item.recibe}`, 15, yOff+30);
+            doc.setFontSize(10); doc.text(`DIRECCION: ${item.des_dir}`, 15, yOff+40, {maxWidth: 180});
+            doc.text(`CONTENIDO: ${item.desc} | PAQUETE: ${item.n_pack} | PESO: ${item.peso} Lbs`, 15, yOff+60);
         });
-        doc.save("Etiquetas_Sandra.pdf");
+        doc.save("Etiquetas_SandraExpress.pdf");
     };
 
+    // --- CORE & SYNC ---
     function startSync() {
         onSnapshot(collection(db, currentUser.col), snap => {
-            const data = snap.docs.map(d => ({id:d.id, ...d.data()}));
-            if(currentUser.menu.includes('inv')) renderInv(data);
-            if(currentUser.menu.includes('encomiendas')) localEnc = data;
+            const data = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            if(currentUser.theme === 'motos') {
+                localInv = data;
+                const t = document.getElementById('table-inv'); t.innerHTML = '';
+                data.forEach(i => t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td><td><button class="btn" style="width:auto; display:inline;" onclick="editStock('${i.id}',${i.stock})">STK</button></td></tr>`);
+            } else {
+                localEnc = data;
+                const t = document.getElementById('table-list-encomiendas') || document.getElementById('e-table-list'); t.innerHTML = '';
+                data.forEach(e => t.innerHTML += `<tr><td>${e.n_pack}</td><td>${e.recibe}</td><td>${e.estado}</td><td>${e.peso} Lbs</td><td><button class="btn btn-red" style="width:auto; display:inline;" onclick="deleteDoc(doc(db,'encomiendas','${e.id}'))">X</button></td></tr>`);
+            }
         });
     }
 
-    function renderInv(data) {
-        const t = document.getElementById('table-inv'); if(!t) return;
-        t.innerHTML = '';
-        data.forEach(i => {
-            t.innerHTML += `<tr><td>${i.nombre}</td><td>$${i.costo}</td><td>$${i.pv}</td><td>${i.stock}</td>
-            <td><button class="btn" style="width:auto; display:inline; padding:5px;" onclick="editStock('${i.id}',${i.stock})">STK</button></td></tr>`;
-        });
-    }
+    window.saveInventory = async () => {
+        const data = { nombre: document.getElementById('inv-n').value, costo: document.getElementById('inv-c').value, pv: document.getElementById('inv-p').value, stock: document.getElementById('inv-s').value };
+        await addDoc(collection(db, currentUser.col), data);
+        showToast("GUARDADO");
+    };
 
+    window.editStock = async (id, cur) => {
+        const val = prompt("NUEVO STOCK:", cur);
+        if(val) await updateDoc(doc(db, currentUser.col, id), {stock: parseInt(val)});
+    };
+
+    window.showToast = (m) => { const t = document.createElement('div'); t.className='toast'; t.innerText=m; document.getElementById('toast-container').appendChild(t); setTimeout(()=>t.remove(), 2000); };
+    window.toggleElement = (id) => { const e = document.getElementById(id); e.style.display = e.style.display==='none'?'grid':'none'; };
     window.logout = () => { localStorage.removeItem('nextcom_session'); location.reload(); };
     window.addEventListener('load', () => { if(localStorage.getItem('nextcom_session')) bootSystem(localStorage.getItem('nextcom_session')); });
     setInterval(() => { document.getElementById('clock').innerText = new Date().toLocaleTimeString(); }, 1000);
