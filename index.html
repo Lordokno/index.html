@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEXTCOM Multiservicios</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><path d='M16 6 L26 11 L26 21 L16 26 L6 21 L6 11 Z' fill='none' stroke='white' stroke-width='2'/><circle cx='16' cy='16' r='4' fill='white'/><path d='M16 8 L16 12 M16 20 L16 24 M8 16 L12 16 M20 16 L24 16' stroke='white' stroke-width='2' stroke-linecap='round'/></svg>">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -109,18 +112,7 @@ tr.status-urgente td{color:#ef4444!important;font-weight:700;}
 .wbadge-active{background:rgba(6,182,212,.12);color:var(--warranty);border:1px solid rgba(6,182,212,.2);}
 .wbadge-expiring{background:rgba(245,158,11,.12);color:var(--edit);border:1px solid rgba(245,158,11,.2);animation:blink 1.5s infinite;}
 .wbadge-expired{background:rgba(239,68,68,.12);color:var(--danger);border:1px solid rgba(239,68,68,.2);}
-.warranty-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:36px;}
-.warranty-card{background:var(--panel);border:1px solid var(--border);border-radius:var(--rx);padding:24px 28px;transition:.3s;position:relative;overflow:hidden;}
-.warranty-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
-.warranty-card.active-warranty::before{background:linear-gradient(90deg,var(--warranty),#4f46e5);}
-.warranty-card.expiring-warranty::before{background:linear-gradient(90deg,var(--edit),#f97316);animation:blink 1.5s infinite;}
-.warranty-card.expired-warranty::before{background:var(--danger);}
-.warranty-card:hover{border-color:rgba(255,255,255,.1);transform:translateY(-3px);}
-.wcard-ticket{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--warranty);letter-spacing:1px;}
-.wcard-client{font-size:15px;font-weight:800;color:#fff;margin:10px 0 3px;}
-.wcard-device{font-size:11px;color:var(--text-dim);margin-bottom:14px;}
-.wcard-days{font-size:32px;font-weight:800;line-height:1;}
-.wcard-days-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:10px;}
+
 .warranty-filters{display:flex;gap:8px;margin-bottom:24px;flex-wrap:wrap;}
 .wfilter-btn{padding:9px 18px;border-radius:11px;font-size:11px;font-weight:700;cursor:pointer;transition:.2s;border:1px solid var(--border);background:transparent;color:var(--text-dim);letter-spacing:.5px;text-transform:uppercase;}
 .wfilter-btn:hover{color:#fff;border-color:rgba(255,255,255,.2);}
@@ -154,11 +146,7 @@ tr.status-urgente td{color:#ef4444!important;font-weight:700;}
 .wa-preview{background:rgba(37,211,102,.05);border:1px solid rgba(37,211,102,.15);border-radius:16px;padding:20px;margin:16px 0;font-size:13px;line-height:1.7;color:#e2e8f0;white-space:pre-wrap;font-family:var(--mono);word-break:break-word;}
 .wa-select-row{display:flex;gap:14px;align-items:flex-end;margin-bottom:20px;flex-wrap:wrap;}
 
-/* ALERTAS */
-.alert-bar{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:16px;padding:16px 22px;margin-bottom:20px;display:flex;align-items:center;gap:14px;animation:slideFade .4s ease;}
-.alert-bar svg{color:var(--danger);flex-shrink:0;}
-.alert-bar p{font-size:13px;font-weight:600;color:#fca5a5;}
-.alert-bar strong{color:#fff;}
+
 
 /* EMPTY */
 .empty-state{text-align:center;padding:60px 40px;color:var(--text-dim);}
@@ -224,6 +212,7 @@ small{font-size:10px;text-transform:uppercase;color:var(--text-dim);margin-left:
     <div style="padding:16px;background:rgba(255,255,255,.02);border-radius:14px;margin-top:auto;">
         <p id="clock" style="font-size:13px;font-weight:700;color:#fff;font-family:var(--mono);"></p>
         <p id="date-display" style="font-size:10px;color:var(--text-dim);font-weight:700;margin-top:3px;"></p>
+        <p id="sync-status" style="font-size:10px;font-weight:700;margin-top:8px;color:#64748b;letter-spacing:.5px;">Iniciando...</p>
     </div>
 </aside>
 
@@ -497,28 +486,75 @@ small{font-size:10px;text-transform:uppercase;color:var(--text-dim);margin-left:
     </div>
 </div>
 
-<script>
+<script type="module">
+// ── FIREBASE IMPORTS ──
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-analytics.js";
+import {
+    getFirestore, doc, getDoc, setDoc, onSnapshot
+} from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
+    authDomain: "nextcom--multiservicos-server.firebaseapp.com",
+    projectId: "nextcom--multiservicos-server",
+    storageBucket: "nextcom--multiservicos-server.firebasestorage.app",
+    messagingSenderId: "1011344400777",
+    appId: "1:1011344400777:web:e40a1a66d9f77046bd8158",
+    measurementId: "G-YJZYPHRXZ6"
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+getAnalytics(firebaseApp);
+const db_fs = getFirestore(firebaseApp);
+const DB_DOC = doc(db_fs, 'nextcom', 'maindb');
+
+// ── STATUS UI ──
+function setStatus(msg, color='#64748b') {
+    const el = document.getElementById('sync-status');
+    if (el) { el.innerText = msg; el.style.color = color; }
+}
+
 // =============================================
-//  AETERNA OS v3  —  ENGINE COMPLETO
+//  ENGINE COMPLETO
 // =============================================
 const Engine = {
-    db: JSON.parse(localStorage.getItem('AETERNA_DB')) || { orders:[], stock:[], clients:[], movimientos:[] },
+    db: { orders:[], stock:[], clients:[], movimientos:[] },
     editState: { lab:null, inv:null },
     warrantyFilter: 'all',
     charts: {},
+    _saving: false,
 
     // ── INIT ──
-    init() {
-        if (!this.db.clients) this.db.clients = [];
-        if (!this.db.movimientos) this.db.movimientos = [];
-        this.db.stock.forEach(s => { if (!s.minStock) s.minStock = 3; });
-        this.refresh();
+    async init() {
+        setStatus('Conectando...', '#f59e0b');
+
+        // Listener en tiempo real: cada vez que Firestore cambia, actualizar UI
+        onSnapshot(DB_DOC, (snap) => {
+            if (snap.exists()) {
+                const data = snap.data();
+                this.db = {
+                    orders:      data.orders      || [],
+                    stock:       data.stock        || [],
+                    clients:     data.clients      || [],
+                    movimientos: data.movimientos  || []
+                };
+                this.db.stock.forEach(s => { if (!s.minStock) s.minStock = 3; });
+            }
+            this.refresh();
+            setStatus('● Sincronizado', '#10b981');
+        }, (err) => {
+            console.error('Firestore error:', err);
+            setStatus('⚠ Sin conexión', '#ef4444');
+        });
+
         document.getElementById('l-name').addEventListener('input', e => {
             const term = e.target.value.toLowerCase();
             if (term.length < 2) return;
             const found = Engine.db.clients.find(c => c.name.toLowerCase().includes(term));
             if (found && !Engine.editState.lab) document.getElementById('l-phone').value = found.phone;
         });
+
         setInterval(() => {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
@@ -526,9 +562,25 @@ const Engine = {
         }, 1000);
     },
 
-    save() { localStorage.setItem('AETERNA_DB', JSON.stringify(this.db)); this.refresh(); },
+    async save() {
+        setStatus('Guardando...', '#f59e0b');
+        try {
+            await setDoc(DB_DOC, {
+                orders:      this.db.orders,
+                stock:       this.db.stock,
+                clients:     this.db.clients,
+                movimientos: this.db.movimientos,
+                updatedAt:   new Date().toISOString()
+            });
+            // onSnapshot se encarga de hacer refresh automáticamente
+        } catch(e) {
+            console.error('Error al guardar:', e);
+            setStatus('⚠ Error al guardar', '#ef4444');
+        }
+    },
 
     refresh() {
+        if (typeof lucide === 'undefined') return;
         this.renderDash();
         this.renderLab();
         this.renderInv();
@@ -576,7 +628,7 @@ const Engine = {
     },
 
     // ── LABORATORIO ──
-    processOrder() {
+    async processOrder() {
         const data = {
             client: document.getElementById('l-name').value.trim(),
             phone: document.getElementById('l-phone').value.trim(),
@@ -599,7 +651,7 @@ const Engine = {
         } else {
             this.db.orders.unshift({ id:'TK-'+Date.now().toString().slice(-4), ...data, status:'PENDIENTE', warrantyStart:null, createdAt:new Date().toISOString() });
         }
-        this.save(); this.cancelEdit('lab');
+        await this.save(); this.cancelEdit('lab');
     },
 
     editOrder(id) {
@@ -621,21 +673,21 @@ const Engine = {
         go('lab',document.querySelector('.nav-item:nth-child(3)'));
     },
 
-    toggleStatusLab(id) {
+    async toggleStatusLab(id) {
         const o = this.db.orders.find(x=>x.id===id);
         if (o.status==='PENDIENTE') o.status='URGENTE';
         else if (o.status==='URGENTE') o.status='LISTO';
         else o.status='PENDIENTE';
         if (o.status==='LISTO' && o.warrantyDays>0 && !o.warrantyStart) o.warrantyStart=new Date().toISOString();
         if (o.status==='PENDIENTE') o.warrantyStart=null;
-        this.save();
+        await this.save();
     },
 
-    deleteItem(type,id) {
+    async deleteItem(type,id) {
         if (!confirm('¿Eliminar este registro?')) return;
         if (type==='lab') this.db.orders=this.db.orders.filter(o=>o.id!==id);
         else this.db.stock=this.db.stock.filter(s=>s.id!==id);
-        this.save();
+        await this.save();
     },
 
     cancelEdit(type) {
@@ -657,7 +709,7 @@ const Engine = {
     },
 
     // ── INVENTARIO ──
-    processInv() {
+    async processInv() {
         const data = { name:document.getElementById('i-item').value.trim(), qty:parseInt(document.getElementById('i-qty').value)||0, cost:parseFloat(document.getElementById('i-cost').value)||0, minStock:parseInt(document.getElementById('i-min').value)||3 };
         if (!data.name) return;
         if (this.editState.inv) {
@@ -666,7 +718,7 @@ const Engine = {
         } else {
             this.db.stock.unshift({id:Date.now(),...data});
         }
-        this.save(); this.cancelEdit('inv');
+        await this.save(); this.cancelEdit('inv');
     },
 
     editInv(id) {
@@ -683,17 +735,17 @@ const Engine = {
     },
 
     // ── CLIENTES ──
-    addClientManual() {
+    async addClientManual() {
         const name=document.getElementById('c-name').value.trim(), phone=document.getElementById('c-phone').value.trim();
         if (!name||!phone) return alert('Completa nombre y teléfono');
         const newClient={name,phone,lastSeen:new Date().toLocaleDateString('es-ES')};
         const exists=this.db.clients.findIndex(c=>c.name.toLowerCase()===name.toLowerCase());
         if (exists>-1) this.db.clients[exists]=newClient; else this.db.clients.unshift(newClient);
         document.getElementById('c-name').value=''; document.getElementById('c-phone').value='';
-        this.save();
+        await this.save();
     },
 
-    delClient(i) { if(confirm('¿Eliminar cliente?')){ this.db.clients.splice(i,1); this.save(); } },
+    async delClient(i) { if(confirm('¿Eliminar cliente?')){ this.db.clients.splice(i,1); await this.save(); } },
 
     showHistorial(clientName) {
         const orders=this.db.orders.filter(o=>o.client.toLowerCase()===clientName.toLowerCase());
@@ -705,7 +757,7 @@ const Engine = {
     },
 
     // ── CAJA ──
-    addMovimiento() {
+    async addMovimiento() {
         const tipo=document.getElementById('mov-tipo').value;
         const desc=document.getElementById('mov-desc').value.trim();
         const amount=parseFloat(document.getElementById('mov-amount').value)||0;
@@ -714,12 +766,12 @@ const Engine = {
         this.db.movimientos.unshift({ id:Date.now(), tipo, desc, amount, metodo, date:this.today(), time:new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}) });
         document.getElementById('mov-desc').value='';
         document.getElementById('mov-amount').value='';
-        this.save();
+        await this.save();
     },
 
-    delMovimiento(id) {
+    async delMovimiento(id) {
         this.db.movimientos=this.db.movimientos.filter(m=>m.id!==id);
-        this.save();
+        await this.save();
     },
 
     getCajaHoy() {
@@ -1058,35 +1110,32 @@ const Engine = {
     }
 };
 
-// ── HELPERS GLOBALES ──
-function go(v,el) {
+// ── HELPERS GLOBALES (expuestos al HTML) ──
+window.Engine = Engine;
+
+window.go = function(v, el) {
     document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
     document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
     document.getElementById('v-'+v).classList.add('active');
     el.classList.add('active');
     if(v==='reportes') setTimeout(()=>Engine.renderReportes(),50);
-    lucide.createIcons();
+    if(typeof lucide !== 'undefined') lucide.createIcons();
+};
+
+window.toggleCheck = function(el) { el.classList.toggle('checked'); };
+window.closeModal  = function()    { document.getElementById('modal-historial').style.display='none'; };
+
+// ── INIT SEGURO: espera que todas las libs estén listas ──
+function waitAndInit() {
+    if (typeof lucide !== 'undefined' && typeof Chart !== 'undefined' && typeof window.jspdf !== 'undefined') {
+        lucide.createIcons();
+        Engine.init();
+    } else {
+        setTimeout(waitAndInit, 50);
+    }
 }
+window.addEventListener('load', waitAndInit);
 
-function toggleCheck(el) { el.classList.toggle('checked'); }
-function closeModal() { document.getElementById('modal-historial').style.display='none'; }
-
-// ── CARGA SEGURA DE LIBRERÍAS ──
-function loadScript(src, onload) {
-    const s = document.createElement('script');
-    s.src = src;
-    s.onload = onload;
-    document.body.appendChild(s);
-}
-
-loadScript('https://cdn.jsdelivr.net/npm/chart.js', () => {
-    loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js', () => {
-        loadScript('https://unpkg.com/lucide@latest', () => {
-            lucide.createIcons();
-            Engine.init();
-        });
-    });
-});
 </script>
 </body>
 </html>
