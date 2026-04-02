@@ -1,75 +1,136 @@
-const { jsPDF } = window.jspdf;
-let shipments = [];
-
-document.getElementById('shipping-form').addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const shipment = {
-        id: Date.now(),
-        sender: document.getElementById('sender').value,
-        receiver: document.getElementById('receiver').value,
-        address: document.getElementById('address').value,
-        phone: document.getElementById('phone').value,
-        state: document.getElementById('state').value,
-        items: document.getElementById('items').value,
-        weight: parseFloat(document.getElementById('weight').value)
-    };
-
-    shipments.push(shipment);
-    renderDashboard();
-    e.target.reset();
-});
-
-function renderDashboard() {
-    const container = document.getElementById('states-container');
-    container.innerHTML = '';
-    
-    // Agrupar por estado
-    const grouped = shipments.reduce((acc, s) => {
-        if (!acc[s.state]) acc[s.state] = [];
-        acc[s.state].push(s);
-        return acc;
-    }, {});
-
-    for (let state in grouped) {
-        const stateDiv = document.createElement('div');
-        stateDiv.innerHTML = `<h3>${state} (${grouped[state].length})</h3>`;
-        grouped[state].forEach(s => {
-            stateDiv.innerHTML += `
-                <div class="card ${s.state.replace(' ', '')}">
-                    <strong>Para:</strong> ${s.receiver} | <strong>Peso:</strong> ${s.weight} lbs
-                </div>
-            `;
-        });
-        container.appendChild(stateDiv);
-    }
-}
-
-document.getElementById('generate-pdf').addEventListener('click', () => {
-    const doc = new jsPDF();
-    let yPos = 10;
-    
-    shipments.forEach((s, index) => {
-        // Lógica para 2 fichas por hoja
-        if (index > 0 && index % 2 === 0) {
-            doc.addPage();
-            yPos = 10;
-        } else if (index % 2 !== 0) {
-            yPos = 150; // Segunda ficha en la mitad de la hoja
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Dashboard Moderno</title>
+    <style>
+        /* CSS - Estilos del sitio */
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --text: #f8fafc;
         }
 
-        doc.setDrawColor(0);
-        doc.rect(10, yPos, 190, 130); // Recuadro de la ficha
-        doc.setFontSize(16);
-        doc.text(`SANDRA EXPRESS - Guía #${s.id}`, 15, yPos + 10);
-        doc.setFontSize(12);
-        doc.text(`Remitente: ${s.sender}`, 15, yPos + 30);
-        doc.text(`Destinatario: ${s.receiver}`, 15, yPos + 40);
-        doc.text(`Estado: ${s.state}`, 15, yPos + 50);
-        doc.text(`Dirección: ${s.address}`, 15, yPos + 60);
-        doc.text(`Artículos: ${s.items}`, 15, yPos + 80);
-        doc.text(`Peso Total: ${s.weight} lbs`, 15, yPos + 110);
-    });
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
 
-    doc.save('envios-sandra-express.pdf');
-});
+        .container {
+            width: 90%;
+            max-width: 500px;
+            background: var(--card);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            text-align: center;
+        }
+
+        h1 { margin-bottom: 0.5rem; color: var(--primary); }
+
+        .clock {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .todo-section {
+            text-align: left;
+            margin-top: 2rem;
+        }
+
+        input {
+            width: 70%;
+            padding: 0.5rem;
+            border-radius: 5px;
+            border: none;
+            outline: none;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover { opacity: 0.8; }
+
+        ul { list-style: none; padding: 0; margin-top: 1rem; }
+
+        li {
+            background: #334155;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .delete-btn { background: #ef4444; padding: 2px 8px; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>¡Hola!</h1>
+        <p>La hora actual es:</p>
+        <div class="clock" id="clock">00:00:00</div>
+
+        <div class="todo-section">
+            <h3>Lista de Tareas</h3>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="taskInput" placeholder="Nueva tarea...">
+                <button onclick="addTask()">Añadir</button>
+            </div>
+            <ul id="taskList"></ul>
+        </div>
+    </div>
+
+    <script>
+        /* JavaScript - Lógica funcional */
+
+        // 1. Reloj en tiempo real
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            document.getElementById('clock').textContent = timeString;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // 2. Gestión de Tareas
+        function addTask() {
+            const input = document.getElementById('taskInput');
+            const taskText = input.value.trim();
+            
+            if (taskText === "") return;
+
+            const li = document.createElement('li');
+            li.innerHTML = `
+                ${taskText}
+                <button class="delete-btn" onclick="this.parentElement.remove()">X</button>
+            `;
+            
+            document.getElementById('taskList').appendChild(li);
+            input.value = "";
+        }
+
+        // Permitir Enter para añadir tareas
+        document.getElementById('taskInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') addTask();
+        });
+    </script>
+</body>
+</html>
