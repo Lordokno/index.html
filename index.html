@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generador de Anuncios WhatsApp — Binance Core</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <title>Ad Generator — Cell Repair Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -19,20 +19,18 @@
             --white-pure: #FFFFFF;
             --white-70: rgba(255, 255, 255, 0.7);
             --white-50: rgba(255, 255, 255, 0.5);
+            --white-30: rgba(255, 255, 255, 0.3);
             --green-success: #0ECB81;
             --green-glow: rgba(14, 203, 129, 0.25);
+            --blue-accent: #1E90FF;
+            --blue-glow: rgba(30, 144, 255, 0.2);
             --red-loss: #F6465D;
             --glass-bg: rgba(30, 32, 38, 0.7);
             --glass-border: rgba(243, 186, 47, 0.12);
             --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
-            --shadow-glow: 0 0 60px rgba(243, 186, 47, 0.08);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -40,7 +38,6 @@
             color: var(--white-pure);
             min-height: 100vh;
             display: flex;
-            gap: 0;
             overflow-x: hidden;
         }
 
@@ -49,763 +46,837 @@
         /* ======================== */
         .control-panel {
             position: fixed;
-            left: 0;
-            top: 0;
-            width: 340px;
+            left: 0; top: 0;
+            width: 380px;
             height: 100vh;
             background: var(--carbon-dark);
             border-right: 1px solid var(--glass-border);
-            padding: 28px 24px;
+            padding: 24px 20px;
             overflow-y: auto;
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
 
-        .control-panel::-webkit-scrollbar {
-            width: 4px;
-        }
-        .control-panel::-webkit-scrollbar-thumb {
-            background: var(--yellow-intense);
-            border-radius: 4px;
-        }
+        .control-panel::-webkit-scrollbar { width: 4px; }
+        .control-panel::-webkit-scrollbar-thumb { background: var(--yellow-intense); border-radius: 4px; }
 
-        .panel-logo {
+        .panel-header {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding-bottom: 20px;
+            padding-bottom: 16px;
             border-bottom: 1px solid var(--glass-border);
         }
 
-        .panel-logo i {
-            font-size: 28px;
-            color: var(--yellow-intense);
-        }
-
-        .panel-logo h2 {
-            font-size: 16px;
-            font-weight: 800;
-            text-transform: uppercase;
+        .panel-header i { font-size: 26px; color: var(--yellow-intense); }
+        .panel-header h2 {
+            font-size: 14px; font-weight: 800; text-transform: uppercase;
             letter-spacing: 2px;
             background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .panel-header span {
+            font-size: 10px; color: var(--white-50); letter-spacing: 1px;
         }
 
-        .control-section {
+        /* Secciones del panel */
+        .ctrl-section {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
 
-        .control-section-title {
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--yellow-intense);
+        .ctrl-section-title {
+            font-size: 9px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 3px; color: var(--yellow-intense);
             padding-bottom: 6px;
             border-bottom: 1px solid rgba(243, 186, 47, 0.1);
+            display: flex; align-items: center; gap: 6px;
         }
 
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
+        .ctrl-section-title i { font-size: 10px; }
+
+        .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
+        .ctrl-group label {
+            font-size: 10px; font-weight: 600; color: var(--white-70); letter-spacing: 0.5px;
         }
 
-        .control-group label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--white-70);
-            letter-spacing: 0.5px;
-        }
-
-        .control-group input,
-        .control-group textarea,
-        .control-group select {
+        .ctrl-group input,
+        .ctrl-group textarea,
+        .ctrl-group select {
             background: rgba(11, 14, 17, 0.8);
             border: 1px solid var(--glass-border);
             border-radius: 8px;
-            padding: 10px 14px;
+            padding: 9px 12px;
             color: var(--white-pure);
             font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            font-weight: 500;
+            font-size: 12px; font-weight: 500;
             transition: all 0.3s ease;
             outline: none;
         }
 
-        .control-group input:focus,
-        .control-group textarea:focus,
-        .control-group select:focus {
+        .ctrl-group input:focus,
+        .ctrl-group textarea:focus,
+        .ctrl-group select:focus {
             border-color: var(--yellow-intense);
             box-shadow: 0 0 0 3px var(--yellow-glow);
         }
 
-        .control-group textarea {
-            resize: vertical;
-            min-height: 60px;
-        }
+        .ctrl-group textarea { resize: vertical; min-height: 50px; }
+        .ctrl-group select option { background: var(--carbon-dark); }
 
-        .control-group select option {
-            background: var(--carbon-dark);
-        }
-
-        .btn-download {
+        /* Logo Upload */
+        .logo-upload-area {
+            width: 100%;
+            height: 80px;
+            border: 2px dashed var(--glass-border);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            width: 100%;
-            padding: 14px 24px;
-            background: linear-gradient(135deg, var(--yellow-intense), #E5A820);
-            color: var(--carbon-black);
-            border: none;
-            border-radius: 10px;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+            flex-direction: column;
+            gap: 6px;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin-top: 10px;
-        }
-
-        .btn-download:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px var(--yellow-glow);
-        }
-
-        .btn-download:active {
-            transform: translateY(0);
-        }
-
-        .btn-download.loading {
-            opacity: 0.7;
-            pointer-events: none;
-        }
-
-        .color-presets {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .color-preset {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .color-preset:hover,
-        .color-preset.active {
-            border-color: var(--white-pure);
-            transform: scale(1.1);
-        }
-
-        /* ======================== */
-        /*    WORKSPACE PREVIEW     */
-        /* ======================== */
-        .workspace {
-            margin-left: 340px;
-            width: calc(100% - 340px);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 40px;
-            background: radial-gradient(ellipse at center, #12151A 0%, #080A0D 100%);
-        }
-
-        /* ======================== */
-        /*    AD CONTAINER 1080x1920 */
-        /* ======================== */
-        .ad-container {
-            width: 540px;
-            height: 960px;
-            /* Escalado para preview (50% de 1080x1920) */
-            transform-origin: center center;
             position: relative;
             overflow: hidden;
-            border-radius: 16px;
-            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6), var(--shadow-glow);
         }
 
-        .ad-container::before {
-            content: '';
+        .logo-upload-area:hover {
+            border-color: var(--yellow-intense);
+            background: var(--yellow-soft);
+        }
+
+        .logo-upload-area i { font-size: 20px; color: var(--white-50); }
+        .logo-upload-area span { font-size: 10px; color: var(--white-50); }
+        .logo-upload-area.has-logo {
+            border-style: solid;
+            border-color: var(--green-success);
+        }
+
+        .logo-preview {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: var(--carbon-black);
-            z-index: 0;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 70px;
+            max-height: 60px;
+            object-fit: contain;
+            display: none;
         }
 
-        /* Formas geométricas diagonales de fondo */
-        .bg-geo {
-            position: absolute;
-            z-index: 1;
-            pointer-events: none;
-        }
+        .logo-upload-area.has-logo .logo-preview { display: block; }
+        .logo-upload-area.has-logo .upload-placeholder { display: none; }
 
-        .bg-geo-1 {
-            width: 120%;
-            height: 600px;
-            top: -100px;
-            right: -200px;
-            background: linear-gradient(135deg, transparent 40%, var(--yellow-soft) 100%);
-            transform: rotate(-15deg);
-        }
-
-        .bg-geo-2 {
-            width: 100%;
-            height: 400px;
-            bottom: -50px;
-            left: -100px;
-            background: linear-gradient(225deg, transparent 30%, rgba(243, 186, 47, 0.04) 100%);
-            transform: rotate(10deg);
-        }
-
-        .bg-geo-3 {
-            width: 300px;
-            height: 300px;
-            top: 200px;
-            left: -80px;
-            border: 1px solid rgba(243, 186, 47, 0.06);
-            border-radius: 50%;
-            transform: rotate(45deg);
-        }
-
-        .bg-geo-4 {
-            width: 500px;
-            height: 2px;
-            top: 350px;
-            left: -50px;
-            background: linear-gradient(90deg, transparent, var(--yellow-glow), transparent);
-            transform: rotate(-20deg);
-        }
-
-        .bg-geo-5 {
-            width: 400px;
-            height: 2px;
-            top: 700px;
-            right: -50px;
-            background: linear-gradient(90deg, transparent, rgba(14, 203, 129, 0.1), transparent);
-            transform: rotate(15deg);
-        }
-
-        /* Partículas decorativas */
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            background: var(--yellow-intense);
-            opacity: 0.08;
-            animation: particleFloat 8s ease-in-out infinite;
-        }
-
-        .particle-1 { width: 6px; height: 6px; top: 15%; left: 20%; animation-delay: 0s; }
-        .particle-2 { width: 4px; height: 4px; top: 45%; right: 15%; animation-delay: 2s; }
-        .particle-3 { width: 8px; height: 8px; bottom: 25%; left: 30%; animation-delay: 4s; }
-        .particle-4 { width: 3px; height: 3px; top: 70%; right: 25%; animation-delay: 1s; }
-
-        @keyframes particleFloat {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.08; }
-            50% { transform: translateY(-20px) scale(1.3); opacity: 0.15; }
-        }
-
-        /* Contenido del anuncio */
-        .ad-content {
-            position: relative;
-            z-index: 10;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            padding: 48px 40px 40px;
-        }
-
-        /* Header del anuncio */
-        .ad-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-        }
-
-        .ad-brand {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .ad-brand-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .ad-brand-icon i {
-            font-size: 18px;
-            color: var(--carbon-black);
-        }
-
-        .ad-brand-text {
-            font-size: 14px;
-            font-weight: 800;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: var(--white-pure);
-        }
-
-        .ad-badge {
-            padding: 6px 14px;
-            background: rgba(14, 203, 129, 0.12);
-            border: 1px solid rgba(14, 203, 129, 0.25);
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--green-success);
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-        }
-
-        /* Título principal */
-        .ad-title {
-            font-size: 38px;
-            font-weight: 900;
-            line-height: 1.05;
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
-            margin-bottom: 8px;
-        }
-
-        .ad-title .highlight {
-            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: block;
-        }
-
-        .ad-subtitle {
-            font-size: 14px;
-            font-weight: 400;
-            color: var(--white-50);
-            line-height: 1.5;
-            margin-bottom: 30px;
-            max-width: 420px;
-        }
-
-        /* Smartphone Mockup 3D */
-        .phone-wrapper {
-            perspective: 1200px;
-            display: flex;
-            justify-content: center;
-            margin-bottom: 30px;
-            flex-shrink: 0;
-        }
-
-        .phone-mockup {
-            width: 240px;
-            height: 480px;
-            background: linear-gradient(145deg, #1a1d24, #0f1115);
-            border-radius: 32px;
-            border: 2px solid rgba(243, 186, 47, 0.15);
-            padding: 12px;
-            position: relative;
-            transform: rotateX(5deg) rotateY(-8deg);
-            animation: phoneFloat 6s ease-in-out infinite;
-            box-shadow:
-                0 25px 60px rgba(0, 0, 0, 0.5),
-                0 0 40px rgba(243, 186, 47, 0.06),
-                inset 0 1px 0 rgba(255, 255, 255, 0.05);
-        }
-
-        @keyframes phoneFloat {
-            0%, 100% { transform: rotateX(5deg) rotateY(-8deg) translateY(0); }
-            50% { transform: rotateX(3deg) rotateY(-6deg) translateY(-12px); }
-        }
-
-        .phone-notch {
-            position: absolute;
-            top: 12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90px;
-            height: 24px;
-            background: #0f1115;
-            border-radius: 0 0 14px 14px;
-            z-index: 20;
-        }
-
-        .phone-screen {
-            width: 100%;
-            height: 100%;
-            background: var(--carbon-black);
-            border-radius: 22px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .screen-header {
-            padding: 36px 16px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .screen-pair {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .screen-pair-icon {
-            width: 28px;
-            height: 28px;
-            background: var(--yellow-intense);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .screen-pair-icon i {
-            font-size: 12px;
-            color: var(--carbon-black);
-        }
-
-        .screen-pair-text {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--white-pure);
-        }
-
-        .screen-pair-sub {
-            font-size: 9px;
-            color: var(--white-50);
-        }
-
-        .screen-price {
-            text-align: right;
-        }
-
-        .screen-price-value {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--white-pure);
-        }
-
-        .screen-price-change {
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--green-success);
-        }
-
-        .screen-price-change.negative {
-            color: var(--red-loss);
-        }
-
-        /* Chart container */
-        .screen-chart {
-            padding: 8px 12px;
-            height: 200px;
-            position: relative;
-        }
-
-        .screen-chart canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-
-        .screen-stats {
-            padding: 12px 16px;
+        /* Template Grid */
+        .template-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
         }
 
-        .stat-card {
-            background: rgba(30, 32, 38, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(243, 186, 47, 0.08);
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        .stat-label {
-            font-size: 8px;
-            color: var(--white-50);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 4px;
-        }
-
-        .stat-value {
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--white-pure);
-        }
-
-        .stat-value.green {
-            color: var(--green-success);
-        }
-
-        /* Datos financieros debajo del teléfono */
-        .financial-data {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .fin-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
+        .template-card {
+            background: rgba(11, 14, 17, 0.8);
             border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            padding: 16px 14px;
+            border-radius: 10px;
+            padding: 12px 10px;
             text-align: center;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
 
-        .fin-card:hover {
-            border-color: rgba(243, 186, 47, 0.25);
+        .template-card:hover {
+            border-color: rgba(243, 186, 47, 0.3);
             transform: translateY(-2px);
         }
 
-        .fin-card-icon {
-            font-size: 16px;
+        .template-card.active {
+            border-color: var(--yellow-intense);
+            background: rgba(243, 186, 47, 0.08);
+            box-shadow: 0 0 20px rgba(243, 186, 47, 0.1);
+        }
+
+        .template-card i {
+            font-size: 22px;
             margin-bottom: 6px;
+            display: block;
         }
 
-        .fin-card-icon.yellow { color: var(--yellow-intense); }
-        .fin-card-icon.green { color: var(--green-success); }
-
-        .fin-card-value {
-            font-size: 20px;
-            font-weight: 800;
-            color: var(--white-pure);
-            margin-bottom: 2px;
-        }
-
-        .fin-card-label {
+        .template-card .tmpl-name {
             font-size: 9px;
-            font-weight: 600;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--white-70);
+        }
+
+        .template-card.active .tmpl-name { color: var(--yellow-intense); }
+
+        /* Color accents */
+        .color-options { display: flex; gap: 8px; flex-wrap: wrap; }
+        .color-opt {
+            width: 30px; height: 30px;
+            border-radius: 8px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        .color-opt:hover, .color-opt.active {
+            border-color: var(--white-pure);
+            transform: scale(1.15);
+        }
+        .color-opt.active::after {
+            content: '✓';
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--carbon-black);
+        }
+
+        /* Toggle Switch */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .toggle-row label {
+            font-size: 11px; font-weight: 600; color: var(--white-70);
+        }
+
+        .toggle-switch {
+            width: 40px; height: 22px;
+            background: rgba(30, 32, 38, 0.8);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--yellow-intense);
+            border-color: var(--yellow-intense);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 16px; height: 16px;
+            background: var(--white-pure);
+            border-radius: 50%;
+            top: 2px; left: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active::after { left: 20px; }
+
+        /* Buttons */
+        .btn-row { display: flex; gap: 8px; }
+
+        .btn-primary {
+            flex: 1;
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px;
+            padding: 13px 20px;
+            background: linear-gradient(135deg, var(--yellow-intense), #E5A820);
+            color: var(--carbon-black);
+            border: none; border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--yellow-glow);
+        }
+
+        .btn-secondary {
+            display: flex; align-items: center; justify-content: center;
+            gap: 8px;
+            padding: 13px 20px;
+            background: rgba(30, 32, 38, 0.8);
+            color: var(--white-70);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 1.5px;
+            cursor: pointer; transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--yellow-intense);
+            color: var(--yellow-intense);
+        }
+
+        /* ======================== */
+        /*    WORKSPACE             */
+        /* ======================== */
+        .workspace {
+            margin-left: 380px;
+            width: calc(100% - 380px);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            background: radial-gradient(ellipse at center, #12151A 0%, #080A0D 100%);
+        }
+
+        /* ======================== */
+        /*    AD CONTAINER          */
+        /* ======================== */
+        .ad-container {
+            width: 540px; height: 960px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(243, 186, 47, 0.06);
+            transition: all 0.5s ease;
+        }
+
+        .ad-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--carbon-black);
+            z-index: 0;
+        }
+
+        /* Background geometry */
+        .bg-layer { position: absolute; z-index: 1; pointer-events: none; }
+
+        .bg-geo-1 {
+            width: 120%; height: 500px; top: -80px; right: -200px;
+            background: linear-gradient(135deg, transparent 35%, var(--yellow-soft) 100%);
+            transform: rotate(-15deg);
+        }
+
+        .bg-geo-2 {
+            width: 100%; height: 350px; bottom: -30px; left: -100px;
+            background: linear-gradient(225deg, transparent 25%, rgba(243, 186, 47, 0.03) 100%);
+            transform: rotate(10deg);
+        }
+
+        .bg-geo-3 {
+            width: 250px; height: 250px; top: 180px; left: -60px;
+            border: 1px solid rgba(243, 186, 47, 0.05);
+            border-radius: 50%;
+            transform: rotate(45deg);
+        }
+
+        .bg-line-1 {
+            width: 400px; height: 1px; top: 300px; left: -30px;
+            background: linear-gradient(90deg, transparent, var(--yellow-glow), transparent);
+            transform: rotate(-20deg);
+        }
+
+        .bg-line-2 {
+            width: 350px; height: 1px; top: 650px; right: -30px;
+            background: linear-gradient(90deg, transparent, rgba(14, 203, 129, 0.08), transparent);
+            transform: rotate(15deg);
+        }
+
+        .bg-line-3 {
+            width: 1px; height: 400px; top: 200px; right: 120px;
+            background: linear-gradient(180deg, transparent, rgba(243, 186, 47, 0.06), transparent);
+        }
+
+        /* Particles */
+        .particle {
+            position: absolute; border-radius: 50%;
+            animation: particleFloat 8s ease-in-out infinite;
+        }
+        .p1 { width: 5px; height: 5px; top: 12%; left: 18%; background: var(--yellow-intense); opacity: 0.07; animation-delay: 0s; }
+        .p2 { width: 3px; height: 3px; top: 42%; right: 12%; background: var(--green-success); opacity: 0.1; animation-delay: 2s; }
+        .p3 { width: 7px; height: 7px; bottom: 22%; left: 25%; background: var(--yellow-intense); opacity: 0.06; animation-delay: 4s; }
+        .p4 { width: 4px; height: 4px; top: 68%; right: 20%; background: var(--blue-accent); opacity: 0.08; animation-delay: 1s; }
+        .p5 { width: 6px; height: 6px; top: 30%; left: 40%; background: var(--yellow-intense); opacity: 0.05; animation-delay: 3s; }
+
+        @keyframes particleFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-18px) scale(1.2); }
+        }
+
+        /* AD Content */
+        .ad-content {
+            position: relative; z-index: 10;
+            width: 100%; height: 100%;
+            display: flex; flex-direction: column;
+            padding: 40px 36px 36px;
+        }
+
+        /* === HEADER === */
+        .ad-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .ad-brand {
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .ad-logo-container {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            overflow: hidden;
+        }
+
+        .ad-logo-container img {
+            width: 100%; height: 100%;
+            object-fit: contain;
+        }
+
+        .ad-logo-container i {
+            font-size: 20px; color: var(--carbon-black);
+        }
+
+        .ad-brand-info .brand-name {
+            font-size: 14px; font-weight: 800;
+            letter-spacing: 2px; text-transform: uppercase;
+        }
+
+        .ad-brand-info .brand-sub {
+            font-size: 9px; color: var(--white-50);
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .ad-badge-live {
+            padding: 5px 12px;
+            background: rgba(14, 203, 129, 0.12);
+            border: 1px solid rgba(14, 203, 129, 0.25);
+            border-radius: 20px;
+            font-size: 9px; font-weight: 700;
+            color: var(--green-success);
+            text-transform: uppercase; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 5px;
+        }
+
+        .ad-badge-live .dot {
+            width: 6px; height: 6px;
+            background: var(--green-success);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* === TITLE === */
+        .ad-title-section { margin-bottom: 6px; }
+
+        .ad-title {
+            font-size: 36px; font-weight: 900;
+            line-height: 1.05; text-transform: uppercase;
+            letter-spacing: -0.5px; margin-bottom: 4px;
+        }
+
+        .ad-title .hl {
+            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            display: block;
+        }
+
+        .ad-subtitle {
+            font-size: 13px; font-weight: 400;
+            color: var(--white-50); line-height: 1.5;
+            margin-bottom: 24px;
+        }
+
+        /* === SERVICE PRICE CARD === */
+        .service-price-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(14px);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            margin-bottom: 22px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+
+        .spc-left {
+            display: flex; align-items: center; gap: 14px;
+        }
+
+        .spc-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .spc-icon i { font-size: 22px; color: var(--carbon-black); }
+
+        .spc-info .spc-name {
+            font-size: 14px; font-weight: 700; color: var(--white-pure);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .spc-info .spc-desc {
+            font-size: 10px; color: var(--white-50); margin-top: 2px;
+        }
+
+        .spc-right { text-align: right; }
+
+        .spc-price {
+            font-size: 26px; font-weight: 900; color: var(--yellow-intense);
+        }
+
+        .spc-old-price {
+            font-size: 12px; color: var(--white-30);
+            text-decoration: line-through;
+        }
+
+        .spc-discount {
+            font-size: 10px; font-weight: 700;
+            color: var(--green-success);
+            background: rgba(14, 203, 129, 0.1);
+            padding: 2px 8px; border-radius: 6px;
+            display: inline-block; margin-top: 4px;
+        }
+
+        /* === PHONE MOCKUP 3D === */
+        .phone-wrapper {
+            perspective: 1200px;
+            display: flex; justify-content: center;
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .phone-glow {
+            position: absolute;
+            width: 280px; height: 280px;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--yellow-glow) 0%, transparent 70%);
+            pointer-events: none;
+            animation: glowPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { opacity: 0.35; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.08); }
+        }
+
+        .phone-mockup {
+            width: 220px; height: 440px;
+            background: linear-gradient(145deg, #1a1d24, #0f1115);
+            border-radius: 30px;
+            border: 2px solid rgba(243, 186, 47, 0.12);
+            padding: 10px;
+            position: relative;
+            transform: rotateX(5deg) rotateY(-8deg);
+            animation: phoneFloat 6s ease-in-out infinite;
+            box-shadow:
+                0 25px 60px rgba(0, 0, 0, 0.5),
+                0 0 40px rgba(243, 186, 47, 0.05),
+                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        }
+
+        @keyframes phoneFloat {
+            0%, 100% { transform: rotateX(5deg) rotateY(-8deg) translateY(0); }
+            50% { transform: rotateX(3deg) rotateY(-6deg) translateY(-10px); }
+        }
+
+        .phone-notch {
+            position: absolute; top: 10px; left: 50%;
+            transform: translateX(-50%);
+            width: 80px; height: 22px;
+            background: #0f1115;
+            border-radius: 0 0 12px 12px;
+            z-index: 20;
+        }
+
+        .phone-screen {
+            width: 100%; height: 100%;
+            background: var(--carbon-black);
+            border-radius: 22px;
+            overflow: hidden;
+            display: flex; flex-direction: column;
+        }
+
+        /* Screen content varies by template */
+        .screen-content {
+            flex: 1; display: flex; flex-direction: column;
+            padding: 32px 14px 14px;
+        }
+
+        .screen-status-bar {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-bottom: 16px;
+        }
+
+        .screen-time { font-size: 12px; font-weight: 700; }
+
+        .screen-icons { display: flex; gap: 4px; font-size: 9px; color: var(--white-50); }
+
+        .screen-main-icon {
+            width: 56px; height: 56px;
+            margin: 10px auto;
+            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
+            border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .screen-main-icon i { font-size: 26px; color: var(--carbon-black); }
+
+        .screen-service-name {
+            text-align: center;
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+        }
+
+        .screen-progress {
+            margin: 16px 0 8px;
+        }
+
+        .progress-label {
+            display: flex; justify-content: space-between;
+            font-size: 8px; color: var(--white-50);
+            margin-bottom: 4px;
+        }
+
+        .progress-bar {
+            width: 100%; height: 6px;
+            background: rgba(30, 32, 38, 0.8);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--yellow-intense), var(--green-success));
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+
+        .screen-checklist {
+            margin-top: auto;
+            display: flex; flex-direction: column;
+            gap: 6px;
+        }
+
+        .check-item {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 9px; color: var(--white-70);
+        }
+
+        .check-item i {
+            font-size: 8px; color: var(--green-success);
+        }
+
+        /* Template-specific screen styles */
+        .screen-acc-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .acc-item {
+            background: rgba(30, 32, 38, 0.6);
+            border: 1px solid rgba(243, 186, 47, 0.08);
+            border-radius: 10px;
+            padding: 10px 8px;
+            text-align: center;
+        }
+
+        .acc-item i { font-size: 16px; color: var(--yellow-intense); margin-bottom: 4px; display: block; }
+        .acc-item .acc-name { font-size: 8px; font-weight: 600; color: var(--white-70); }
+        .acc-item .acc-price { font-size: 9px; font-weight: 700; color: var(--green-success); margin-top: 2px; }
+
+        /* === STATS ROW === */
+        .stats-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 14px 10px;
+            text-align: center;
+        }
+
+        .stat-card i {
+            font-size: 16px; margin-bottom: 4px; display: block;
+        }
+
+        .stat-card .stat-val {
+            font-size: 18px; font-weight: 800; margin-bottom: 2px;
+        }
+
+        .stat-card .stat-lbl {
+            font-size: 8px; font-weight: 600;
             color: var(--white-50);
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
         }
 
-        /* Botón CTA */
-        .ad-cta {
-            margin-top: auto;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
+        .icon-yellow { color: var(--yellow-intense) !important; }
+        .icon-green { color: var(--green-success) !important; }
+        .icon-blue { color: var(--blue-accent) !important; }
+
+        /* === FEATURES LIST === */
+        .features-list {
+            display: flex; flex-direction: column;
+            gap: 8px; margin-bottom: 18px;
         }
+
+        .feature-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 8px 12px;
+            background: rgba(30, 32, 38, 0.4);
+            border-radius: 10px;
+            border-left: 3px solid var(--yellow-intense);
+        }
+
+        .feature-item i {
+            font-size: 14px; color: var(--yellow-intense);
+        }
+
+        .feature-item .feat-text {
+            font-size: 11px; font-weight: 600;
+            color: var(--white-70);
+        }
+
+        /* === GUARANTEE BADGE === */
+        .guarantee-badge {
+            display: flex; align-items: center; justify-content: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(14, 203, 129, 0.08);
+            border: 1px solid rgba(14, 203, 129, 0.15);
+            border-radius: 12px;
+            margin-bottom: 18px;
+        }
+
+        .guarantee-badge i { font-size: 20px; color: var(--green-success); }
+        .guarantee-badge .gb-text {
+            font-size: 12px; font-weight: 700; color: var(--green-success);
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .guarantee-badge .gb-sub {
+            font-size: 9px; color: rgba(14, 203, 129, 0.6);
+        }
+
+        /* === CONTACT INFO === */
+        .contact-info {
+            display: flex; flex-direction: column;
+            gap: 6px; margin-bottom: 16px;
+        }
+
+        .contact-item {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 11px; color: var(--white-70);
+        }
+
+        .contact-item i {
+            width: 16px; text-align: center;
+            color: var(--yellow-intense); font-size: 13px;
+        }
+
+        /* === CTA === */
+        .ad-cta { margin-top: auto; }
 
         .cta-button {
             width: 100%;
-            padding: 18px 32px;
+            padding: 16px 28px;
             background: linear-gradient(135deg, var(--yellow-intense), #E5A820);
-            border: none;
-            border-radius: 14px;
+            border: none; border-radius: 14px;
             font-family: 'Inter', sans-serif;
-            font-size: 15px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 3px;
+            font-size: 14px; font-weight: 800;
+            text-transform: uppercase; letter-spacing: 2.5px;
             color: var(--carbon-black);
             cursor: pointer;
-            position: relative;
-            overflow: hidden;
+            position: relative; overflow: hidden;
             transition: all 0.3s ease;
         }
 
         .cta-button::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
             transition: left 0.5s ease;
         }
 
-        .cta-button:hover::before {
-            left: 100%;
-        }
+        .cta-button:hover::before { left: 100%; }
+        .cta-button:hover { box-shadow: 0 8px 30px var(--yellow-glow); transform: translateY(-2px); }
 
-        .cta-button:hover {
-            box-shadow: 0 8px 30px var(--yellow-glow);
-            transform: translateY(-2px);
-        }
-
-        .cta-disclaimer {
-            font-size: 9px;
-            color: var(--white-50);
+        .cta-sub {
             text-align: center;
-            line-height: 1.4;
-            letter-spacing: 0.3px;
+            font-size: 9px; color: var(--white-30);
+            margin-top: 8px; letter-spacing: 0.3px;
         }
 
-        /* ======================== */
-        /*    RESPONSIVE SCALING    */
-        /* ======================== */
-        @media (max-width: 1400px) {
-            .ad-container {
-                transform: scale(0.75);
-            }
-        }
-
-        @media (max-width: 1100px) {
-            .ad-container {
-                transform: scale(0.6);
-            }
-        }
-
-        @media (max-width: 900px) {
-            .control-panel {
-                width: 280px;
-            }
-            .workspace {
-                margin-left: 280px;
-                width: calc(100% - 280px);
-            }
-        }
-
-        /* Animación de entrada */
+        /* Animations */
         .ad-content > * {
             animation: fadeInUp 0.6s ease forwards;
             opacity: 0;
         }
-
         .ad-content > *:nth-child(1) { animation-delay: 0.1s; }
-        .ad-content > *:nth-child(2) { animation-delay: 0.2s; }
-        .ad-content > *:nth-child(3) { animation-delay: 0.3s; }
-        .ad-content > *:nth-child(4) { animation-delay: 0.4s; }
-        .ad-content > *:nth-child(5) { animation-delay: 0.5s; }
-        .ad-content > *:nth-child(6) { animation-delay: 0.6s; }
+        .ad-content > *:nth-child(2) { animation-delay: 0.15s; }
+        .ad-content > *:nth-child(3) { animation-delay: 0.2s; }
+        .ad-content > *:nth-child(4) { animation-delay: 0.25s; }
+        .ad-content > *:nth-child(5) { animation-delay: 0.3s; }
+        .ad-content > *:nth-child(6) { animation-delay: 0.35s; }
+        .ad-content > *:nth-child(7) { animation-delay: 0.4s; }
+        .ad-content > *:nth-child(8) { animation-delay: 0.45s; }
+        .ad-content > *:nth-child(9) { animation-delay: 0.5s; }
+        .ad-content > *:nth-child(10) { animation-delay: 0.55s; }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(20px); }
+            from { opacity: 0; transform: translateY(18px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Línea decorativa SVG */
-        .deco-line {
-            position: absolute;
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .deco-line-1 {
-            top: 280px;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent 5%, rgba(243, 186, 47, 0.1) 50%, transparent 95%);
-        }
-
-        .deco-line-2 {
-            bottom: 180px;
-            left: 0;
-            width: 100%;
-            height: 1px;
-            background: linear-gradient(90deg, transparent 5%, rgba(243, 186, 47, 0.08) 50%, transparent 95%);
-        }
-
-        /* Toast de descarga */
+        /* Toast */
         .toast {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
+            position: fixed; bottom: 30px; right: 30px;
             background: var(--carbon-card);
             border: 1px solid var(--green-success);
             border-radius: 12px;
-            padding: 16px 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            padding: 14px 22px;
+            display: flex; align-items: center; gap: 10px;
             z-index: 9999;
-            transform: translateY(100px);
-            opacity: 0;
+            transform: translateY(100px); opacity: 0;
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             box-shadow: 0 10px 40px rgba(14, 203, 129, 0.15);
         }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast i { color: var(--green-success); font-size: 18px; }
+        .toast-text { font-size: 12px; font-weight: 600; }
 
-        .toast.show {
-            transform: translateY(0);
-            opacity: 1;
+        /* Hidden file input */
+        #logoInput { display: none; }
+
+        /* Responsive */
+        @media (max-width: 1300px) {
+            .ad-container { transform: scale(0.75); }
         }
-
-        .toast i {
-            color: var(--green-success);
-            font-size: 20px;
-        }
-
-        .toast-text {
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        /* Glow ring behind phone */
-        .phone-glow {
-            position: absolute;
-            width: 300px;
-            height: 300px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--yellow-glow) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 5;
-            animation: glowPulse 4s ease-in-out infinite;
-        }
-
-        @keyframes glowPulse {
-            0%, 100% { opacity: 0.4; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
-        }
-
-        /* Theme selector */
-        .theme-options {
-            display: flex;
-            gap: 6px;
-        }
-
-        .theme-btn {
-            padding: 6px 12px;
-            background: rgba(11, 14, 17, 0.8);
-            border: 1px solid var(--glass-border);
-            border-radius: 6px;
-            color: var(--white-70);
-            font-family: 'Inter', sans-serif;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .theme-btn.active {
-            border-color: var(--yellow-intense);
-            color: var(--yellow-intense);
-            background: rgba(243, 186, 47, 0.08);
+        @media (max-width: 1050px) {
+            .ad-container { transform: scale(0.6); }
         }
     </style>
 </head>
@@ -815,386 +886,755 @@
     <!--     PANEL DE CONTROL     -->
     <!-- ======================== -->
     <aside class="control-panel">
-        <div class="panel-logo">
-            <i class="fas fa-bolt"></i>
-            <h2>Ad Generator</h2>
-        </div>
-
-        <!-- Textos -->
-        <div class="control-section">
-            <div class="control-section-title">Textos del Anuncio</div>
-            <div class="control-group">
-                <label>Título Principal</label>
-                <input type="text" id="inputTitle" value="INVERSIÓN INTELIGENTE" placeholder="Escribe el título...">
-            </div>
-            <div class="control-group">
-                <label>Palabra Destacada (Amarilla)</label>
-                <input type="text" id="inputHighlight" value="RENDIMIENTO MÁXIMO" placeholder="Texto en amarillo...">
-            </div>
-            <div class="control-group">
-                <label>Subtítulo</label>
-                <textarea id="inputSubtitle" placeholder="Descripción corta...">Maximiza tu capital con estrategias de trading automatizadas y análisis en tiempo real.</textarea>
+        <div class="panel-header">
+            <i class="fas fa-mobile-screen-button"></i>
+            <div>
+                <h2>Cell Repair Ads</h2>
+                <span>Generador de Publicidad</span>
             </div>
         </div>
 
-        <!-- Precios y Datos -->
-        <div class="control-section">
-            <div class="control-section-title">Datos Financieros</div>
-            <div class="control-group">
-                <label>Precio Principal</label>
-                <input type="text" id="inputPrice" value="$67,842" placeholder="Ej: $67,842">
-            </div>
-            <div class="control-group">
-                <label>Cambio (%)</label>
-                <input type="text" id="inputChange" value="+12.4%" placeholder="Ej: +12.4%">
-            </div>
-            <div class="control-group">
-                <label>Vol. 24h</label>
-                <input type="text" id="inputVolume" value="$48.2B" placeholder="Ej: $48.2B">
-            </div>
-            <div class="control-group">
-                <label>Market Cap</label>
-                <input type="text" id="inputMcap" value="$1.32T" placeholder="Ej: $1.32T">
-            </div>
-            <div class="control-group">
-                <label>ATH</label>
-                <input type="text" id="inputAth" value="$69,044" placeholder="Ej: $69,044">
-            </div>
-        </div>
-
-        <!-- Configuración -->
-        <div class="control-section">
-            <div class="control-section-title">Configuración</div>
-            <div class="control-group">
-                <label>Par de Trading</label>
-                <input type="text" id="inputPair" value="BTC/USDT" placeholder="Ej: BTC/USDT">
-            </div>
-            <div class="control-group">
-                <label>Texto del Botón CTA</label>
-                <input type="text" id="inputCta" value="COMENZAR AHORA" placeholder="Ej: COMENZAR AHORA">
-            </div>
-            <div class="control-group">
-                <label>Tendencia del Gráfico</label>
-                <div class="theme-options">
-                    <button class="theme-btn active" onclick="setTrend('bullish')">📈 Alcista</button>
-                    <button class="theme-btn" onclick="setTrend('bearish')">📉 Bajista</button>
+        <!-- TEMPLATE SELECTOR -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-layer-group"></i> Plantilla</div>
+            <div class="template-grid">
+                <div class="template-card active" onclick="selectTemplate('pantalla')">
+                    <i class="fas fa-mobile-screen" style="color: #F3BA2F;"></i>
+                    <span class="tmpl-name">Pantalla</span>
+                </div>
+                <div class="template-card" onclick="selectTemplate('carga')">
+                    <i class="fas fa-plug-circle-bolt" style="color: #0ECB81;"></i>
+                    <span class="tmpl-name">Puerto Carga</span>
+                </div>
+                <div class="template-card" onclick="selectTemplate('diagnostico')">
+                    <i class="fas fa-stethoscope" style="color: #1E90FF;"></i>
+                    <span class="tmpl-name">Diagnóstico</span>
+                </div>
+                <div class="template-card" onclick="selectTemplate('accesorios')">
+                    <i class="fas fa-headphones" style="color: #F3BA2F;"></i>
+                    <span class="tmpl-name">Accesorios</span>
+                </div>
+                <div class="template-card" onclick="selectTemplate('bateria')">
+                    <i class="fas fa-battery-full" style="color: #0ECB81;"></i>
+                    <span class="tmpl-name">Batería</span>
+                </div>
+                <div class="template-card" onclick="selectTemplate('placa')">
+                    <i class="fas fa-microchip" style="color: #1E90FF;"></i>
+                    <span class="tmpl-name">Micro-soldadura</span>
                 </div>
             </div>
         </div>
 
-        <!-- Descargar -->
-        <button class="btn-download" id="btnDownload" onclick="downloadAd()">
-            <i class="fas fa-download"></i>
-            Descargar PNG
-        </button>
+        <!-- LOGO -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-image"></i> Logo del Taller</div>
+            <div class="logo-upload-area" id="logoArea" onclick="document.getElementById('logoInput').click()">
+                <input type="file" id="logoInput" accept="image/*" onchange="handleLogo(event)">
+                <div class="upload-placeholder">
+                    <i class="fas fa-cloud-arrow-up"></i>
+                    <span>Click para subir logo</span>
+                </div>
+                <img class="logo-preview" id="logoPreview" src="" alt="Logo">
+            </div>
+        </div>
+
+        <!-- TEXTOS -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-font"></i> Textos</div>
+            <div class="ctrl-group">
+                <label>Nombre del Taller</label>
+                <input type="text" id="inpBrand" value="CELLFIX PRO">
+            </div>
+            <div class="ctrl-group">
+                <label>Eslogan / Sub-brand</label>
+                <input type="text" id="inpBrandSub" value="Reparación Express">
+            </div>
+            <div class="ctrl-group">
+                <label>Título Principal</label>
+                <input type="text" id="inpTitle" value="CAMBIO DE PANTALLA">
+            </div>
+            <div class="ctrl-group">
+                <label>Texto Destacado (Amarillo)</label>
+                <input type="text" id="inpHighlight" value="CALIDAD ORIGINAL">
+            </div>
+            <div class="ctrl-group">
+                <label>Descripción</label>
+                <textarea id="inpDesc">Reemplazo de pantalla con repuestos de grado original. Garantía incluida en todos los servicios.</textarea>
+            </div>
+        </div>
+
+        <!-- PRECIO -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-tag"></i> Precio del Servicio</div>
+            <div class="ctrl-group">
+                <label>Servicio</label>
+                <input type="text" id="inpService" value="Cambio de Pantalla LCD">
+            </div>
+            <div style="display:flex; gap:8px;">
+                <div class="ctrl-group" style="flex:1;">
+                    <label>Precio</label>
+                    <input type="text" id="inpPrice" value="$49.99">
+                </div>
+                <div class="ctrl-group" style="flex:1;">
+                    <label>Precio Anterior</label>
+                    <input type="text" id="inpOldPrice" value="$79.99">
+                </div>
+            </div>
+            <div class="ctrl-group">
+                <label>Descuento (badge)</label>
+                <input type="text" id="inpDiscount" value="-37% OFF">
+            </div>
+        </div>
+
+        <!-- STATS -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-chart-bar"></i> Estadísticas</div>
+            <div style="display:flex; gap:8px;">
+                <div class="ctrl-group" style="flex:1;">
+                    <label>Clientes</label>
+                    <input type="text" id="inpClients" value="5,200+">
+                </div>
+                <div class="ctrl-group" style="flex:1;">
+                    <label>Garantía</label>
+                    <input type="text" id="inpWarranty" value="6 Meses">
+                </div>
+                <div class="ctrl-group" style="flex:1;">
+                    <label>Tiempo</label>
+                    <input type="text" id="inpTime" value="30 min">
+                </div>
+            </div>
+        </div>
+
+        <!-- FEATURES -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-list-check"></i> Características</div>
+            <div class="ctrl-group">
+                <label>Feature 1</label>
+                <input type="text" id="inpFeat1" value="Repuestos de grado original">
+            </div>
+            <div class="ctrl-group">
+                <label>Feature 2</label>
+                <input type="text" id="inpFeat2" value="Reparación en el momento">
+            </div>
+            <div class="ctrl-group">
+                <label>Feature 3</label>
+                <input type="text" id="inpFeat3" value="Garantía por escrito">
+            </div>
+        </div>
+
+        <!-- CONTACTO -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-address-book"></i> Contacto</div>
+            <div class="ctrl-group">
+                <label>WhatsApp</label>
+                <input type="text" id="inpWhatsapp" value="+52 55 1234 5678">
+            </div>
+            <div class="ctrl-group">
+                <label>Dirección</label>
+                <input type="text" id="inpAddress" value="Av. Reforma #456, CDMX">
+            </div>
+            <div class="ctrl-group">
+                <label>Horario</label>
+                <input type="text" id="inpSchedule" value="Lun-Sáb 9:00AM - 8:00PM">
+            </div>
+        </div>
+
+        <!-- GUARANTEE -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-shield-halved"></i> Garantía</div>
+            <div class="toggle-row">
+                <label>Mostrar badge de garantía</label>
+                <div class="toggle-switch active" id="togGuarantee" onclick="toggleEl(this, 'guaranteeBadge')"></div>
+            </div>
+            <div class="ctrl-group" style="margin-top:6px;">
+                <label>Texto de garantía</label>
+                <input type="text" id="inpGuarantee" value="GARANTÍA DE 6 MESES">
+            </div>
+            <div class="ctrl-group">
+                <label>Subtexto garantía</label>
+                <input type="text" id="inpGuaranteeSub" value="En todos nuestros servicios">
+            </div>
+        </div>
+
+        <!-- CTA -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-hand-pointer"></i> Botón CTA</div>
+            <div class="ctrl-group">
+                <label>Texto del botón</label>
+                <input type="text" id="inpCta" value="AGENDAR POR WHATSAPP">
+            </div>
+            <div class="ctrl-group">
+                <label>Texto inferior</label>
+                <input type="text" id="inpCtaSub" value="Respuesta inmediata • Sin compromiso">
+            </div>
+        </div>
+
+        <!-- COLOR ACCENT -->
+        <div class="ctrl-section">
+            <div class="ctrl-section-title"><i class="fas fa-palette"></i> Color de Acento</div>
+            <div class="color-options">
+                <div class="color-opt active" style="background: #F3BA2F;" onclick="setAccent('#F3BA2F', this)"></div>
+                <div class="color-opt" style="background: #0ECB81;" onclick="setAccent('#0ECB81', this)"></div>
+                <div class="color-opt" style="background: #1E90FF;" onclick="setAccent('#1E90FF', this)"></div>
+                <div class="color-opt" style="background: #F6465D;" onclick="setAccent('#F6465D', this)"></div>
+                <div class="color-opt" style="background: #A855F7;" onclick="setAccent('#A855F7', this)"></div>
+                <div class="color-opt" style="background: #FFFFFF;" onclick="setAccent('#FFFFFF', this)"></div>
+            </div>
+        </div>
+
+        <!-- DOWNLOAD -->
+        <div class="btn-row">
+            <button class="btn-primary" onclick="downloadAd()">
+                <i class="fas fa-download"></i> Descargar PNG
+            </button>
+            <button class="btn-secondary" onclick="resetAll()">
+                <i class="fas fa-rotate-left"></i>
+            </button>
+        </div>
     </aside>
 
     <!-- ======================== -->
     <!--     WORKSPACE PREVIEW    -->
     <!-- ======================== -->
     <main class="workspace">
-        <!-- Contenedor del anuncio 1080x1920 (escalado al 50% para preview) -->
         <div class="ad-container" id="adContainer">
 
-            <!-- Fondo geométrico -->
-            <div class="bg-geo bg-geo-1"></div>
-            <div class="bg-geo bg-geo-2"></div>
-            <div class="bg-geo bg-geo-3"></div>
-            <div class="bg-geo bg-geo-4"></div>
-            <div class="bg-geo bg-geo-5"></div>
+            <!-- Background -->
+            <div class="bg-layer bg-geo-1"></div>
+            <div class="bg-layer bg-geo-2"></div>
+            <div class="bg-layer bg-geo-3"></div>
+            <div class="bg-layer bg-line-1"></div>
+            <div class="bg-layer bg-line-2"></div>
+            <div class="bg-layer bg-line-3"></div>
+            <div class="particle p1"></div>
+            <div class="particle p2"></div>
+            <div class="particle p3"></div>
+            <div class="particle p4"></div>
+            <div class="particle p5"></div>
 
-            <!-- Partículas -->
-            <div class="particle particle-1"></div>
-            <div class="particle particle-2"></div>
-            <div class="particle particle-3"></div>
-            <div class="particle particle-4"></div>
-
-            <!-- Líneas decorativas -->
-            <div class="deco-line deco-line-1"></div>
-            <div class="deco-line deco-line-2"></div>
-
-            <!-- Contenido -->
-            <div class="ad-content">
+            <!-- Content -->
+            <div class="ad-content" id="adContent">
 
                 <!-- Header -->
                 <div class="ad-header">
                     <div class="ad-brand">
-                        <div class="ad-brand-icon">
-                            <i class="fas fa-chart-line"></i>
+                        <div class="ad-logo-container" id="adLogoContainer">
+                            <i class="fas fa-screwdriver-wrench"></i>
                         </div>
-                        <span class="ad-brand-text">TradeX</span>
+                        <div class="ad-brand-info">
+                            <div class="brand-name" id="adBrand">CELLFIX PRO</div>
+                            <div class="brand-sub" id="adBrandSub">Reparación Express</div>
+                        </div>
                     </div>
-                    <div class="ad-badge">
-                        <i class="fas fa-circle" style="font-size:6px;margin-right:4px;"></i>
-                        Live Trading
+                    <div class="ad-badge-live">
+                        <span class="dot"></span>
+                        Disponible
                     </div>
                 </div>
 
-                <!-- Título -->
-                <div class="ad-title">
-                    <span id="adTitle">INVERSIÓN INTELIGENTE</span>
-                    <span class="highlight" id="adHighlight">RENDIMIENTO MÁXIMO</span>
+                <!-- Title -->
+                <div class="ad-title-section">
+                    <div class="ad-title">
+                        <span id="adTitle">CAMBIO DE PANTALLA</span>
+                        <span class="hl" id="adHighlight">CALIDAD ORIGINAL</span>
+                    </div>
+                </div>
+                <p class="ad-subtitle" id="adDesc">Reemplazo de pantalla con repuestos de grado original. Garantía incluida en todos los servicios.</p>
+
+                <!-- Service Price Card -->
+                <div class="service-price-card">
+                    <div class="spc-left">
+                        <div class="spc-icon" id="spcIcon">
+                            <i class="fas fa-mobile-screen" id="spcIconI"></i>
+                        </div>
+                        <div class="spc-info">
+                            <div class="spc-name" id="adService">Cambio de Pantalla LCD</div>
+                            <div class="spc-desc">Incluye instalación</div>
+                        </div>
+                    </div>
+                    <div class="spc-right">
+                        <div class="spc-old-price" id="adOldPrice">$79.99</div>
+                        <div class="spc-price" id="adPrice">$49.99</div>
+                        <div class="spc-discount" id="adDiscount">-37% OFF</div>
+                    </div>
                 </div>
 
-                <!-- Subtítulo -->
-                <p class="ad-subtitle" id="adSubtitle">Maximiza tu capital con estrategias de trading automatizadas y análisis en tiempo real.</p>
-
-                <!-- Smartphone Mockup -->
+                <!-- Phone Mockup -->
                 <div class="phone-wrapper">
                     <div class="phone-glow"></div>
                     <div class="phone-mockup">
                         <div class="phone-notch"></div>
                         <div class="phone-screen">
-                            <div class="screen-header">
-                                <div class="screen-pair">
-                                    <div class="screen-pair-icon">
-                                        <i class="fab fa-bitcoin"></i>
-                                    </div>
-                                    <div>
-                                        <div class="screen-pair-text" id="screenPair">BTC/USDT</div>
-                                        <div class="screen-pair-sub">Perpetual</div>
-                                    </div>
-                                </div>
-                                <div class="screen-price">
-                                    <div class="screen-price-value" id="screenPrice">$67,842</div>
-                                    <div class="screen-price-change" id="screenChange">+12.4%</div>
-                                </div>
-                            </div>
-                            <div class="screen-chart">
-                                <canvas id="tradingChart"></canvas>
-                            </div>
-                            <div class="screen-stats">
-                                <div class="stat-card">
-                                    <div class="stat-label">24h High</div>
-                                    <div class="stat-value green" id="statHigh">$68,440</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">24h Low</div>
-                                    <div class="stat-value" id="statLow">$60,120</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Volume</div>
-                                    <div class="stat-value" id="statVol">$48.2B</div>
-                                </div>
-                                <div class="stat-card">
-                                    <div class="stat-label">Mkt Cap</div>
-                                    <div class="stat-value" id="statMcap">$1.32T</div>
-                                </div>
+                            <div class="screen-content" id="screenContent">
+                                <!-- Dynamic screen content -->
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Datos Financieros -->
-                <div class="financial-data">
-                    <div class="fin-card">
-                        <div class="fin-card-icon yellow"><i class="fas fa-fire"></i></div>
-                        <div class="fin-card-value" id="finRoi">+284%</div>
-                        <div class="fin-card-label">ROI Anual</div>
+                <!-- Stats -->
+                <div class="stats-row">
+                    <div class="stat-card">
+                        <i class="fas fa-users icon-yellow"></i>
+                        <div class="stat-val" id="adClients" style="color: var(--yellow-intense);">5,200+</div>
+                        <div class="stat-lbl">Clientes</div>
                     </div>
-                    <div class="fin-card">
-                        <div class="fin-card-icon green"><i class="fas fa-shield-halved"></i></div>
-                        <div class="fin-card-value" id="finTrades">12.4K</div>
-                        <div class="fin-card-label">Trades</div>
+                    <div class="stat-card">
+                        <i class="fas fa-clock icon-green"></i>
+                        <div class="stat-val" id="adTime" style="color: var(--green-success);">30 min</div>
+                        <div class="stat-lbl">Tiempo</div>
                     </div>
-                    <div class="fin-card">
-                        <div class="fin-card-icon yellow"><i class="fas fa-trophy"></i></div>
-                        <div class="fin-card-value" id="finWin">94.2%</div>
-                        <div class="fin-card-label">Win Rate</div>
+                    <div class="stat-card">
+                        <i class="fas fa-shield-halved icon-blue"></i>
+                        <div class="stat-val" id="adWarranty" style="color: var(--blue-accent);">6 Meses</div>
+                        <div class="stat-lbl">Garantía</div>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="features-list" id="featuresList">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="feat-text" id="adFeat1">Repuestos de grado original</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="feat-text" id="adFeat2">Reparación en el momento</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span class="feat-text" id="adFeat3">Garantía por escrito</span>
+                    </div>
+                </div>
+
+                <!-- Guarantee Badge -->
+                <div class="guarantee-badge" id="guaranteeBadge">
+                    <i class="fas fa-shield-check"></i>
+                    <div>
+                        <div class="gb-text" id="adGuarantee">GARANTÍA DE 6 MESES</div>
+                        <div class="gb-sub" id="adGuaranteeSub">En todos nuestros servicios</div>
+                    </div>
+                </div>
+
+                <!-- Contact -->
+                <div class="contact-info" id="contactInfo">
+                    <div class="contact-item">
+                        <i class="fab fa-whatsapp"></i>
+                        <span id="adWhatsapp">+52 55 1234 5678</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-location-dot"></i>
+                        <span id="adAddress">Av. Reforma #456, CDMX</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="adSchedule">Lun-Sáb 9:00AM - 8:00PM</span>
                     </div>
                 </div>
 
                 <!-- CTA -->
                 <div class="ad-cta">
-                    <button class="cta-button" id="adCta">COMENZAR AHORA</button>
-                    <p class="cta-disclaimer">Rendimientos pasados no garantizan resultados futuros.<br>Invierte con responsabilidad.</p>
+                    <button class="cta-button" id="adCta">AGENDAR POR WHATSAPP</button>
+                    <p class="cta-sub" id="adCtaSub">Respuesta inmediata • Sin compromiso</p>
                 </div>
 
             </div>
         </div>
     </main>
 
-    <!-- Toast de confirmación -->
+    <!-- Toast -->
     <div class="toast" id="toast">
         <i class="fas fa-check-circle"></i>
-        <span class="toast-text">Imagen descargada exitosamente</span>
+        <span class="toast-text">¡Imagen descargada a 1080×1920!</span>
     </div>
 
     <script>
         // ========================
-        //     CHART.JS CONFIG
+        //     TEMPLATE DATA
         // ========================
-        let chartInstance = null;
-        let currentTrend = 'bullish';
-
-        function generateChartData(trend, points = 60) {
-            const data = [];
-            let value = 50;
-            for (let i = 0; i < points; i++) {
-                const bias = trend === 'bullish' ? 0.4 : -0.3;
-                value += (Math.random() - 0.45 + bias) * 3;
-                value = Math.max(10, Math.min(90, value));
-                data.push(value);
+        const templates = {
+            pantalla: {
+                icon: 'fa-mobile-screen',
+                title: 'CAMBIO DE PANTALLA',
+                highlight: 'CALIDAD ORIGINAL',
+                desc: 'Reemplazo de pantalla con repuestos de grado original. Garantía incluida en todos los servicios.',
+                service: 'Cambio de Pantalla LCD',
+                price: '$49.99', oldPrice: '$79.99', discount: '-37% OFF',
+                clients: '5,200+', warranty: '6 Meses', time: '30 min',
+                feat1: 'Repuestos de grado original',
+                feat2: 'Reparación en el momento',
+                feat3: 'Garantía por escrito',
+                guarantee: 'GARANTÍA DE 6 MESES',
+                guaranteeSub: 'En todos nuestros servicios',
+                screenType: 'repair',
+                screenIcon: 'fa-mobile-screen',
+                screenService: 'Pantalla LCD',
+                screenProgress: 85,
+                screenChecks: ['Pantalla original instalada', 'Calibración de táctil', 'Prueba de colores', 'Sellado hermético']
+            },
+            carga: {
+                icon: 'fa-plug-circle-bolt',
+                title: 'PUERTO DE CARGA',
+                highlight: 'CARGA RESTAURADA',
+                desc: '¿Tu celular no carga? Reparamos o reemplazamos el puerto de carga en minutos.',
+                service: 'Reparación Puerto de Carga',
+                price: '$24.99', oldPrice: '$44.99', discount: '-44% OFF',
+                clients: '3,800+', warranty: '3 Meses', time: '20 min',
+                feat1: 'Diagnóstico gratuito incluido',
+                feat2: 'Reparación express',
+                feat3: 'Compatible con todos los modelos',
+                guarantee: 'GARANTÍA DE 3 MESES',
+                guaranteeSub: 'En reparación de puerto',
+                screenType: 'repair',
+                screenIcon: 'fa-plug-circle-bolt',
+                screenService: 'Puerto de Carga',
+                screenProgress: 100,
+                screenChecks: ['Puerto reemplazado', 'Carga rápida activada', 'Puerto limpio', 'Prueba de voltaje']
+            },
+            diagnostico: {
+                icon: 'fa-stethoscope',
+                title: 'DIAGNÓSTICO',
+                highlight: 'GRATIS HOY',
+                desc: 'Diagnóstico completo y gratuito de tu dispositivo. Identificamos el problema exacto.',
+                service: 'Diagnóstico Completo',
+                price: 'GRATIS', oldPrice: '$15.00', discount: '100% OFF',
+                clients: '8,100+', warranty: 'N/A', time: '15 min',
+                feat1: 'Evaluación de hardware completa',
+                feat2: 'Reporte detallado del estado',
+                feat3: 'Presupuesto sin compromiso',
+                guarantee: 'DIAGNÓSTICO GRATUITO',
+                guaranteeSub: 'Sin costo ni compromiso',
+                screenType: 'diagnostic',
+                screenIcon: 'fa-magnifying-glass-chart',
+                screenService: 'Diagnóstico',
+                screenProgress: 72,
+                screenChecks: ['Batería: Salud 78%', 'Pantalla: Sin daños', 'Memoria: 64GB libre', 'Señal: Normal']
+            },
+            accesorios: {
+                icon: 'fa-headphones',
+                title: 'ACCESORIOS',
+                highlight: 'PREMIUM SHOP',
+                desc: 'Los mejores accesorios para tu celular. Cargadores, fundas, micas y más.',
+                service: 'Catálogo de Accesorios',
+                price: 'Desde $5.99', oldPrice: '', discount: 'NUEVO',
+                clients: '12,000+', warranty: '1 Mes', time: 'En stock',
+                feat1: 'Marcas originales certificadas',
+                feat2: 'Envío a domicilio disponible',
+                feat3: 'Ofertas semanales exclusivas',
+                guarantee: 'GARANTÍA DE SATISFACCIÓN',
+                guaranteeSub: 'Devolución en 7 días',
+                screenType: 'accessories',
+                screenIcon: 'fa-bag-shopping',
+                screenService: 'Accesorios',
+                screenAccItems: [
+                    { icon: 'fa-headphones', name: 'Audífonos', price: '$12.99' },
+                    { icon: 'fa-mobile-screen-button', name: 'Funda', price: '$8.99' },
+                    { icon: 'fa-bolt', name: 'Cargador', price: '$14.99' },
+                    { icon: 'fa-shield-halved', name: 'Mica', price: '$5.99' }
+                ]
+            },
+            bateria: {
+                icon: 'fa-battery-full',
+                title: 'CAMBIO DE BATERÍA',
+                highlight: 'VUELVE A VIVIR',
+                desc: '¿Tu batería no dura nada? Instalamos baterías nuevas con capacidad original.',
+                service: 'Reemplazo de Batería',
+                price: '$29.99', oldPrice: '$54.99', discount: '-45% OFF',
+                clients: '4,500+', warranty: '6 Meses', time: '25 min',
+                feat1: 'Batería de capacidad original',
+                feat2: 'Calibración incluida',
+                feat3: 'Test de rendimiento post-cambio',
+                guarantee: 'GARANTÍA DE 6 MESES',
+                guaranteeSub: 'En batería instalada',
+                screenType: 'repair',
+                screenIcon: 'fa-battery-full',
+                screenService: 'Batería Nueva',
+                screenProgress: 100,
+                screenChecks: ['Batería instalada', 'Calibración: 100%', 'Salud: Óptima', 'Ciclo: 0']
+            },
+            placa: {
+                icon: 'fa-microchip',
+                title: 'MICRO-SOLDADURA',
+                highlight: 'REPARACIÓN EXPERTA',
+                desc: 'Reparación a nivel de componente con micro-soldadura de precisión profesional.',
+                service: 'Micro-soldadura de Placa',
+                price: '$59.99', oldPrice: '$99.99', discount: '-40% OFF',
+                clients: '2,100+', warranty: '3 Meses', time: '2-4 hrs',
+                feat1: 'Técnico certificado en micro-soldadura',
+                feat2: 'Equipo de precisión profesional',
+                feat3: 'Reparación de IC, condensadores, etc.',
+                guarantee: 'GARANTÍA DE 3 MESES',
+                guaranteeSub: 'En micro-soldadura',
+                screenType: 'repair',
+                screenIcon: 'fa-microchip',
+                screenService: 'Micro-soldadura',
+                screenProgress: 60,
+                screenChecks: ['IC de carga reparado', 'Condensadores reemplazados', 'Prueba de corto: OK', 'Test final: Aprobado']
             }
-            return data;
+        };
+
+        let currentTemplate = 'pantalla';
+        let currentAccent = '#F3BA2F';
+
+        // ========================
+        //     SELECT TEMPLATE
+        // ========================
+        function selectTemplate(key) {
+            currentTemplate = key;
+            const t = templates[key];
+
+            // Update active card
+            document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+
+            // Update inputs
+            document.getElementById('inpTitle').value = t.title;
+            document.getElementById('inpHighlight').value = t.highlight;
+            document.getElementById('inpDesc').value = t.desc;
+            document.getElementById('inpService').value = t.service;
+            document.getElementById('inpPrice').value = t.price;
+            document.getElementById('inpOldPrice').value = t.oldPrice;
+            document.getElementById('inpDiscount').value = t.discount;
+            document.getElementById('inpClients').value = t.clients;
+            document.getElementById('inpWarranty').value = t.warranty;
+            document.getElementById('inpTime').value = t.time;
+            document.getElementById('inpFeat1').value = t.feat1;
+            document.getElementById('inpFeat2').value = t.feat2;
+            document.getElementById('inpFeat3').value = t.feat3;
+            document.getElementById('inpGuarantee').value = t.guarantee;
+            document.getElementById('inpGuaranteeSub').value = t.guaranteeSub;
+
+            // Update preview
+            updatePreview();
+            updateScreenContent();
         }
 
-        function initChart() {
-            const ctx = document.getElementById('tradingChart').getContext('2d');
-            const labels = Array.from({ length: 60 }, (_, i) => i);
-            const data = generateChartData(currentTrend);
+        // ========================
+        //     UPDATE SCREEN
+        // ========================
+        function updateScreenContent() {
+            const t = templates[currentTemplate];
+            const container = document.getElementById('screenContent');
 
-            // Gradiente de relleno
-            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-            gradient.addColorStop(0, 'rgba(243, 186, 47, 0.25)');
-            gradient.addColorStop(1, 'rgba(243, 186, 47, 0)');
+            let html = `
+                <div class="screen-status-bar">
+                    <span class="screen-time">9:41</span>
+                    <div class="screen-icons">
+                        <i class="fas fa-signal"></i>
+                        <i class="fas fa-wifi"></i>
+                        <i class="fas fa-battery-full"></i>
+                    </div>
+                </div>
+                <div class="screen-main-icon">
+                    <i class="fas ${t.screenIcon}"></i>
+                </div>
+                <div class="screen-service-name">${t.screenService}</div>
+            `;
 
-            if (chartInstance) {
-                chartInstance.destroy();
+            if (t.screenType === 'repair') {
+                html += `
+                    <div class="screen-progress">
+                        <div class="progress-label">
+                            <span>Progreso</span>
+                            <span>${t.screenProgress}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${t.screenProgress}%;"></div>
+                        </div>
+                    </div>
+                    <div class="screen-checklist">
+                        ${t.screenChecks.map(c => `
+                            <div class="check-item">
+                                <i class="fas fa-circle-check"></i>
+                                <span>${c}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (t.screenType === 'diagnostic') {
+                html += `
+                    <div class="screen-progress">
+                        <div class="progress-label">
+                            <span>Escaneando...</span>
+                            <span>${t.screenProgress}%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${t.screenProgress}%;"></div>
+                        </div>
+                    </div>
+                    <div class="screen-checklist">
+                        ${t.screenChecks.map(c => `
+                            <div class="check-item">
+                                <i class="fas fa-chart-simple"></i>
+                                <span>${c}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (t.screenType === 'accessories') {
+                html += `
+                    <div class="screen-acc-grid">
+                        ${t.screenAccItems.map(a => `
+                            <div class="acc-item">
+                                <i class="fas ${a.icon}"></i>
+                                <div class="acc-name">${a.name}</div>
+                                <div class="acc-price">${a.price}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
             }
 
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        borderColor: '#F3BA2F',
-                        borderWidth: 2,
-                        backgroundColor: gradient,
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 0,
-                        pointHitRadius: 0,
-                        pointHoverRadius: 0,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: { enabled: false },
-                    },
-                    scales: {
-                        x: {
-                            display: false,
-                            grid: { display: false },
-                            ticks: { display: false },
-                            border: { display: false },
-                        },
-                        y: {
-                            display: false,
-                            grid: { display: false },
-                            ticks: { display: false },
-                            border: { display: false },
-                            min: 0,
-                            max: 100,
-                        }
-                    },
-                    animation: {
-                        duration: 1200,
-                        easing: 'easeInOutQuart',
-                    },
-                }
-            });
-        }
-
-        function setTrend(trend) {
-            currentTrend = trend;
-            document.querySelectorAll('.theme-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-
-            // Actualizar color del cambio
-            const changeEl = document.getElementById('screenChange');
-            if (trend === 'bearish') {
-                changeEl.classList.add('negative');
-            } else {
-                changeEl.classList.remove('negative');
-            }
-
-            // Regenerar datos del gráfico
-            const ctx = document.getElementById('tradingChart').getContext('2d');
-            const data = generateChartData(trend);
-            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
-            gradient.addColorStop(0, trend === 'bullish' ? 'rgba(243, 186, 47, 0.25)' : 'rgba(246, 70, 93, 0.2)');
-            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-            chartInstance.data.datasets[0].data = data;
-            chartInstance.data.datasets[0].borderColor = trend === 'bullish' ? '#F3BA2F' : '#F6465D';
-            chartInstance.data.datasets[0].backgroundColor = gradient;
-            chartInstance.update('active');
+            container.innerHTML = html;
         }
 
         // ========================
-        //     LIVE UPDATE BINDING
+        //     UPDATE PREVIEW
         // ========================
-        function bindInput(inputId, targetId, transformer = null) {
-            const input = document.getElementById(inputId);
+        function updatePreview() {
+            const t = templates[currentTemplate];
+
+            setText('adBrand', 'inpBrand');
+            setText('adBrandSub', 'inpBrandSub');
+            setText('adTitle', 'inpTitle');
+            setText('adHighlight', 'inpHighlight');
+            setText('adDesc', 'inpDesc');
+            setText('adService', 'inpService');
+            setText('adPrice', 'inpPrice');
+            setText('adOldPrice', 'inpOldPrice');
+            setText('adDiscount', 'inpDiscount');
+            setText('adClients', 'inpClients');
+            setText('adWarranty', 'inpWarranty');
+            setText('adTime', 'inpTime');
+            setText('adFeat1', 'inpFeat1');
+            setText('adFeat2', 'inpFeat2');
+            setText('adFeat3', 'inpFeat3');
+            setText('adGuarantee', 'inpGuarantee');
+            setText('adGuaranteeSub', 'inpGuaranteeSub');
+            setText('adWhatsapp', 'inpWhatsapp');
+            setText('adAddress', 'inpAddress');
+            setText('adSchedule', 'inpSchedule');
+            setText('adCta', 'inpCta');
+            setText('adCtaSub', 'inpCtaSub');
+
+            // Update service icon
+            const spcIconI = document.getElementById('spcIconI');
+            spcIconI.className = `fas ${t.icon}`;
+
+            // Update accent color
+            applyAccent();
+        }
+
+        function setText(adId, inpId) {
+            const inp = document.getElementById(inpId);
+            const ad = document.getElementById(adId);
+            if (inp && ad) {
+                inp.addEventListener('input', () => { ad.textContent = inp.value; });
+                ad.textContent = inp.value;
+            }
+        }
+
+        // ========================
+        //     LOGO HANDLING
+        // ========================
+        function handleLogo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('logoPreview');
+                const area = document.getElementById('logoArea');
+                preview.src = e.target.result;
+                area.classList.add('has-logo');
+
+                // Update ad logo
+                const container = document.getElementById('adLogoContainer');
+                container.innerHTML = `<img src="${e.target.result}" alt="Logo">`;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ========================
+        //     ACCENT COLOR
+        // ========================
+        function setAccent(color, el) {
+            currentAccent = color;
+            document.querySelectorAll('.color-opt').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            applyAccent();
+        }
+
+        function applyAccent() {
+            const root = document.documentElement;
+            // Update CSS variable
+            root.style.setProperty('--yellow-intense', currentAccent);
+            root.style.setProperty('--yellow-glow', hexToRgba(currentAccent, 0.3));
+            root.style.setProperty('--yellow-soft', hexToRgba(currentAccent, 0.08));
+        }
+
+        function hexToRgba(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // ========================
+        //     TOGGLE ELEMENTS
+        // ========================
+        function toggleEl(el, targetId) {
+            el.classList.toggle('active');
             const target = document.getElementById(targetId);
-            if (!input || !target) return;
-
-            input.addEventListener('input', () => {
-                const value = transformer ? transformer(input.value) : input.value;
-                target.textContent = value;
-            });
+            if (target) {
+                target.style.display = el.classList.contains('active') ? 'flex' : 'none';
+            }
         }
 
-        // Vincular todos los inputs
-        document.addEventListener('DOMContentLoaded', () => {
-            bindInput('inputTitle', 'adTitle');
-            bindInput('inputHighlight', 'adHighlight');
-            bindInput('inputSubtitle', 'adSubtitle');
-            bindInput('inputPrice', 'screenPrice');
-            bindInput('inputChange', 'screenChange');
-            bindInput('inputPair', 'screenPair');
-            bindInput('inputCta', 'adCta');
-            bindInput('inputVolume', 'statVol');
-            bindInput('inputMcap', 'statMcap');
-
-            // Inicializar gráfico
-            initChart();
-
-            // Ajustar escala del contenedor
-            adjustScale();
-            window.addEventListener('resize', adjustScale);
-        });
-
         // ========================
-        //     SCALE ADJUSTMENT
+        //     RESET
         // ========================
-        function adjustScale() {
-            const workspace = document.querySelector('.workspace');
-            const container = document.getElementById('adContainer');
-            const availableWidth = workspace.clientWidth - 80;
-            const availableHeight = workspace.clientHeight - 80;
+        function resetAll() {
+            selectTemplate('pantalla');
+            // Reset inputs to defaults
+            document.getElementById('inpBrand').value = 'CELLFIX PRO';
+            document.getElementById('inpBrandSub').value = 'Reparación Express';
+            document.getElementById('inpWhatsapp').value = '+52 55 1234 5678';
+            document.getElementById('inpAddress').value = 'Av. Reforma #456, CDMX';
+            document.getElementById('inpSchedule').value = 'Lun-Sáb 9:00AM - 8:00PM';
+            document.getElementById('inpCta').value = 'AGENDAR POR WHATSAPP';
+            document.getElementById('inpCtaSub').value = 'Respuesta inmediata • Sin compromiso';
 
-            const scaleX = availableWidth / 540;
-            const scaleY = availableHeight / 960;
-            const scale = Math.min(scaleX, scaleY, 1);
+            // Reset logo
+            const area = document.getElementById('logoArea');
+            area.classList.remove('has-logo');
+            document.getElementById('logoPreview').src = '';
+            document.getElementById('adLogoContainer').innerHTML = '<i class="fas fa-screwdriver-wrench"></i>';
 
-            container.style.transform = `scale(${scale})`;
+            // Reset accent
+            setAccent('#F3BA2F', document.querySelector('.color-opt'));
+
+            updatePreview();
+            updateScreenContent();
         }
 
         // ========================
         //     DOWNLOAD PNG
         // ========================
         async function downloadAd() {
-            const btn = document.getElementById('btnDownload');
-            btn.classList.add('loading');
+            const btn = event.currentTarget;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+            btn.style.pointerEvents = 'none';
 
-            // Crear contenedor a resolución real
             const adContainer = document.getElementById('adContainer');
             const currentTransform = adContainer.style.transform;
+            const currentWidth = adContainer.style.width;
+            const currentHeight = adContainer.style.height;
+
             adContainer.style.transform = 'none';
             adContainer.style.width = '1080px';
             adContainer.style.height = '1920px';
-
-            // Escalar contenido interno para mantener proporciones
-            const content = adContainer.querySelector('.ad-content');
-            const originalFontSize = content.style.fontSize;
-            content.style.fontSize = '20px'; // Escalar todo al doble
+            adContainer.style.borderRadius = '0';
 
             try {
                 const canvas = await html2canvas(adContainer, {
@@ -1204,33 +1644,24 @@
                     useCORS: true,
                     backgroundColor: '#0B0E11',
                     logging: false,
-                    onclone: (clonedDoc) => {
-                        // Ajustar el canvas del clon para Chart.js
-                        const clonedCanvas = clonedDoc.getElementById('tradingChart');
-                        if (clonedCanvas) {
-                            clonedCanvas.width = 960;
-                            clonedCanvas.height = 800;
-                        }
-                    }
                 });
 
                 const link = document.createElement('a');
-                link.download = `ad-whatsapp-${Date.now()}.png`;
+                link.download = `cellfix-ad-${currentTemplate}-${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
 
                 showToast();
             } catch (err) {
-                console.error('Error al generar imagen:', err);
-                alert('Error al generar la imagen. Intenta de nuevo.');
+                console.error('Error:', err);
+                alert('Error al generar la imagen.');
             } finally {
-                // Restaurar estilos
                 adContainer.style.transform = currentTransform;
-                adContainer.style.width = '540px';
-                adContainer.style.height = '960px';
-                content.style.fontSize = originalFontSize;
-                btn.classList.remove('loading');
+                adContainer.style.width = currentWidth || '540px';
+                adContainer.style.height = currentHeight || '960px';
+                adContainer.style.borderRadius = '16px';
                 btn.innerHTML = '<i class="fas fa-download"></i> Descargar PNG';
+                btn.style.pointerEvents = 'auto';
             }
         }
 
@@ -1239,6 +1670,43 @@
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
+
+        // ========================
+        //     SCALE ADJUST
+        // ========================
+        function adjustScale() {
+            const workspace = document.querySelector('.workspace');
+            const container = document.getElementById('adContainer');
+            const aw = workspace.clientWidth - 60;
+            const ah = workspace.clientHeight - 60;
+            const scale = Math.min(aw / 540, ah / 960, 1);
+            container.style.transform = `scale(${scale})`;
+        }
+
+        // ========================
+        //     INIT
+        // ========================
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePreview();
+            updateScreenContent();
+            adjustScale();
+            window.addEventListener('resize', adjustScale);
+
+            // Bind all inputs
+            ['inpBrand','inpBrandSub','inpTitle','inpHighlight','inpDesc',
+             'inpService','inpPrice','inpOldPrice','inpDiscount',
+             'inpClients','inpWarranty','inpTime',
+             'inpFeat1','inpFeat2','inpFeat3',
+             'inpGuarantee','inpGuaranteeSub',
+             'inpWhatsapp','inpAddress','inpSchedule',
+             'inpCta','inpCtaSub'
+            ].forEach(id => {
+                const inp = document.getElementById(id);
+                if (inp) {
+                    inp.addEventListener('input', updatePreview);
+                }
+            });
+        });
     </script>
 
 </body>
