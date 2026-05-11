@@ -3,873 +3,821 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ad Generator — Cell Repair Pro</title>
+    <title>CellFix Ad Generator Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         :root {
-            --carbon-black: #0B0E11;
+            --carbon: #0B0E11;
             --carbon-dark: #141619;
             --carbon-card: #1E2026;
-            --yellow-intense: #F3BA2F;
-            --yellow-glow: rgba(243, 186, 47, 0.3);
-            --yellow-soft: rgba(243, 186, 47, 0.08);
-            --white-pure: #FFFFFF;
-            --white-70: rgba(255, 255, 255, 0.7);
-            --white-50: rgba(255, 255, 255, 0.5);
-            --white-30: rgba(255, 255, 255, 0.3);
-            --green-success: #0ECB81;
-            --green-glow: rgba(14, 203, 129, 0.25);
-            --blue-accent: #1E90FF;
-            --blue-glow: rgba(30, 144, 255, 0.2);
-            --red-loss: #F6465D;
-            --glass-bg: rgba(30, 32, 38, 0.7);
-            --glass-border: rgba(243, 186, 47, 0.12);
-            --shadow-soft: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --accent: #F3BA2F;
+            --accent-glow: rgba(243,186,47,0.3);
+            --accent-soft: rgba(243,186,47,0.08);
+            --white: #FFFFFF;
+            --white-70: rgba(255,255,255,0.7);
+            --white-50: rgba(255,255,255,0.5);
+            --white-30: rgba(255,255,255,0.3);
+            --green: #0ECB81;
+            --blue: #1E90FF;
+            --red: #F6465D;
+            --glass: rgba(30,32,38,0.7);
+            --glass-border: rgba(243,186,47,0.12);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin:0; padding:0; box-sizing:border-box; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: #080A0D;
-            color: var(--white-pure);
-            min-height: 100vh;
-            display: flex;
-            overflow-x: hidden;
+            font-family:'Inter',sans-serif;
+            background:#080A0D;
+            color:var(--white);
+            min-height:100vh;
+            display:flex;
+            overflow-x:hidden;
         }
 
-        /* ======================== */
-        /*    PANEL DE CONTROL      */
-        /* ======================== */
-        .control-panel {
-            position: fixed;
-            left: 0; top: 0;
-            width: 380px;
-            height: 100vh;
-            background: var(--carbon-dark);
-            border-right: 1px solid var(--glass-border);
-            padding: 24px 20px;
-            overflow-y: auto;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+        /* ============ PANEL ============ */
+        .panel {
+            position:fixed; left:0; top:0;
+            width:380px; height:100vh;
+            background:var(--carbon-dark);
+            border-right:1px solid var(--glass-border);
+            padding:20px 18px;
+            overflow-y:auto;
+            z-index:1000;
+            display:flex;
+            flex-direction:column;
+            gap:14px;
         }
 
-        .control-panel::-webkit-scrollbar { width: 4px; }
-        .control-panel::-webkit-scrollbar-thumb { background: var(--yellow-intense); border-radius: 4px; }
+        .panel::-webkit-scrollbar { width:3px; }
+        .panel::-webkit-scrollbar-thumb { background:var(--accent); border-radius:3px; }
 
-        .panel-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--glass-border);
+        .panel-top {
+            display:flex; align-items:center; gap:10px;
+            padding-bottom:14px;
+            border-bottom:1px solid var(--glass-border);
         }
 
-        .panel-header i { font-size: 26px; color: var(--yellow-intense); }
-        .panel-header h2 {
-            font-size: 14px; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 2px;
-            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .panel-header span {
-            font-size: 10px; color: var(--white-50); letter-spacing: 1px;
+        .panel-top i { font-size:24px; color:var(--accent); }
+        .panel-top h2 {
+            font-size:13px; font-weight:800; text-transform:uppercase;
+            letter-spacing:2px;
+            background:linear-gradient(135deg,var(--accent),#FFD966);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
         }
 
-        /* Secciones del panel */
-        .ctrl-section {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        .section-title {
+            font-size:9px; font-weight:700; text-transform:uppercase;
+            letter-spacing:3px; color:var(--accent);
+            padding-bottom:5px;
+            border-bottom:1px solid rgba(243,186,47,0.1);
+            display:flex; align-items:center; gap:6px;
         }
 
-        .ctrl-section-title {
-            font-size: 9px; font-weight: 700; text-transform: uppercase;
-            letter-spacing: 3px; color: var(--yellow-intense);
-            padding-bottom: 6px;
-            border-bottom: 1px solid rgba(243, 186, 47, 0.1);
-            display: flex; align-items: center; gap: 6px;
+        .section-title i { font-size:10px; }
+
+        .ctrl { display:flex; flex-direction:column; gap:6px; }
+
+        .ctrl label {
+            font-size:10px; font-weight:600; color:var(--white-70);
+            letter-spacing:0.5px;
         }
 
-        .ctrl-section-title i { font-size: 10px; }
-
-        .ctrl-group { display: flex; flex-direction: column; gap: 4px; }
-        .ctrl-group label {
-            font-size: 10px; font-weight: 600; color: var(--white-70); letter-spacing: 0.5px;
+        .ctrl input, .ctrl textarea, .ctrl select {
+            background:rgba(11,14,17,0.8);
+            border:1px solid var(--glass-border);
+            border-radius:8px; padding:8px 11px;
+            color:var(--white);
+            font-family:'Inter',sans-serif;
+            font-size:12px; font-weight:500;
+            transition:all 0.3s;
+            outline:none;
         }
 
-        .ctrl-group input,
-        .ctrl-group textarea,
-        .ctrl-group select {
-            background: rgba(11, 14, 17, 0.8);
-            border: 1px solid var(--glass-border);
-            border-radius: 8px;
-            padding: 9px 12px;
-            color: var(--white-pure);
-            font-family: 'Inter', sans-serif;
-            font-size: 12px; font-weight: 500;
-            transition: all 0.3s ease;
-            outline: none;
+        .ctrl input:focus, .ctrl textarea:focus {
+            border-color:var(--accent);
+            box-shadow:0 0 0 3px var(--accent-glow);
         }
 
-        .ctrl-group input:focus,
-        .ctrl-group textarea:focus,
-        .ctrl-group select:focus {
-            border-color: var(--yellow-intense);
-            box-shadow: 0 0 0 3px var(--yellow-glow);
-        }
-
-        .ctrl-group textarea { resize: vertical; min-height: 50px; }
-        .ctrl-group select option { background: var(--carbon-dark); }
-
-        /* Logo Upload */
-        .logo-upload-area {
-            width: 100%;
-            height: 80px;
-            border: 2px dashed var(--glass-border);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            gap: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .logo-upload-area:hover {
-            border-color: var(--yellow-intense);
-            background: var(--yellow-soft);
-        }
-
-        .logo-upload-area i { font-size: 20px; color: var(--white-50); }
-        .logo-upload-area span { font-size: 10px; color: var(--white-50); }
-        .logo-upload-area.has-logo {
-            border-style: solid;
-            border-color: var(--green-success);
-        }
-
-        .logo-preview {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            max-width: 70px;
-            max-height: 60px;
-            object-fit: contain;
-            display: none;
-        }
-
-        .logo-upload-area.has-logo .logo-preview { display: block; }
-        .logo-upload-area.has-logo .upload-placeholder { display: none; }
+        .ctrl textarea { resize:vertical; min-height:45px; }
 
         /* Template Grid */
-        .template-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
+        .tmpl-grid {
+            display:grid; grid-template-columns:1fr 1fr 1fr;
+            gap:6px;
         }
 
-        .template-card {
-            background: rgba(11, 14, 17, 0.8);
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            padding: 12px 10px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .tmpl-card {
+            background:rgba(11,14,17,0.8);
+            border:1px solid var(--glass-border);
+            border-radius:10px;
+            padding:10px 6px;
+            text-align:center;
+            cursor:pointer;
+            transition:all 0.3s;
         }
 
-        .template-card:hover {
-            border-color: rgba(243, 186, 47, 0.3);
-            transform: translateY(-2px);
+        .tmpl-card:hover {
+            border-color:rgba(243,186,47,0.3);
+            transform:translateY(-2px);
         }
 
-        .template-card.active {
-            border-color: var(--yellow-intense);
-            background: rgba(243, 186, 47, 0.08);
-            box-shadow: 0 0 20px rgba(243, 186, 47, 0.1);
+        .tmpl-card.active {
+            border-color:var(--accent);
+            background:rgba(243,186,47,0.08);
+            box-shadow:0 0 15px rgba(243,186,47,0.1);
         }
 
-        .template-card i {
-            font-size: 22px;
-            margin-bottom: 6px;
-            display: block;
+        .tmpl-card i { font-size:20px; margin-bottom:4px; display:block; }
+        .tmpl-card span {
+            font-size:8px; font-weight:700; text-transform:uppercase;
+            letter-spacing:0.5px; color:var(--white-70);
         }
 
-        .template-card .tmpl-name {
-            font-size: 9px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--white-70);
+        .tmpl-card.active span { color:var(--accent); }
+
+        /* Logo Upload */
+        .logo-area {
+            width:100%; height:70px;
+            border:2px dashed var(--glass-border);
+            border-radius:10px;
+            display:flex; align-items:center; justify-content:center;
+            flex-direction:column; gap:4px;
+            cursor:pointer;
+            transition:all 0.3s;
+            position:relative; overflow:hidden;
         }
 
-        .template-card.active .tmpl-name { color: var(--yellow-intense); }
+        .logo-area:hover { border-color:var(--accent); background:var(--accent-soft); }
+        .logo-area.has-logo { border-style:solid; border-color:var(--green); }
+        .logo-area i { font-size:18px; color:var(--white-50); }
+        .logo-area span { font-size:9px; color:var(--white-50); }
 
-        /* Color accents */
-        .color-options { display: flex; gap: 8px; flex-wrap: wrap; }
-        .color-opt {
-            width: 30px; height: 30px;
-            border-radius: 8px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        .color-opt:hover, .color-opt.active {
-            border-color: var(--white-pure);
-            transform: scale(1.15);
-        }
-        .color-opt.active::after {
-            content: '✓';
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 14px;
-            font-weight: 800;
-            color: var(--carbon-black);
+        .logo-preview {
+            position:absolute; top:50%; left:50%;
+            transform:translate(-50%,-50%);
+            max-width:60px; max-height:55px;
+            object-fit:contain;
+            display:none;
         }
 
-        /* Toggle Switch */
-        .toggle-row {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        .logo-area.has-logo .logo-preview { display:block; }
+        .logo-area.has-logo .upload-ph { display:none; }
+
+        #logoInput { display:none; }
+
+        /* Color Options */
+        .color-row { display:flex; gap:7px; flex-wrap:wrap; }
+
+        .color-dot {
+            width:28px; height:28px;
+            border-radius:7px;
+            border:2px solid transparent;
+            cursor:pointer;
+            transition:all 0.2s;
+            position:relative;
         }
 
-        .toggle-row label {
-            font-size: 11px; font-weight: 600; color: var(--white-70);
+        .color-dot:hover, .color-dot.active {
+            border-color:var(--white);
+            transform:scale(1.15);
         }
 
-        .toggle-switch {
-            width: 40px; height: 22px;
-            background: rgba(30, 32, 38, 0.8);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            cursor: pointer;
-            position: relative;
-            transition: all 0.3s ease;
+        .color-dot.active::after {
+            content:'✓'; position:absolute;
+            top:50%; left:50%; transform:translate(-50%,-50%);
+            font-size:12px; font-weight:800;
+            color:var(--carbon);
         }
-
-        .toggle-switch.active {
-            background: var(--yellow-intense);
-            border-color: var(--yellow-intense);
-        }
-
-        .toggle-switch::after {
-            content: '';
-            position: absolute;
-            width: 16px; height: 16px;
-            background: var(--white-pure);
-            border-radius: 50%;
-            top: 2px; left: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .toggle-switch.active::after { left: 20px; }
 
         /* Buttons */
-        .btn-row { display: flex; gap: 8px; }
+        .btn-row { display:flex; gap:6px; }
 
         .btn-primary {
-            flex: 1;
-            display: flex; align-items: center; justify-content: center;
-            gap: 8px;
-            padding: 13px 20px;
-            background: linear-gradient(135deg, var(--yellow-intense), #E5A820);
-            color: var(--carbon-black);
-            border: none; border-radius: 10px;
-            font-family: 'Inter', sans-serif;
-            font-size: 11px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 1.5px;
-            cursor: pointer; transition: all 0.3s ease;
+            flex:1; display:flex; align-items:center; justify-content:center;
+            gap:7px; padding:12px 16px;
+            background:linear-gradient(135deg,var(--accent),#E5A820);
+            color:var(--carbon); border:none; border-radius:10px;
+            font-family:'Inter',sans-serif;
+            font-size:10px; font-weight:800;
+            text-transform:uppercase; letter-spacing:1.5px;
+            cursor:pointer; transition:all 0.3s;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px var(--yellow-glow);
+        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 25px var(--accent-glow); }
+
+        .btn-shuffle {
+            flex:1; display:flex; align-items:center; justify-content:center;
+            gap:7px; padding:12px 16px;
+            background:linear-gradient(135deg,#A855F7,#7C3AED);
+            color:var(--white); border:none; border-radius:10px;
+            font-family:'Inter',sans-serif;
+            font-size:10px; font-weight:800;
+            text-transform:uppercase; letter-spacing:1.5px;
+            cursor:pointer; transition:all 0.3s;
+        }
+
+        .btn-shuffle:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(168,85,247,0.3); }
+
+        .btn-shuffle.spinning i { animation: spin 0.6s ease; }
+
+        @keyframes spin {
+            from { transform:rotate(0deg); }
+            to { transform:rotate(360deg); }
         }
 
         .btn-secondary {
-            display: flex; align-items: center; justify-content: center;
-            gap: 8px;
-            padding: 13px 20px;
-            background: rgba(30, 32, 38, 0.8);
-            color: var(--white-70);
-            border: 1px solid var(--glass-border);
-            border-radius: 10px;
-            font-family: 'Inter', sans-serif;
-            font-size: 11px; font-weight: 700;
-            text-transform: uppercase; letter-spacing: 1.5px;
-            cursor: pointer; transition: all 0.3s ease;
+            display:flex; align-items:center; justify-content:center;
+            gap:7px; padding:12px 16px;
+            background:rgba(30,32,38,0.8);
+            color:var(--white-70);
+            border:1px solid var(--glass-border);
+            border-radius:10px;
+            font-family:'Inter',sans-serif;
+            font-size:10px; font-weight:700;
+            text-transform:uppercase; letter-spacing:1.5px;
+            cursor:pointer; transition:all 0.3s;
         }
 
-        .btn-secondary:hover {
-            border-color: var(--yellow-intense);
-            color: var(--yellow-intense);
+        .btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
+
+        /* Toggle */
+        .toggle-row {
+            display:flex; align-items:center; justify-content:space-between;
         }
 
-        /* ======================== */
-        /*    WORKSPACE             */
-        /* ======================== */
+        .toggle-row label { font-size:10px; font-weight:600; color:var(--white-70); }
+
+        .toggle {
+            width:38px; height:20px;
+            background:rgba(30,32,38,0.8);
+            border:1px solid var(--glass-border);
+            border-radius:10px;
+            cursor:pointer; position:relative;
+            transition:all 0.3s;
+        }
+
+        .toggle.active { background:var(--accent); border-color:var(--accent); }
+
+        .toggle::after {
+            content:''; position:absolute;
+            width:14px; height:14px;
+            background:var(--white);
+            border-radius:50%;
+            top:2px; left:2px;
+            transition:all 0.3s;
+        }
+
+        .toggle.active::after { left:20px; }
+
+        /* ============ WORKSPACE ============ */
         .workspace {
-            margin-left: 380px;
-            width: calc(100% - 380px);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-            background: radial-gradient(ellipse at center, #12151A 0%, #080A0D 100%);
+            margin-left:380px;
+            width:calc(100% - 380px);
+            min-height:100vh;
+            display:flex; align-items:center; justify-content:center;
+            padding:25px;
+            background:radial-gradient(ellipse at center,#12151A 0%,#080A0D 100%);
         }
 
-        /* ======================== */
-        /*    AD CONTAINER          */
-        /* ======================== */
+        /* ============ AD CONTAINER ============ */
         .ad-container {
-            width: 540px; height: 960px;
-            position: relative;
-            overflow: hidden;
-            border-radius: 16px;
-            box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(243, 186, 47, 0.06);
-            transition: all 0.5s ease;
+            width:540px; height:960px;
+            position:relative;
+            overflow:hidden;
+            border-radius:16px;
+            box-shadow:0 20px 80px rgba(0,0,0,0.6), 0 0 60px rgba(243,186,47,0.06);
+            transition:all 0.5s ease;
         }
 
-        .ad-container::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--carbon-black);
-            z-index: 0;
+        .ad-bg { position:absolute; top:0; left:0; right:0; bottom:0; background:var(--carbon); z-index:0; }
+
+        .bg-geo {
+            position:absolute; pointer-events:none; z-index:1;
         }
 
-        /* Background geometry */
-        .bg-layer { position: absolute; z-index: 1; pointer-events: none; }
-
-        .bg-geo-1 {
-            width: 120%; height: 500px; top: -80px; right: -200px;
-            background: linear-gradient(135deg, transparent 35%, var(--yellow-soft) 100%);
-            transform: rotate(-15deg);
+        .bg1 {
+            width:130%; height:500px; top:-80px; right:-200px;
+            background:linear-gradient(135deg,transparent 35%,var(--accent-soft) 100%);
+            transform:rotate(-15deg);
         }
 
-        .bg-geo-2 {
-            width: 100%; height: 350px; bottom: -30px; left: -100px;
-            background: linear-gradient(225deg, transparent 25%, rgba(243, 186, 47, 0.03) 100%);
-            transform: rotate(10deg);
+        .bg2 {
+            width:100%; height:350px; bottom:-30px; left:-100px;
+            background:linear-gradient(225deg,transparent 25%,rgba(243,186,47,0.03) 100%);
+            transform:rotate(10deg);
         }
 
-        .bg-geo-3 {
-            width: 250px; height: 250px; top: 180px; left: -60px;
-            border: 1px solid rgba(243, 186, 47, 0.05);
-            border-radius: 50%;
-            transform: rotate(45deg);
+        .bg3 {
+            width:220px; height:220px; top:160px; left:-50px;
+            border:1px solid rgba(243,186,47,0.05);
+            border-radius:50%; transform:rotate(45deg);
         }
 
-        .bg-line-1 {
-            width: 400px; height: 1px; top: 300px; left: -30px;
-            background: linear-gradient(90deg, transparent, var(--yellow-glow), transparent);
-            transform: rotate(-20deg);
+        .bg4 {
+            width:380px; height:1px; top:280px; left:-20px;
+            background:linear-gradient(90deg,transparent,var(--accent-glow),transparent);
+            transform:rotate(-20deg);
         }
 
-        .bg-line-2 {
-            width: 350px; height: 1px; top: 650px; right: -30px;
-            background: linear-gradient(90deg, transparent, rgba(14, 203, 129, 0.08), transparent);
-            transform: rotate(15deg);
+        .bg5 {
+            width:320px; height:1px; top:620px; right:-20px;
+            background:linear-gradient(90deg,transparent,rgba(14,203,129,0.08),transparent);
+            transform:rotate(15deg);
         }
 
-        .bg-line-3 {
-            width: 1px; height: 400px; top: 200px; right: 120px;
-            background: linear-gradient(180deg, transparent, rgba(243, 186, 47, 0.06), transparent);
+        .bg6 {
+            width:1px; height:350px; top:180px; right:110px;
+            background:linear-gradient(180deg,transparent,rgba(243,186,47,0.06),transparent);
         }
 
-        /* Particles */
         .particle {
-            position: absolute; border-radius: 50%;
-            animation: particleFloat 8s ease-in-out infinite;
+            position:absolute; border-radius:50%;
+            animation:pFloat 8s ease-in-out infinite;
         }
-        .p1 { width: 5px; height: 5px; top: 12%; left: 18%; background: var(--yellow-intense); opacity: 0.07; animation-delay: 0s; }
-        .p2 { width: 3px; height: 3px; top: 42%; right: 12%; background: var(--green-success); opacity: 0.1; animation-delay: 2s; }
-        .p3 { width: 7px; height: 7px; bottom: 22%; left: 25%; background: var(--yellow-intense); opacity: 0.06; animation-delay: 4s; }
-        .p4 { width: 4px; height: 4px; top: 68%; right: 20%; background: var(--blue-accent); opacity: 0.08; animation-delay: 1s; }
-        .p5 { width: 6px; height: 6px; top: 30%; left: 40%; background: var(--yellow-intense); opacity: 0.05; animation-delay: 3s; }
 
-        @keyframes particleFloat {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-18px) scale(1.2); }
+        .pt1 { width:5px; height:5px; top:10%; left:15%; background:var(--accent); opacity:0.07; }
+        .pt2 { width:3px; height:3px; top:40%; right:10%; background:var(--green); opacity:0.1; animation-delay:2s; }
+        .pt3 { width:7px; height:7px; bottom:20%; left:22%; background:var(--accent); opacity:0.06; animation-delay:4s; }
+        .pt4 { width:4px; height:4px; top:65%; right:18%; background:var(--blue); opacity:0.08; animation-delay:1s; }
+        .pt5 { width:6px; height:6px; top:28%; left:38%; background:var(--accent); opacity:0.05; animation-delay:3s; }
+
+        @keyframes pFloat {
+            0%,100% { transform:translateY(0) scale(1); }
+            50% { transform:translateY(-18px) scale(1.2); }
         }
 
         /* AD Content */
         .ad-content {
-            position: relative; z-index: 10;
-            width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            padding: 40px 36px 36px;
+            position:relative; z-index:10;
+            width:100%; height:100%;
+            display:flex; flex-direction:column;
+            padding:36px 32px 32px;
         }
 
-        /* === HEADER === */
+        /* Header */
         .ad-header {
-            display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 20px;
+            display:flex; align-items:center; justify-content:space-between;
+            margin-bottom:16px;
         }
 
-        .ad-brand {
-            display: flex; align-items: center; gap: 10px;
+        .ad-brand { display:flex; align-items:center; gap:10px; }
+
+        .ad-logo-box {
+            width:38px; height:38px;
+            background:linear-gradient(135deg,var(--accent),#FFD966);
+            border-radius:9px;
+            display:flex; align-items:center; justify-content:center;
+            overflow:hidden;
         }
 
-        .ad-logo-container {
-            width: 40px; height: 40px;
-            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            overflow: hidden;
+        .ad-logo-box img { width:100%; height:100%; object-fit:contain; }
+        .ad-logo-box i { font-size:18px; color:var(--carbon); }
+
+        .brand-name {
+            font-size:13px; font-weight:800;
+            letter-spacing:2px; text-transform:uppercase;
         }
 
-        .ad-logo-container img {
-            width: 100%; height: 100%;
-            object-fit: contain;
+        .brand-sub {
+            font-size:8px; color:var(--white-50);
+            letter-spacing:1px; text-transform:uppercase;
         }
 
-        .ad-logo-container i {
-            font-size: 20px; color: var(--carbon-black);
+        .badge-live {
+            padding:4px 10px;
+            background:rgba(14,203,129,0.12);
+            border:1px solid rgba(14,203,129,0.25);
+            border-radius:16px;
+            font-size:8px; font-weight:700;
+            color:var(--green);
+            text-transform:uppercase; letter-spacing:1px;
+            display:flex; align-items:center; gap:4px;
         }
 
-        .ad-brand-info .brand-name {
-            font-size: 14px; font-weight: 800;
-            letter-spacing: 2px; text-transform: uppercase;
+        .badge-live .dot {
+            width:5px; height:5px;
+            background:var(--green);
+            border-radius:50%;
+            animation:pulse 2s infinite;
         }
 
-        .ad-brand-info .brand-sub {
-            font-size: 9px; color: var(--white-50);
-            letter-spacing: 1px; text-transform: uppercase;
-        }
+        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
-        .ad-badge-live {
-            padding: 5px 12px;
-            background: rgba(14, 203, 129, 0.12);
-            border: 1px solid rgba(14, 203, 129, 0.25);
-            border-radius: 20px;
-            font-size: 9px; font-weight: 700;
-            color: var(--green-success);
-            text-transform: uppercase; letter-spacing: 1px;
-            display: flex; align-items: center; gap: 5px;
-        }
-
-        .ad-badge-live .dot {
-            width: 6px; height: 6px;
-            background: var(--green-success);
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        /* === TITLE === */
-        .ad-title-section { margin-bottom: 6px; }
+        /* Title Section */
+        .title-section { margin-bottom:5px; }
 
         .ad-title {
-            font-size: 36px; font-weight: 900;
-            line-height: 1.05; text-transform: uppercase;
-            letter-spacing: -0.5px; margin-bottom: 4px;
+            font-size:34px; font-weight:900;
+            line-height:1.05; text-transform:uppercase;
+            letter-spacing:-0.5px;
         }
 
         .ad-title .hl {
-            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            display: block;
+            background:linear-gradient(135deg,var(--accent),#FFD966);
+            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            display:block;
         }
 
-        .ad-subtitle {
-            font-size: 13px; font-weight: 400;
-            color: var(--white-50); line-height: 1.5;
-            margin-bottom: 24px;
+        .ad-desc {
+            font-size:12px; font-weight:400;
+            color:var(--white-50); line-height:1.5;
+            margin-bottom:18px;
         }
 
-        /* === SERVICE PRICE CARD === */
-        .service-price-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(14px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 18px 20px;
-            margin-bottom: 22px;
-            display: flex; align-items: center; justify-content: space-between;
+        /* Service Price Card */
+        .price-card {
+            background:var(--glass);
+            backdrop-filter:blur(14px);
+            border:1px solid var(--glass-border);
+            border-radius:14px;
+            padding:16px 18px;
+            margin-bottom:18px;
+            display:flex; align-items:center; justify-content:space-between;
         }
 
-        .spc-left {
-            display: flex; align-items: center; gap: 14px;
+        .price-left { display:flex; align-items:center; gap:12px; }
+
+        .price-icon {
+            width:44px; height:44px;
+            background:linear-gradient(135deg,var(--accent),#FFD966);
+            border-radius:11px;
+            display:flex; align-items:center; justify-content:center;
         }
 
-        .spc-icon {
-            width: 48px; height: 48px;
-            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
-            border-radius: 12px;
-            display: flex; align-items: center; justify-content: center;
+        .price-icon i { font-size:20px; color:var(--carbon); }
+
+        .price-name {
+            font-size:13px; font-weight:700; color:var(--white);
+            text-transform:uppercase; letter-spacing:0.5px;
         }
 
-        .spc-icon i { font-size: 22px; color: var(--carbon-black); }
+        .price-desc-sm { font-size:9px; color:var(--white-50); margin-top:2px; }
 
-        .spc-info .spc-name {
-            font-size: 14px; font-weight: 700; color: var(--white-pure);
-            text-transform: uppercase; letter-spacing: 1px;
+        .price-right { text-align:right; }
+
+        .price-old { font-size:11px; color:var(--white-30); text-decoration:line-through; }
+
+        .price-val {
+            font-size:24px; font-weight:900; color:var(--accent);
         }
 
-        .spc-info .spc-desc {
-            font-size: 10px; color: var(--white-50); margin-top: 2px;
+        .price-badge {
+            font-size:9px; font-weight:700;
+            color:var(--green);
+            background:rgba(14,203,129,0.1);
+            padding:2px 7px; border-radius:5px;
+            display:inline-block; margin-top:3px;
         }
 
-        .spc-right { text-align: right; }
-
-        .spc-price {
-            font-size: 26px; font-weight: 900; color: var(--yellow-intense);
-        }
-
-        .spc-old-price {
-            font-size: 12px; color: var(--white-30);
-            text-decoration: line-through;
-        }
-
-        .spc-discount {
-            font-size: 10px; font-weight: 700;
-            color: var(--green-success);
-            background: rgba(14, 203, 129, 0.1);
-            padding: 2px 8px; border-radius: 6px;
-            display: inline-block; margin-top: 4px;
-        }
-
-        /* === PHONE MOCKUP 3D === */
-        .phone-wrapper {
-            perspective: 1200px;
-            display: flex; justify-content: center;
-            margin-bottom: 22px;
-            position: relative;
+        /* ============ PHONE MOCKUP ============ */
+        .phone-area {
+            display:flex; justify-content:center;
+            margin-bottom:18px;
+            position:relative;
         }
 
         .phone-glow {
-            position: absolute;
-            width: 280px; height: 280px;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: radial-gradient(circle, var(--yellow-glow) 0%, transparent 70%);
-            pointer-events: none;
-            animation: glowPulse 4s ease-in-out infinite;
+            position:absolute;
+            width:260px; height:260px;
+            top:50%; left:50%;
+            transform:translate(-50%,-50%);
+            border-radius:50%;
+            background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);
+            pointer-events:none;
+            animation:glowP 4s ease-in-out infinite;
         }
 
-        @keyframes glowPulse {
-            0%, 100% { opacity: 0.35; transform: translate(-50%, -50%) scale(1); }
-            50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.08); }
+        @keyframes glowP {
+            0%,100% { opacity:0.35; transform:translate(-50%,-50%) scale(1); }
+            50% { opacity:0.6; transform:translate(-50%,-50%) scale(1.08); }
         }
 
-        .phone-mockup {
-            width: 220px; height: 440px;
-            background: linear-gradient(145deg, #1a1d24, #0f1115);
-            border-radius: 30px;
-            border: 2px solid rgba(243, 186, 47, 0.12);
-            padding: 10px;
-            position: relative;
-            transform: rotateX(5deg) rotateY(-8deg);
-            animation: phoneFloat 6s ease-in-out infinite;
-            box-shadow:
-                0 25px 60px rgba(0, 0, 0, 0.5),
-                0 0 40px rgba(243, 186, 47, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 0.04);
+        .phone-frame {
+            width:210px; height:420px;
+            background:linear-gradient(145deg,#1a1d24,#0f1115);
+            border-radius:28px;
+            border:2px solid rgba(243,186,47,0.12);
+            padding:10px;
+            position:relative;
+            transform:rotateX(5deg) rotateY(-8deg);
+            animation:phoneF 6s ease-in-out infinite;
+            box-shadow:0 25px 60px rgba(0,0,0,0.5), 0 0 35px rgba(243,186,47,0.05), inset 0 1px 0 rgba(255,255,255,0.04);
         }
 
-        @keyframes phoneFloat {
-            0%, 100% { transform: rotateX(5deg) rotateY(-8deg) translateY(0); }
-            50% { transform: rotateX(3deg) rotateY(-6deg) translateY(-10px); }
+        @keyframes phoneF {
+            0%,100% { transform:rotateX(5deg) rotateY(-8deg) translateY(0); }
+            50% { transform:rotateX(3deg) rotateY(-6deg) translateY(-10px); }
         }
 
-        .phone-notch {
-            position: absolute; top: 10px; left: 50%;
-            transform: translateX(-50%);
-            width: 80px; height: 22px;
-            background: #0f1115;
-            border-radius: 0 0 12px 12px;
-            z-index: 20;
+        .notch {
+            position:absolute; top:10px; left:50%;
+            transform:translateX(-50%);
+            width:75px; height:20px;
+            background:#0f1115;
+            border-radius:0 0 11px 11px;
+            z-index:20;
         }
 
-        .phone-screen {
-            width: 100%; height: 100%;
-            background: var(--carbon-black);
-            border-radius: 22px;
-            overflow: hidden;
-            display: flex; flex-direction: column;
+        .phone-display {
+            width:100%; height:100%;
+            background:var(--carbon);
+            border-radius:20px;
+            overflow:hidden;
+            position:relative;
         }
 
-        /* Screen content varies by template */
-        .screen-content {
-            flex: 1; display: flex; flex-direction: column;
-            padding: 32px 14px 14px;
+        .phone-display svg {
+            width:100%; height:100%;
         }
 
-        .screen-status-bar {
-            display: flex; justify-content: space-between;
-            align-items: center; margin-bottom: 16px;
+        /* ============ STATS ============ */
+        .stats-row {
+            display:grid;
+            grid-template-columns:1fr 1fr 1fr;
+            gap:8px;
+            margin-bottom:16px;
         }
 
-        .screen-time { font-size: 12px; font-weight: 700; }
-
-        .screen-icons { display: flex; gap: 4px; font-size: 9px; color: var(--white-50); }
-
-        .screen-main-icon {
-            width: 56px; height: 56px;
-            margin: 10px auto;
-            background: linear-gradient(135deg, var(--yellow-intense), #FFD966);
-            border-radius: 16px;
-            display: flex; align-items: center; justify-content: center;
+        .stat-box {
+            background:var(--glass);
+            backdrop-filter:blur(12px);
+            border:1px solid var(--glass-border);
+            border-radius:11px;
+            padding:12px 8px;
+            text-align:center;
         }
 
-        .screen-main-icon i { font-size: 26px; color: var(--carbon-black); }
+        .stat-box i { font-size:14px; margin-bottom:3px; display:block; }
 
-        .screen-service-name {
-            text-align: center;
-            font-size: 11px; font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 10px;
+        .stat-box .s-val { font-size:16px; font-weight:800; margin-bottom:1px; }
+
+        .stat-box .s-lbl {
+            font-size:7px; font-weight:600;
+            color:var(--white-50);
+            text-transform:uppercase; letter-spacing:1px;
         }
 
-        .screen-progress {
-            margin: 16px 0 8px;
+        /* ============ FEATURES ============ */
+        .feat-list {
+            display:flex; flex-direction:column;
+            gap:6px; margin-bottom:14px;
         }
 
-        .progress-label {
-            display: flex; justify-content: space-between;
-            font-size: 8px; color: var(--white-50);
-            margin-bottom: 4px;
+        .feat-item {
+            display:flex; align-items:center; gap:8px;
+            padding:7px 10px;
+            background:rgba(30,32,38,0.4);
+            border-radius:9px;
+            border-left:3px solid var(--accent);
         }
 
-        .progress-bar {
-            width: 100%; height: 6px;
-            background: rgba(30, 32, 38, 0.8);
-            border-radius: 3px;
-            overflow: hidden;
+        .feat-item i { font-size:12px; color:var(--accent); }
+
+        .feat-item .f-text {
+            font-size:10px; font-weight:600; color:var(--white-70);
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--yellow-intense), var(--green-success));
-            border-radius: 3px;
-            transition: width 1s ease;
+        /* ============ GUARANTEE ============ */
+        .guarantee-box {
+            display:flex; align-items:center; justify-content:center;
+            gap:8px;
+            padding:10px 16px;
+            background:rgba(14,203,129,0.08);
+            border:1px solid rgba(14,203,129,0.15);
+            border-radius:11px;
+            margin-bottom:14px;
         }
 
-        .screen-checklist {
-            margin-top: auto;
-            display: flex; flex-direction: column;
-            gap: 6px;
+        .guarantee-box i { font-size:18px; color:var(--green); }
+
+        .guarantee-box .gb-main {
+            font-size:11px; font-weight:700; color:var(--green);
+            text-transform:uppercase; letter-spacing:1px;
         }
 
-        .check-item {
-            display: flex; align-items: center; gap: 6px;
-            font-size: 9px; color: var(--white-70);
+        .guarantee-box .gb-sub {
+            font-size:8px; color:rgba(14,203,129,0.6);
         }
 
-        .check-item i {
-            font-size: 8px; color: var(--green-success);
+        /* ============ PHONE NUMBER SECTION ============ */
+        .phone-number-section {
+            background:var(--glass);
+            backdrop-filter:blur(14px);
+            border:1px solid var(--glass-border);
+            border-radius:14px;
+            padding:14px 18px;
+            margin-bottom:14px;
+            display:flex;
+            align-items:center;
+            gap:14px;
         }
 
-        /* Template-specific screen styles */
-        .screen-acc-grid {
+        .phone-number-icon {
+            width:44px; height:44px;
+            background:linear-gradient(135deg,#25D366,#128C7E);
+            border-radius:12px;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0;
+        }
+
+        .phone-number-icon i { font-size:22px; color:var(--white); }
+
+        .phone-number-info { flex:1; }
+
+        .phone-number-label {
+            font-size:9px; color:var(--white-50);
+            text-transform:uppercase; letter-spacing:1px;
+            margin-bottom:2px;
+        }
+
+        .phone-number-value {
+            font-size:18px; font-weight:800; color:var(--white);
+            letter-spacing:0.5px;
+        }
+
+        .phone-number-extra {
+            display:flex; gap:12px; margin-top:4px;
+        }
+
+        .phone-number-extra span {
+            font-size:9px; color:var(--white-50);
+            display:flex; align-items:center; gap:3px;
+        }
+
+        .phone-number-extra span i { font-size:8px; color:var(--accent); }
+
+        .phone-call-btn {
+            width:40px; height:40px;
+            background:var(--green);
+            border-radius:50%;
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0;
+            animation:callPulse 2s infinite;
+        }
+
+        .phone-call-btn i { font-size:18px; color:var(--white); }
+
+        @keyframes callPulse {
+            0%,100% { box-shadow:0 0 0 0 rgba(14,203,129,0.4); }
+            50% { box-shadow:0 0 0 10px rgba(14,203,129,0); }
+        }
+
+        /* ============ CTA ============ */
+        .ad-cta { margin-top:auto; }
+
+        .cta-btn {
+            width:100%;
+            padding:15px 24px;
+            background:linear-gradient(135deg,var(--accent),#E5A820);
+            border:none; border-radius:13px;
+            font-family:'Inter',sans-serif;
+            font-size:13px; font-weight:800;
+            text-transform:uppercase; letter-spacing:2px;
+            color:var(--carbon);
+            cursor:pointer;
+            position:relative; overflow:hidden;
+            transition:all 0.3s;
+        }
+
+        .cta-btn::before {
+            content:''; position:absolute;
+            top:0; left:-100%;
+            width:100%; height:100%;
+            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+            transition:left 0.5s;
+        }
+
+        .cta-btn:hover::before { left:100%; }
+        .cta-btn:hover { box-shadow:0 8px 25px var(--accent-glow); transform:translateY(-2px); }
+
+        .cta-sub {
+            text-align:center;
+            font-size:8px; color:var(--white-30);
+            margin-top:6px; letter-spacing:0.3px;
+        }
+
+        /* ============ ANIMATIONS ============ */
+        .ad-content > * {
+            animation:fadeUp 0.5s ease forwards;
+            opacity:0;
+        }
+
+        .ad-content > *:nth-child(1) { animation-delay:0.08s; }
+        .ad-content > *:nth-child(2) { animation-delay:0.14s; }
+        .ad-content > *:nth-child(3) { animation-delay:0.2s; }
+        .ad-content > *:nth-child(4) { animation-delay:0.26s; }
+        .ad-content > *:nth-child(5) { animation-delay:0.32s; }
+        .ad-content > *:nth-child(6) { animation-delay:0.38s; }
+        .ad-content > *:nth-child(7) { animation-delay:0.44s; }
+        .ad-content > *:nth-child(8) { animation-delay:0.5s; }
+        .ad-content > *:nth-child(9) { animation-delay:0.56s; }
+        .ad-content > *:nth-child(10) { animation-delay:0.62s; }
+
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(16px); }
+            to { opacity:1; transform:translateY(0); }
+        }
+
+        /* ============ TOAST ============ */
+        .toast {
+            position:fixed; bottom:25px; right:25px;
+            background:var(--carbon-card);
+            border:1px solid var(--green);
+            border-radius:11px;
+            padding:12px 20px;
+            display:flex; align-items:center; gap:10px;
+            z-index:9999;
+            transform:translateY(100px); opacity:0;
+            transition:all 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+            box-shadow:0 10px 40px rgba(14,203,129,0.15);
+        }
+
+        .toast.show { transform:translateY(0); opacity:1; }
+        .toast i { color:var(--green); font-size:16px; }
+        .toast span { font-size:11px; font-weight:600; }
+
+        /* ============ LAYOUT VARIANTS ============ */
+        /* Layout: Stats arriba, features abajo */
+        .layout-stats-top .stats-row { order: -1; margin-bottom: 16px; margin-top: 0; }
+
+        /* Layout: Features como grid 2x2 */
+        .layout-features-grid .feat-list {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 8px;
-            margin-top: 14px;
         }
 
-        .acc-item {
-            background: rgba(30, 32, 38, 0.6);
-            border: 1px solid rgba(243, 186, 47, 0.08);
-            border-radius: 10px;
+        .layout-features-grid .feat-item {
+            flex-direction: column;
+            text-align: center;
+            border-left: none;
+            border-top: 3px solid var(--accent);
             padding: 10px 8px;
+        }
+
+        /* Layout: Title centrado */
+        .layout-title-center .title-section { text-align: center; }
+        .layout-title-center .ad-desc { text-align: center; }
+
+        /* Layout: Stats en 2 columnas */
+        .layout-stats-2col .stats-row {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        /* Layout: Precio grande */
+        .layout-big-price .price-card {
+            flex-direction: column;
+            text-align: center;
+            gap: 12px;
+            padding: 20px;
+        }
+
+        .layout-big-price .price-left {
+            flex-direction: column;
+        }
+
+        .layout-big-price .price-val {
+            font-size: 32px;
+        }
+
+        /* Layout: Contacto minimal */
+        .layout-contact-minimal .phone-number-section {
+            flex-direction: column;
             text-align: center;
         }
 
-        .acc-item i { font-size: 16px; color: var(--yellow-intense); margin-bottom: 4px; display: block; }
-        .acc-item .acc-name { font-size: 8px; font-weight: 600; color: var(--white-70); }
-        .acc-item .acc-price { font-size: 9px; font-weight: 700; color: var(--green-success); margin-top: 2px; }
-
-        /* === STATS ROW === */
-        .stats-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
+        .layout-contact-minimal .phone-number-extra {
+            justify-content: center;
         }
 
-        .stat-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 14px 10px;
+        /* Layout: Features horizontales */
+        .layout-features-row .feat-list {
+            flex-direction: row;
+            gap: 8px;
+        }
+
+        .layout-features-row .feat-item {
+            flex: 1;
+            flex-direction: column;
             text-align: center;
+            border-left: none;
+            border-top: 3px solid var(--accent);
+            padding: 8px 6px;
         }
 
-        .stat-card i {
-            font-size: 16px; margin-bottom: 4px; display: block;
+        /* Shuffle transition */
+        .shuffle-transition {
+            animation: shuffleAnim 0.8s ease;
         }
 
-        .stat-card .stat-val {
-            font-size: 18px; font-weight: 800; margin-bottom: 2px;
+        @keyframes shuffleAnim {
+            0% { opacity: 0; transform: scale(0.95) rotate(2deg); }
+            50% { opacity: 0.5; transform: scale(0.98) rotate(-1deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
         }
-
-        .stat-card .stat-lbl {
-            font-size: 8px; font-weight: 600;
-            color: var(--white-50);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .icon-yellow { color: var(--yellow-intense) !important; }
-        .icon-green { color: var(--green-success) !important; }
-        .icon-blue { color: var(--blue-accent) !important; }
-
-        /* === FEATURES LIST === */
-        .features-list {
-            display: flex; flex-direction: column;
-            gap: 8px; margin-bottom: 18px;
-        }
-
-        .feature-item {
-            display: flex; align-items: center; gap: 10px;
-            padding: 8px 12px;
-            background: rgba(30, 32, 38, 0.4);
-            border-radius: 10px;
-            border-left: 3px solid var(--yellow-intense);
-        }
-
-        .feature-item i {
-            font-size: 14px; color: var(--yellow-intense);
-        }
-
-        .feature-item .feat-text {
-            font-size: 11px; font-weight: 600;
-            color: var(--white-70);
-        }
-
-        /* === GUARANTEE BADGE === */
-        .guarantee-badge {
-            display: flex; align-items: center; justify-content: center;
-            gap: 10px;
-            padding: 12px 20px;
-            background: rgba(14, 203, 129, 0.08);
-            border: 1px solid rgba(14, 203, 129, 0.15);
-            border-radius: 12px;
-            margin-bottom: 18px;
-        }
-
-        .guarantee-badge i { font-size: 20px; color: var(--green-success); }
-        .guarantee-badge .gb-text {
-            font-size: 12px; font-weight: 700; color: var(--green-success);
-            text-transform: uppercase; letter-spacing: 1px;
-        }
-
-        .guarantee-badge .gb-sub {
-            font-size: 9px; color: rgba(14, 203, 129, 0.6);
-        }
-
-        /* === CONTACT INFO === */
-        .contact-info {
-            display: flex; flex-direction: column;
-            gap: 6px; margin-bottom: 16px;
-        }
-
-        .contact-item {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 11px; color: var(--white-70);
-        }
-
-        .contact-item i {
-            width: 16px; text-align: center;
-            color: var(--yellow-intense); font-size: 13px;
-        }
-
-        /* === CTA === */
-        .ad-cta { margin-top: auto; }
-
-        .cta-button {
-            width: 100%;
-            padding: 16px 28px;
-            background: linear-gradient(135deg, var(--yellow-intense), #E5A820);
-            border: none; border-radius: 14px;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px; font-weight: 800;
-            text-transform: uppercase; letter-spacing: 2.5px;
-            color: var(--carbon-black);
-            cursor: pointer;
-            position: relative; overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .cta-button::before {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .cta-button:hover::before { left: 100%; }
-        .cta-button:hover { box-shadow: 0 8px 30px var(--yellow-glow); transform: translateY(-2px); }
-
-        .cta-sub {
-            text-align: center;
-            font-size: 9px; color: var(--white-30);
-            margin-top: 8px; letter-spacing: 0.3px;
-        }
-
-        /* Animations */
-        .ad-content > * {
-            animation: fadeInUp 0.6s ease forwards;
-            opacity: 0;
-        }
-        .ad-content > *:nth-child(1) { animation-delay: 0.1s; }
-        .ad-content > *:nth-child(2) { animation-delay: 0.15s; }
-        .ad-content > *:nth-child(3) { animation-delay: 0.2s; }
-        .ad-content > *:nth-child(4) { animation-delay: 0.25s; }
-        .ad-content > *:nth-child(5) { animation-delay: 0.3s; }
-        .ad-content > *:nth-child(6) { animation-delay: 0.35s; }
-        .ad-content > *:nth-child(7) { animation-delay: 0.4s; }
-        .ad-content > *:nth-child(8) { animation-delay: 0.45s; }
-        .ad-content > *:nth-child(9) { animation-delay: 0.5s; }
-        .ad-content > *:nth-child(10) { animation-delay: 0.55s; }
-
-        @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(18px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Toast */
-        .toast {
-            position: fixed; bottom: 30px; right: 30px;
-            background: var(--carbon-card);
-            border: 1px solid var(--green-success);
-            border-radius: 12px;
-            padding: 14px 22px;
-            display: flex; align-items: center; gap: 10px;
-            z-index: 9999;
-            transform: translateY(100px); opacity: 0;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            box-shadow: 0 10px 40px rgba(14, 203, 129, 0.15);
-        }
-        .toast.show { transform: translateY(0); opacity: 1; }
-        .toast i { color: var(--green-success); font-size: 18px; }
-        .toast-text { font-size: 12px; font-weight: 600; }
-
-        /* Hidden file input */
-        #logoInput { display: none; }
 
         /* Responsive */
         @media (max-width: 1300px) {
@@ -882,362 +830,337 @@
 </head>
 <body>
 
-    <!-- ======================== -->
-    <!--     PANEL DE CONTROL     -->
-    <!-- ======================== -->
-    <aside class="control-panel">
-        <div class="panel-header">
+    <!-- ============ PANEL ============ -->
+    <aside class="panel">
+        <div class="panel-top">
             <i class="fas fa-mobile-screen-button"></i>
             <div>
-                <h2>Cell Repair Ads</h2>
-                <span>Generador de Publicidad</span>
+                <h2>CellFix Ad Generator</h2>
+                <span style="font-size:9px; color:var(--white-50); letter-spacing:1px;">v2.0 — Shuffle Edition</span>
             </div>
         </div>
 
-        <!-- TEMPLATE SELECTOR -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-layer-group"></i> Plantilla</div>
-            <div class="template-grid">
-                <div class="template-card active" onclick="selectTemplate('pantalla')">
-                    <i class="fas fa-mobile-screen" style="color: #F3BA2F;"></i>
-                    <span class="tmpl-name">Pantalla</span>
+        <!-- Templates -->
+        <div>
+            <div class="section-title"><i class="fas fa-layer-group"></i> Plantilla</div>
+            <div class="tmpl-grid" id="tmplGrid">
+                <div class="tmpl-card active" onclick="selectTemplate('pantalla', this)">
+                    <i class="fas fa-mobile-screen" style="color:#F3BA2F;"></i>
+                    <span>Pantalla</span>
                 </div>
-                <div class="template-card" onclick="selectTemplate('carga')">
-                    <i class="fas fa-plug-circle-bolt" style="color: #0ECB81;"></i>
-                    <span class="tmpl-name">Puerto Carga</span>
+                <div class="tmpl-card" onclick="selectTemplate('carga', this)">
+                    <i class="fas fa-plug-circle-bolt" style="color:#0ECB81;"></i>
+                    <span>P. Carga</span>
                 </div>
-                <div class="template-card" onclick="selectTemplate('diagnostico')">
-                    <i class="fas fa-stethoscope" style="color: #1E90FF;"></i>
-                    <span class="tmpl-name">Diagnóstico</span>
+                <div class="tmpl-card" onclick="selectTemplate('diagnostico', this)">
+                    <i class="fas fa-magnifying-glass-chart" style="color:#1E90FF;"></i>
+                    <span>Diagnóstico</span>
                 </div>
-                <div class="template-card" onclick="selectTemplate('accesorios')">
-                    <i class="fas fa-headphones" style="color: #F3BA2F;"></i>
-                    <span class="tmpl-name">Accesorios</span>
+                <div class="tmpl-card" onclick="selectTemplate('accesorios', this)">
+                    <i class="fas fa-headphones-simple" style="color:#F3BA2F;"></i>
+                    <span>Accesorios</span>
                 </div>
-                <div class="template-card" onclick="selectTemplate('bateria')">
-                    <i class="fas fa-battery-full" style="color: #0ECB81;"></i>
-                    <span class="tmpl-name">Batería</span>
+                <div class="tmpl-card" onclick="selectTemplate('bateria', this)">
+                    <i class="fas fa-battery-full" style="color:#0ECB81;"></i>
+                    <span>Batería</span>
                 </div>
-                <div class="template-card" onclick="selectTemplate('placa')">
-                    <i class="fas fa-microchip" style="color: #1E90FF;"></i>
-                    <span class="tmpl-name">Micro-soldadura</span>
+                <div class="tmpl-card" onclick="selectTemplate('placa', this)">
+                    <i class="fas fa-microchip" style="color:#1E90FF;"></i>
+                    <span>Micro-sold.</span>
                 </div>
             </div>
         </div>
 
-        <!-- LOGO -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-image"></i> Logo del Taller</div>
-            <div class="logo-upload-area" id="logoArea" onclick="document.getElementById('logoInput').click()">
+        <!-- Logo -->
+        <div>
+            <div class="section-title"><i class="fas fa-image"></i> Logo del Taller</div>
+            <div class="logo-area" id="logoArea" onclick="document.getElementById('logoInput').click()">
                 <input type="file" id="logoInput" accept="image/*" onchange="handleLogo(event)">
-                <div class="upload-placeholder">
+                <div class="upload-ph">
                     <i class="fas fa-cloud-arrow-up"></i>
-                    <span>Click para subir logo</span>
+                    <span>Subir logo</span>
                 </div>
-                <img class="logo-preview" id="logoPreview" src="" alt="Logo">
+                <img class="logo-preview" id="logoPreview" src="" alt="">
             </div>
         </div>
 
-        <!-- TEXTOS -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-font"></i> Textos</div>
-            <div class="ctrl-group">
+        <!-- Textos -->
+        <div>
+            <div class="section-title"><i class="fas fa-font"></i> Textos</div>
+            <div class="ctrl">
                 <label>Nombre del Taller</label>
                 <input type="text" id="inpBrand" value="CELLFIX PRO">
             </div>
-            <div class="ctrl-group">
-                <label>Eslogan / Sub-brand</label>
+            <div class="ctrl">
+                <label>Eslogan</label>
                 <input type="text" id="inpBrandSub" value="Reparación Express">
             </div>
-            <div class="ctrl-group">
+            <div class="ctrl">
                 <label>Título Principal</label>
                 <input type="text" id="inpTitle" value="CAMBIO DE PANTALLA">
             </div>
-            <div class="ctrl-group">
-                <label>Texto Destacado (Amarillo)</label>
+            <div class="ctrl">
+                <label>Texto Destacado</label>
                 <input type="text" id="inpHighlight" value="CALIDAD ORIGINAL">
             </div>
-            <div class="ctrl-group">
+            <div class="ctrl">
                 <label>Descripción</label>
                 <textarea id="inpDesc">Reemplazo de pantalla con repuestos de grado original. Garantía incluida en todos los servicios.</textarea>
             </div>
         </div>
 
-        <!-- PRECIO -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-tag"></i> Precio del Servicio</div>
-            <div class="ctrl-group">
-                <label>Servicio</label>
+        <!-- Precio -->
+        <div>
+            <div class="section-title"><i class="fas fa-tag"></i> Precio</div>
+            <div class="ctrl">
+                <label>Nombre del Servicio</label>
                 <input type="text" id="inpService" value="Cambio de Pantalla LCD">
             </div>
-            <div style="display:flex; gap:8px;">
-                <div class="ctrl-group" style="flex:1;">
+            <div style="display:flex; gap:6px;">
+                <div class="ctrl" style="flex:1;">
                     <label>Precio</label>
                     <input type="text" id="inpPrice" value="$49.99">
                 </div>
-                <div class="ctrl-group" style="flex:1;">
+                <div class="ctrl" style="flex:1;">
                     <label>Precio Anterior</label>
                     <input type="text" id="inpOldPrice" value="$79.99">
                 </div>
             </div>
-            <div class="ctrl-group">
-                <label>Descuento (badge)</label>
+            <div class="ctrl">
+                <label>Badge Descuento</label>
                 <input type="text" id="inpDiscount" value="-37% OFF">
             </div>
         </div>
 
-        <!-- STATS -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-chart-bar"></i> Estadísticas</div>
-            <div style="display:flex; gap:8px;">
-                <div class="ctrl-group" style="flex:1;">
+        <!-- Teléfono -->
+        <div>
+            <div class="section-title"><i class="fab fa-whatsapp"></i> Teléfono / WhatsApp</div>
+            <div class="ctrl">
+                <label>Número Principal</label>
+                <input type="text" id="inpPhone" value="+52 55 1234 5678">
+            </div>
+            <div class="ctrl">
+                <label>Llamadas / WhatsApp</label>
+                <input type="text" id="inpPhoneLabel" value="Llamadas y WhatsApp">
+            </div>
+            <div class="ctrl">
+                <label>Dirección</label>
+                <input type="text" id="inpAddress" value="Av. Reforma #456, CDMX">
+            </div>
+            <div class="ctrl">
+                <label>Horario</label>
+                <input type="text" id="inpSchedule" value="Lun-Sáb 9AM - 8PM">
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div>
+            <div class="section-title"><i class="fas fa-chart-bar"></i> Estadísticas</div>
+            <div style="display:flex; gap:6px;">
+                <div class="ctrl" style="flex:1;">
                     <label>Clientes</label>
                     <input type="text" id="inpClients" value="5,200+">
                 </div>
-                <div class="ctrl-group" style="flex:1;">
+                <div class="ctrl" style="flex:1;">
                     <label>Garantía</label>
                     <input type="text" id="inpWarranty" value="6 Meses">
                 </div>
-                <div class="ctrl-group" style="flex:1;">
+                <div class="ctrl" style="flex:1;">
                     <label>Tiempo</label>
                     <input type="text" id="inpTime" value="30 min">
                 </div>
             </div>
         </div>
 
-        <!-- FEATURES -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-list-check"></i> Características</div>
-            <div class="ctrl-group">
-                <label>Feature 1</label>
-                <input type="text" id="inpFeat1" value="Repuestos de grado original">
-            </div>
-            <div class="ctrl-group">
-                <label>Feature 2</label>
-                <input type="text" id="inpFeat2" value="Reparación en el momento">
-            </div>
-            <div class="ctrl-group">
-                <label>Feature 3</label>
-                <input type="text" id="inpFeat3" value="Garantía por escrito">
-            </div>
+        <!-- Features -->
+        <div>
+            <div class="section-title"><i class="fas fa-list-check"></i> Características</div>
+            <div class="ctrl"><label>Feature 1</label><input type="text" id="inpFeat1" value="Repuestos de grado original"></div>
+            <div class="ctrl"><label>Feature 2</label><input type="text" id="inpFeat2" value="Reparación en el momento"></div>
+            <div class="ctrl"><label>Feature 3</label><input type="text" id="inpFeat3" value="Garantía por escrito"></div>
         </div>
 
-        <!-- CONTACTO -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-address-book"></i> Contacto</div>
-            <div class="ctrl-group">
-                <label>WhatsApp</label>
-                <input type="text" id="inpWhatsapp" value="+52 55 1234 5678">
-            </div>
-            <div class="ctrl-group">
-                <label>Dirección</label>
-                <input type="text" id="inpAddress" value="Av. Reforma #456, CDMX">
-            </div>
-            <div class="ctrl-group">
-                <label>Horario</label>
-                <input type="text" id="inpSchedule" value="Lun-Sáb 9:00AM - 8:00PM">
-            </div>
-        </div>
-
-        <!-- GUARANTEE -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-shield-halved"></i> Garantía</div>
+        <!-- Garantía -->
+        <div>
+            <div class="section-title"><i class="fas fa-shield-halved"></i> Garantía</div>
             <div class="toggle-row">
-                <label>Mostrar badge de garantía</label>
-                <div class="toggle-switch active" id="togGuarantee" onclick="toggleEl(this, 'guaranteeBadge')"></div>
+                <label>Mostrar badge</label>
+                <div class="toggle active" id="togGuarantee" onclick="toggleEl(this,'guaranteeBox')"></div>
             </div>
-            <div class="ctrl-group" style="margin-top:6px;">
-                <label>Texto de garantía</label>
-                <input type="text" id="inpGuarantee" value="GARANTÍA DE 6 MESES">
-            </div>
-            <div class="ctrl-group">
-                <label>Subtexto garantía</label>
-                <input type="text" id="inpGuaranteeSub" value="En todos nuestros servicios">
-            </div>
+            <div class="ctrl" style="margin-top:6px;"><label>Texto</label><input type="text" id="inpGuarantee" value="GARANTÍA DE 6 MESES"></div>
+            <div class="ctrl"><label>Subtexto</label><input type="text" id="inpGuaranteeSub" value="En todos nuestros servicios"></div>
         </div>
 
         <!-- CTA -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-hand-pointer"></i> Botón CTA</div>
-            <div class="ctrl-group">
-                <label>Texto del botón</label>
-                <input type="text" id="inpCta" value="AGENDAR POR WHATSAPP">
-            </div>
-            <div class="ctrl-group">
-                <label>Texto inferior</label>
-                <input type="text" id="inpCtaSub" value="Respuesta inmediata • Sin compromiso">
+        <div>
+            <div class="section-title"><i class="fas fa-hand-pointer"></i> Botón</div>
+            <div class="ctrl"><label>Texto</label><input type="text" id="inpCta" value="AGENDAR POR WHATSAPP"></div>
+            <div class="ctrl"><label>Subtexto</label><input type="text" id="inpCtaSub" value="Respuesta inmediata • Sin compromiso"></div>
+        </div>
+
+        <!-- Color -->
+        <div>
+            <div class="section-title"><i class="fas fa-palette"></i> Color de Acento</div>
+            <div class="color-row">
+                <div class="color-dot active" style="background:#F3BA2F;" onclick="setAccent('#F3BA2F',this)"></div>
+                <div class="color-dot" style="background:#0ECB81;" onclick="setAccent('#0ECB81',this)"></div>
+                <div class="color-dot" style="background:#1E90FF;" onclick="setAccent('#1E90FF',this)"></div>
+                <div class="color-dot" style="background:#F6465D;" onclick="setAccent('#F6465D',this)"></div>
+                <div class="color-dot" style="background:#A855F7;" onclick="setAccent('#A855F7',this)"></div>
+                <div class="color-dot" style="background:#FFFFFF;" onclick="setAccent('#FFFFFF',this)"></div>
             </div>
         </div>
 
-        <!-- COLOR ACCENT -->
-        <div class="ctrl-section">
-            <div class="ctrl-section-title"><i class="fas fa-palette"></i> Color de Acento</div>
-            <div class="color-options">
-                <div class="color-opt active" style="background: #F3BA2F;" onclick="setAccent('#F3BA2F', this)"></div>
-                <div class="color-opt" style="background: #0ECB81;" onclick="setAccent('#0ECB81', this)"></div>
-                <div class="color-opt" style="background: #1E90FF;" onclick="setAccent('#1E90FF', this)"></div>
-                <div class="color-opt" style="background: #F6465D;" onclick="setAccent('#F6465D', this)"></div>
-                <div class="color-opt" style="background: #A855F7;" onclick="setAccent('#A855F7', this)"></div>
-                <div class="color-opt" style="background: #FFFFFF;" onclick="setAccent('#FFFFFF', this)"></div>
-            </div>
-        </div>
-
-        <!-- DOWNLOAD -->
+        <!-- Actions -->
         <div class="btn-row">
-            <button class="btn-primary" onclick="downloadAd()">
-                <i class="fas fa-download"></i> Descargar PNG
+            <button class="btn-shuffle" id="btnShuffle" onclick="shuffleLayout()">
+                <i class="fas fa-shuffle"></i> Mezclar
             </button>
-            <button class="btn-secondary" onclick="resetAll()">
-                <i class="fas fa-rotate-left"></i>
+            <button class="btn-primary" onclick="downloadAd()">
+                <i class="fas fa-download"></i> PNG
+            </button>
+        </div>
+        <div class="btn-row">
+            <button class="btn-secondary" onclick="resetAll()" style="flex:1;">
+                <i class="fas fa-rotate-left"></i> Reset
             </button>
         </div>
     </aside>
 
-    <!-- ======================== -->
-    <!--     WORKSPACE PREVIEW    -->
-    <!-- ======================== -->
+    <!-- ============ WORKSPACE ============ -->
     <main class="workspace">
         <div class="ad-container" id="adContainer">
+            <div class="ad-bg"></div>
+            <div class="bg-geo bg1"></div>
+            <div class="bg-geo bg2"></div>
+            <div class="bg-geo bg3"></div>
+            <div class="bg-geo bg4"></div>
+            <div class="bg-geo bg5"></div>
+            <div class="bg-geo bg6"></div>
+            <div class="particle pt1"></div>
+            <div class="particle pt2"></div>
+            <div class="particle pt3"></div>
+            <div class="particle pt4"></div>
+            <div class="particle pt5"></div>
 
-            <!-- Background -->
-            <div class="bg-layer bg-geo-1"></div>
-            <div class="bg-layer bg-geo-2"></div>
-            <div class="bg-layer bg-geo-3"></div>
-            <div class="bg-layer bg-line-1"></div>
-            <div class="bg-layer bg-line-2"></div>
-            <div class="bg-layer bg-line-3"></div>
-            <div class="particle p1"></div>
-            <div class="particle p2"></div>
-            <div class="particle p3"></div>
-            <div class="particle p4"></div>
-            <div class="particle p5"></div>
-
-            <!-- Content -->
             <div class="ad-content" id="adContent">
-
                 <!-- Header -->
                 <div class="ad-header">
                     <div class="ad-brand">
-                        <div class="ad-logo-container" id="adLogoContainer">
+                        <div class="ad-logo-box" id="adLogoBox">
                             <i class="fas fa-screwdriver-wrench"></i>
                         </div>
-                        <div class="ad-brand-info">
+                        <div>
                             <div class="brand-name" id="adBrand">CELLFIX PRO</div>
                             <div class="brand-sub" id="adBrandSub">Reparación Express</div>
                         </div>
                     </div>
-                    <div class="ad-badge-live">
-                        <span class="dot"></span>
-                        Disponible
-                    </div>
+                    <div class="badge-live"><span class="dot"></span> Disponible</div>
                 </div>
 
                 <!-- Title -->
-                <div class="ad-title-section">
+                <div class="title-section">
                     <div class="ad-title">
                         <span id="adTitle">CAMBIO DE PANTALLA</span>
                         <span class="hl" id="adHighlight">CALIDAD ORIGINAL</span>
                     </div>
                 </div>
-                <p class="ad-subtitle" id="adDesc">Reemplazo de pantalla con repuestos de grado original. Garantía incluida en todos los servicios.</p>
+                <p class="ad-desc" id="adDesc">Reemplazo de pantalla con repuestos de grado original.</p>
 
-                <!-- Service Price Card -->
-                <div class="service-price-card">
-                    <div class="spc-left">
-                        <div class="spc-icon" id="spcIcon">
-                            <i class="fas fa-mobile-screen" id="spcIconI"></i>
-                        </div>
-                        <div class="spc-info">
-                            <div class="spc-name" id="adService">Cambio de Pantalla LCD</div>
-                            <div class="spc-desc">Incluye instalación</div>
+                <!-- Price Card -->
+                <div class="price-card">
+                    <div class="price-left">
+                        <div class="price-icon"><i class="fas fa-mobile-screen" id="priceIconI"></i></div>
+                        <div>
+                            <div class="price-name" id="adService">Cambio de Pantalla LCD</div>
+                            <div class="price-desc-sm">Incluye instalación</div>
                         </div>
                     </div>
-                    <div class="spc-right">
-                        <div class="spc-old-price" id="adOldPrice">$79.99</div>
-                        <div class="spc-price" id="adPrice">$49.99</div>
-                        <div class="spc-discount" id="adDiscount">-37% OFF</div>
+                    <div class="price-right">
+                        <div class="price-old" id="adOldPrice">$79.99</div>
+                        <div class="price-val" id="adPrice">$49.99</div>
+                        <div class="price-badge" id="adDiscount">-37% OFF</div>
                     </div>
                 </div>
 
                 <!-- Phone Mockup -->
-                <div class="phone-wrapper">
+                <div class="phone-area">
                     <div class="phone-glow"></div>
-                    <div class="phone-mockup">
-                        <div class="phone-notch"></div>
-                        <div class="phone-screen">
-                            <div class="screen-content" id="screenContent">
-                                <!-- Dynamic screen content -->
-                            </div>
+                    <div class="phone-frame">
+                        <div class="notch"></div>
+                        <div class="phone-display" id="phoneDisplay">
+                            <!-- SVG Mockup injected here -->
                         </div>
                     </div>
                 </div>
 
                 <!-- Stats -->
                 <div class="stats-row">
-                    <div class="stat-card">
-                        <i class="fas fa-users icon-yellow"></i>
-                        <div class="stat-val" id="adClients" style="color: var(--yellow-intense);">5,200+</div>
-                        <div class="stat-lbl">Clientes</div>
+                    <div class="stat-box">
+                        <i class="fas fa-users" style="color:var(--accent);"></i>
+                        <div class="s-val" id="adClients" style="color:var(--accent);">5,200+</div>
+                        <div class="s-lbl">Clientes</div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-clock icon-green"></i>
-                        <div class="stat-val" id="adTime" style="color: var(--green-success);">30 min</div>
-                        <div class="stat-lbl">Tiempo</div>
+                    <div class="stat-box">
+                        <i class="fas fa-clock" style="color:var(--green);"></i>
+                        <div class="s-val" id="adTime" style="color:var(--green);">30 min</div>
+                        <div class="s-lbl">Tiempo</div>
                     </div>
-                    <div class="stat-card">
-                        <i class="fas fa-shield-halved icon-blue"></i>
-                        <div class="stat-val" id="adWarranty" style="color: var(--blue-accent);">6 Meses</div>
-                        <div class="stat-lbl">Garantía</div>
+                    <div class="stat-box">
+                        <i class="fas fa-shield-halved" style="color:var(--blue);"></i>
+                        <div class="s-val" id="adWarranty" style="color:var(--blue);">6 Meses</div>
+                        <div class="s-lbl">Garantía</div>
                     </div>
                 </div>
 
                 <!-- Features -->
-                <div class="features-list" id="featuresList">
-                    <div class="feature-item">
+                <div class="feat-list">
+                    <div class="feat-item">
                         <i class="fas fa-check-circle"></i>
-                        <span class="feat-text" id="adFeat1">Repuestos de grado original</span>
+                        <span class="f-text" id="adFeat1">Repuestos de grado original</span>
                     </div>
-                    <div class="feature-item">
+                    <div class="feat-item">
                         <i class="fas fa-check-circle"></i>
-                        <span class="feat-text" id="adFeat2">Reparación en el momento</span>
+                        <span class="f-text" id="adFeat2">Reparación en el momento</span>
                     </div>
-                    <div class="feature-item">
+                    <div class="feat-item">
                         <i class="fas fa-check-circle"></i>
-                        <span class="feat-text" id="adFeat3">Garantía por escrito</span>
+                        <span class="f-text" id="adFeat3">Garantía por escrito</span>
                     </div>
                 </div>
 
-                <!-- Guarantee Badge -->
-                <div class="guarantee-badge" id="guaranteeBadge">
+                <!-- Guarantee -->
+                <div class="guarantee-box" id="guaranteeBox">
                     <i class="fas fa-shield-check"></i>
                     <div>
-                        <div class="gb-text" id="adGuarantee">GARANTÍA DE 6 MESES</div>
+                        <div class="gb-main" id="adGuarantee">GARANTÍA DE 6 MESES</div>
                         <div class="gb-sub" id="adGuaranteeSub">En todos nuestros servicios</div>
                     </div>
                 </div>
 
-                <!-- Contact -->
-                <div class="contact-info" id="contactInfo">
-                    <div class="contact-item">
+                <!-- Phone Number Section -->
+                <div class="phone-number-section" id="phoneSection">
+                    <div class="phone-number-icon">
                         <i class="fab fa-whatsapp"></i>
-                        <span id="adWhatsapp">+52 55 1234 5678</span>
                     </div>
-                    <div class="contact-item">
-                        <i class="fas fa-location-dot"></i>
-                        <span id="adAddress">Av. Reforma #456, CDMX</span>
+                    <div class="phone-number-info">
+                        <div class="phone-number-label" id="adPhoneLabel">Llamadas y WhatsApp</div>
+                        <div class="phone-number-value" id="adPhone">+52 55 1234 5678</div>
+                        <div class="phone-number-extra">
+                            <span><i class="fas fa-location-dot"></i> <span id="adAddress">Av. Reforma #456, CDMX</span></span>
+                            <span><i class="fas fa-clock"></i> <span id="adSchedule">Lun-Sáb 9AM - 8PM</span></span>
+                        </div>
                     </div>
-                    <div class="contact-item">
-                        <i class="fas fa-clock"></i>
-                        <span id="adSchedule">Lun-Sáb 9:00AM - 8:00PM</span>
+                    <div class="phone-call-btn">
+                        <i class="fas fa-phone"></i>
                     </div>
                 </div>
 
                 <!-- CTA -->
                 <div class="ad-cta">
-                    <button class="cta-button" id="adCta">AGENDAR POR WHATSAPP</button>
+                    <button class="cta-btn" id="adCta">AGENDAR POR WHATSAPP</button>
                     <p class="cta-sub" id="adCtaSub">Respuesta inmediata • Sin compromiso</p>
                 </div>
-
             </div>
         </div>
     </main>
@@ -1245,147 +1168,390 @@
     <!-- Toast -->
     <div class="toast" id="toast">
         <i class="fas fa-check-circle"></i>
-        <span class="toast-text">¡Imagen descargada a 1080×1920!</span>
+        <span>¡Imagen descargada a 1080×1920!</span>
     </div>
 
     <script>
-        // ========================
-        //     TEMPLATE DATA
-        // ========================
+        // ============================
+        // TEMPLATE DATA
+        // ============================
         const templates = {
             pantalla: {
-                icon: 'fa-mobile-screen',
-                title: 'CAMBIO DE PANTALLA',
-                highlight: 'CALIDAD ORIGINAL',
-                desc: 'Reemplazo de pantalla con repuestos de grado original. Garantía incluida en todos los servicios.',
-                service: 'Cambio de Pantalla LCD',
-                price: '$49.99', oldPrice: '$79.99', discount: '-37% OFF',
-                clients: '5,200+', warranty: '6 Meses', time: '30 min',
-                feat1: 'Repuestos de grado original',
-                feat2: 'Reparación en el momento',
-                feat3: 'Garantía por escrito',
-                guarantee: 'GARANTÍA DE 6 MESES',
-                guaranteeSub: 'En todos nuestros servicios',
-                screenType: 'repair',
-                screenIcon: 'fa-mobile-screen',
-                screenService: 'Pantalla LCD',
-                screenProgress: 85,
-                screenChecks: ['Pantalla original instalada', 'Calibración de táctil', 'Prueba de colores', 'Sellado hermético']
+                icon:'fa-mobile-screen',
+                title:'CAMBIO DE PANTALLA',
+                highlight:'CALIDAD ORIGINAL',
+                desc:'Reemplazo de pantalla con repuestos de grado original. Garantía incluida en todos los servicios.',
+                service:'Cambio de Pantalla LCD',
+                price:'$49.99', oldPrice:'$79.99', discount:'-37% OFF',
+                clients:'5,200+', warranty:'6 Meses', time:'30 min',
+                feat1:'Pantalla AMOLED / LCD original', feat2:'Instalación en 30 minutos', feat3:'Garantía de 6 meses',
+                guarantee:'GARANTÍA DE 6 MESES', guaranteeSub:'En pantalla instalada',
+                phone:'pantalla'
             },
             carga: {
-                icon: 'fa-plug-circle-bolt',
-                title: 'PUERTO DE CARGA',
-                highlight: 'CARGA RESTAURADA',
-                desc: '¿Tu celular no carga? Reparamos o reemplazamos el puerto de carga en minutos.',
-                service: 'Reparación Puerto de Carga',
-                price: '$24.99', oldPrice: '$44.99', discount: '-44% OFF',
-                clients: '3,800+', warranty: '3 Meses', time: '20 min',
-                feat1: 'Diagnóstico gratuito incluido',
-                feat2: 'Reparación express',
-                feat3: 'Compatible con todos los modelos',
-                guarantee: 'GARANTÍA DE 3 MESES',
-                guaranteeSub: 'En reparación de puerto',
-                screenType: 'repair',
-                screenIcon: 'fa-plug-circle-bolt',
-                screenService: 'Puerto de Carga',
-                screenProgress: 100,
-                screenChecks: ['Puerto reemplazado', 'Carga rápida activada', 'Puerto limpio', 'Prueba de voltaje']
+                icon:'fa-plug-circle-bolt',
+                title:'PUERTO DE CARGA',
+                highlight:'CARGA RESTAURADA',
+                desc:'¿Tu celular no carga? Reparamos o reemplazamos el puerto de carga en minutos.',
+                service:'Reparación Puerto de Carga',
+                price:'$24.99', oldPrice:'$44.99', discount:'-44% OFF',
+                clients:'3,800+', warranty:'3 Meses', time:'20 min',
+                feat1:'Diagnóstico gratuito', feat2:'Carga rápida restaurada', feat3:'Compatible con todos los modelos',
+                guarantee:'GARANTÍA DE 3 MESES', guaranteeSub:'En reparación de puerto',
+                phone:'carga'
             },
             diagnostico: {
-                icon: 'fa-stethoscope',
-                title: 'DIAGNÓSTICO',
-                highlight: 'GRATIS HOY',
-                desc: 'Diagnóstico completo y gratuito de tu dispositivo. Identificamos el problema exacto.',
-                service: 'Diagnóstico Completo',
-                price: 'GRATIS', oldPrice: '$15.00', discount: '100% OFF',
-                clients: '8,100+', warranty: 'N/A', time: '15 min',
-                feat1: 'Evaluación de hardware completa',
-                feat2: 'Reporte detallado del estado',
-                feat3: 'Presupuesto sin compromiso',
-                guarantee: 'DIAGNÓSTICO GRATUITO',
-                guaranteeSub: 'Sin costo ni compromiso',
-                screenType: 'diagnostic',
-                screenIcon: 'fa-magnifying-glass-chart',
-                screenService: 'Diagnóstico',
-                screenProgress: 72,
-                screenChecks: ['Batería: Salud 78%', 'Pantalla: Sin daños', 'Memoria: 64GB libre', 'Señal: Normal']
+                icon:'fa-magnifying-glass-chart',
+                title:'DIAGNÓSTICO',
+                highlight:'GRATIS HOY',
+                desc:'Diagnóstico completo y gratuito. Identificamos el problema exacto de tu dispositivo.',
+                service:'Diagnóstico Completo',
+                price:'GRATIS', oldPrice:'$15.00', discount:'100% OFF',
+                clients:'8,100+', warranty:'N/A', time:'15 min',
+                feat1:'Evaluación de hardware completa', feat2:'Reporte detallado del estado', feat3:'Presupuesto sin compromiso',
+                guarantee:'DIAGNÓSTICO GRATUITO', guaranteeSub:'Sin costo ni compromiso',
+                phone:'diagnostico'
             },
             accesorios: {
-                icon: 'fa-headphones',
-                title: 'ACCESORIOS',
-                highlight: 'PREMIUM SHOP',
-                desc: 'Los mejores accesorios para tu celular. Cargadores, fundas, micas y más.',
-                service: 'Catálogo de Accesorios',
-                price: 'Desde $5.99', oldPrice: '', discount: 'NUEVO',
-                clients: '12,000+', warranty: '1 Mes', time: 'En stock',
-                feat1: 'Marcas originales certificadas',
-                feat2: 'Envío a domicilio disponible',
-                feat3: 'Ofertas semanales exclusivas',
-                guarantee: 'GARANTÍA DE SATISFACCIÓN',
-                guaranteeSub: 'Devolución en 7 días',
-                screenType: 'accessories',
-                screenIcon: 'fa-bag-shopping',
-                screenService: 'Accesorios',
-                screenAccItems: [
-                    { icon: 'fa-headphones', name: 'Audífonos', price: '$12.99' },
-                    { icon: 'fa-mobile-screen-button', name: 'Funda', price: '$8.99' },
-                    { icon: 'fa-bolt', name: 'Cargador', price: '$14.99' },
-                    { icon: 'fa-shield-halved', name: 'Mica', price: '$5.99' }
-                ]
+                icon:'fa-headphones-simple',
+                title:'ACCESORIOS',
+                highlight:'PREMIUM SHOP',
+                desc:'Los mejores accesorios para tu celular. Cargadores, fundas, micas y más.',
+                service:'Catálogo de Accesorios',
+                price:'Desde $5.99', oldPrice:'', discount:'NUEVO',
+                clients:'12,000+', warranty:'1 Mes', time:'En stock',
+                feat1:'Marcas originales certificadas', feat2:'Envío a domicilio disponible', feat3:'Ofertas semanales exclusivas',
+                guarantee:'GARANTÍA DE SATISFACCIÓN', guaranteeSub:'Devolución en 7 días',
+                phone:'accesorios'
             },
             bateria: {
-                icon: 'fa-battery-full',
-                title: 'CAMBIO DE BATERÍA',
-                highlight: 'VUELVE A VIVIR',
-                desc: '¿Tu batería no dura nada? Instalamos baterías nuevas con capacidad original.',
-                service: 'Reemplazo de Batería',
-                price: '$29.99', oldPrice: '$54.99', discount: '-45% OFF',
-                clients: '4,500+', warranty: '6 Meses', time: '25 min',
-                feat1: 'Batería de capacidad original',
-                feat2: 'Calibración incluida',
-                feat3: 'Test de rendimiento post-cambio',
-                guarantee: 'GARANTÍA DE 6 MESES',
-                guaranteeSub: 'En batería instalada',
-                screenType: 'repair',
-                screenIcon: 'fa-battery-full',
-                screenService: 'Batería Nueva',
-                screenProgress: 100,
-                screenChecks: ['Batería instalada', 'Calibración: 100%', 'Salud: Óptima', 'Ciclo: 0']
+                icon:'fa-battery-full',
+                title:'CAMBIO DE BATERÍA',
+                highlight:'VUELVE A VIVIR',
+                desc:'¿Tu batería no dura nada? Instalamos baterías nuevas con capacidad original.',
+                service:'Reemplazo de Batería',
+                price:'$29.99', oldPrice:'$54.99', discount:'-45% OFF',
+                clients:'4,500+', warranty:'6 Meses', time:'25 min',
+                feat1:'Batería de capacidad original', feat2:'Calibración incluida', feat3:'Test de rendimiento post-cambio',
+                guarantee:'GARANTÍA DE 6 MESES', guaranteeSub:'En batería instalada',
+                phone:'bateria'
             },
             placa: {
-                icon: 'fa-microchip',
-                title: 'MICRO-SOLDADURA',
-                highlight: 'REPARACIÓN EXPERTA',
-                desc: 'Reparación a nivel de componente con micro-soldadura de precisión profesional.',
-                service: 'Micro-soldadura de Placa',
-                price: '$59.99', oldPrice: '$99.99', discount: '-40% OFF',
-                clients: '2,100+', warranty: '3 Meses', time: '2-4 hrs',
-                feat1: 'Técnico certificado en micro-soldadura',
-                feat2: 'Equipo de precisión profesional',
-                feat3: 'Reparación de IC, condensadores, etc.',
-                guarantee: 'GARANTÍA DE 3 MESES',
-                guaranteeSub: 'En micro-soldadura',
-                screenType: 'repair',
-                screenIcon: 'fa-microchip',
-                screenService: 'Micro-soldadura',
-                screenProgress: 60,
-                screenChecks: ['IC de carga reparado', 'Condensadores reemplazados', 'Prueba de corto: OK', 'Test final: Aprobado']
+                icon:'fa-microchip',
+                title:'MICRO-SOLDADURA',
+                highlight:'REPARACIÓN EXPERTA',
+                desc:'Reparación a nivel de componente con micro-soldadura de precisión profesional.',
+                service:'Micro-soldadura de Placa',
+                price:'$59.99', oldPrice:'$99.99', discount:'-40% OFF',
+                clients:'2,100+', warranty:'3 Meses', time:'2-4 hrs',
+                feat1:'Técnico certificado', feat2:'Equipo de precisión profesional', feat3:'IC, condensadores, FPC',
+                guarantee:'GARANTÍA DE 3 MESES', guaranteeSub:'En micro-soldadura',
+                phone:'placa'
             }
         };
 
         let currentTemplate = 'pantalla';
         let currentAccent = '#F3BA2F';
+        let shuffleCount = 0;
 
-        // ========================
-        //     SELECT TEMPLATE
-        // ========================
-        function selectTemplate(key) {
+        // ============================
+        // SVG MOCKUP GENERATORS
+        // ============================
+        function getMockupSVG(type) {
+            const accent = currentAccent;
+
+            switch(type) {
+                case 'pantalla':
+                    return `
+                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Phone body -->
+                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
+                        <!-- Screen background -->
+                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
+                        <!-- Status bar -->
+                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
+                        <text x="155" y="50" fill="#666" font-size="9" font-family="Inter,sans-serif">📶 🔋</text>
+                        <!-- Broken screen effect -->
+                        <rect x="18" y="30" width="174" height="360" rx="8" fill="none" stroke="#444" stroke-width="0.5"/>
+                        <!-- Crack lines - major cracks -->
+                        <line x1="60" y1="60" x2="120" y2="180" stroke="${accent}" stroke-width="1.5" opacity="0.6"/>
+                        <line x1="120" y1="180" x2="170" y2="250" stroke="${accent}" stroke-width="1.2" opacity="0.5"/>
+                        <line x1="60" y1="60" x2="40" y2="200" stroke="${accent}" stroke-width="1" opacity="0.4"/>
+                        <line x1="120" y1="180" x2="90" y2="320" stroke="${accent}" stroke-width="1.3" opacity="0.5"/>
+                        <line x1="170" y1="250" x2="150" y2="350" stroke="${accent}" stroke-width="1" opacity="0.4"/>
+                        <line x1="40" y1="200" x2="80" y2="280" stroke="${accent}" stroke-width="0.8" opacity="0.3"/>
+                        <line x1="90" y1="320" x2="130" y2="370" stroke="${accent}" stroke-width="0.8" opacity="0.3"/>
+                        <!-- Spider web cracks from center -->
+                        <line x1="110" y1="150" x2="50" y2="100" stroke="${accent}" stroke-width="0.8" opacity="0.35"/>
+                        <line x1="110" y1="150" x2="170" y2="120" stroke="${accent}" stroke-width="0.8" opacity="0.35"/>
+                        <line x1="110" y1="150" x2="140" y2="200" stroke="${accent}" stroke-width="0.8" opacity="0.35"/>
+                        <line x1="110" y1="150" x2="70" y2="170" stroke="${accent}" stroke-width="0.8" opacity="0.35"/>
+                        <!-- Impact points -->
+                        <circle cx="110" cy="150" r="12" fill="none" stroke="${accent}" stroke-width="1" opacity="0.5"/>
+                        <circle cx="110" cy="150" r="6" fill="${accent}" opacity="0.15"/>
+                        <circle cx="60" cy="60" r="8" fill="none" stroke="${accent}" stroke-width="0.8" opacity="0.4"/>
+                        <!-- Crack shards (triangles) -->
+                        <polygon points="60,60 80,80 70,100" fill="${accent}" opacity="0.06"/>
+                        <polygon points="120,180 140,170 130,200" fill="${accent}" opacity="0.06"/>
+                        <polygon points="170,250 160,270 180,260" fill="${accent}" opacity="0.06"/>
+                        <!-- "SCREEN BROKEN" text -->
+                        <text x="105" y="300" text-anchor="middle" fill="${accent}" font-size="11" font-family="Inter,sans-serif" font-weight="800" opacity="0.8">SCREEN</text>
+                        <text x="105" y="315" text-anchor="middle" fill="${accent}" font-size="11" font-family="Inter,sans-serif" font-weight="800" opacity="0.8">BROKEN</text>
+                        <!-- Warning triangle -->
+                        <polygon points="105,340 90,365 120,365" fill="none" stroke="${accent}" stroke-width="1" opacity="0.6"/>
+                        <text x="105" y="358" text-anchor="middle" fill="${accent}" font-size="12" font-weight="800" opacity="0.7">!</text>
+                        <!-- Arrow pointing down -->
+                        <text x="105" y="390" text-anchor="middle" fill="${accent}" font-size="9" font-family="Inter,sans-serif" font-weight="700" opacity="0.5">↓ REPARACIÓN ↓</text>
+                        <!-- Screen reflection -->
+                        <rect x="18" y="30" width="174" height="360" rx="8" fill="url(#screenRef)" opacity="0.3"/>
+                        <defs>
+                            <linearGradient id="screenRef" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="white" stop-opacity="0.1"/>
+                                <stop offset="50%" stop-color="white" stop-opacity="0"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>`;
+
+                case 'carga':
+                    return `
+                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
+                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
+                        <!-- Time -->
+                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
+                        <!-- Battery icon - EMPTY -->
+                        <rect x="145" y="38" width="24" height="12" rx="3" fill="none" stroke="#F6465D" stroke-width="1.5"/>
+                        <rect x="169" y="41" width="4" height="6" rx="1" fill="#F6465D" opacity="0.6"/>
+                        <rect x="148" y="41" width="4" height="6" rx="1" fill="#F6465D" opacity="0.3"/>
+                        <text x="105" y="100" text-anchor="middle" fill="#F6465D" font-size="10" font-family="Inter,sans-serif" font-weight="800">5%</text>
+                        <!-- Charging cable -->
+                        <rect x="90" y="385" width="30" height="20" rx="3" fill="#333" stroke="#555" stroke-width="0.5"/>
+                        <rect x="100" y="370" width="10" height="18" rx="2" fill="#444"/>
+                        <line x1="105" y1="370" x2="105" y2="340" stroke="#666" stroke-width="2"/>
+                        <!-- Lightning bolts -->
+                        <polygon points="105,280 95,300 102,300 92,320 110,298 103,298" fill="${accent}" opacity="0.8"/>
+                        <polygon points="105,200 98,215 103,215 96,230 108,213 104,213" fill="${accent}" opacity="0.4"/>
+                        <!-- Phone charging animation -->
+                        <text x="105" y="160" text-anchor="middle" fill="${accent}" font-size="9" font-family="Inter,sans-serif" font-weight="700">CARGANDO...</text>
+                        <!-- Progress bar -->
+                        <rect x="40" y="175" width="130" height="6" rx="3" fill="#333"/>
+                        <rect x="40" y="175" width="30" height="6" rx="3" fill="${accent}">
+                            <animate attributeName="width" from="10" to="130" dur="3s" repeatCount="indefinite"/>
+                        </rect>
+                        <!-- Port closeup -->
+                        <rect x="70" y="230" width="70" height="35" rx="8" fill="#222" stroke="${accent}" stroke-width="1" opacity="0.6"/>
+                        <rect x="85" y="238" width="40" height="8" rx="4" fill="#333"/>
+                        <circle cx="105" cy="242" r="2" fill="${accent}" opacity="0.8">
+                            <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
+                        </circle>
+                        <text x="105" y="262" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="600">USB-C / LIGHTNING</text>
+                        <!-- Before/After arrows -->
+                        <text x="55" y="320" fill="#F6465D" font-size="8" font-family="Inter,sans-serif" font-weight="700">✗ NO CARGA</text>
+                        <text x="155" y="320" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">✓ CARGANDO</text>
+                        <line x1="90" y1="318" x2="130" y2="318" stroke="${accent}" stroke-width="0.5" stroke-dasharray="3,2" opacity="0.5"/>
+                        <!-- Arrow -->
+                        <text x="110" y="318" text-anchor="middle" fill="${accent}" font-size="10" opacity="0.6">→</text>
+                    </svg>`;
+
+                case 'diagnostico':
+                    return `
+                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
+                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
+                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
+                        <!-- Scan animation -->
+                        <text x="105" y="80" text-anchor="middle" fill="${accent}" font-size="9" font-family="Inter,sans-serif" font-weight="700">DIAGNÓSTICO EN CURSO</text>
+                        <!-- Scanning line -->
+                        <line x1="25" y1="100" x2="185" y2="100" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+                        <line x1="25" y1="100" x2="185" y2="100" stroke="${accent}" stroke-width="1" opacity="0.6">
+                            <animate attributeName="y1" values="100;350;100" dur="4s" repeatCount="indefinite"/>
+                            <animate attributeName="y2" values="100;350;100" dur="4s" repeatCount="indefinite"/>
+                        </line>
+                        <!-- Health bars -->
+                        <g transform="translate(30, 110)">
+                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Batería</text>
+                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
+                            <rect x="0" y="5" width="115" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
+                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">78%</text>
+                        </g>
+                        <g transform="translate(30, 140)">
+                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Pantalla</text>
+                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
+                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
+                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">100%</text>
+                        </g>
+                        <g transform="translate(30, 170)">
+                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Memoria</text>
+                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
+                            <rect x="0" y="5" width="90" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
+                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">60%</text>
+                        </g>
+                        <g transform="translate(30, 200)">
+                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Señal</text>
+                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
+                            <rect x="0" y="5" width="135" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
+                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">90%</text>
+                        </g>
+                        <g transform="translate(30, 230)">
+                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Sensores</text>
+                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
+                            <rect x="0" y="5" width="120" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
+                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">80%</text>
+                        </g>
+                        <!-- Result card -->
+                        <rect x="25" y="270" width="160" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
+                        <text x="105" y="295" text-anchor="middle" fill="${accent}" font-size="10" font-family="Inter,sans-serif" font-weight="800">RESULTADO GENERAL</text>
+                        <text x="105" y="320" text-anchor="middle" fill="${accent}" font-size="22" font-family="Inter,sans-serif" font-weight="900">B+</text>
+                        <text x="105" y="340" text-anchor="middle" fill="#888" font-size="8" font-family="Inter,sans-serif">El dispositivo necesita mantenimiento</text>
+                    </svg>`;
+
+                case 'accesorios':
+                    return `
+                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
+                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
+                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
+                        <!-- Header -->
+                        <text x="105" y="75" text-anchor="middle" fill="${accent}" font-size="11" font-family="Inter,sans-serif" font-weight="800">ACCESORIOS PREMIUM</text>
+                        <!-- Grid items -->
+                        <!-- Item 1: Headphones -->
+                        <rect x="25" y="90" width="75" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
+                        <circle cx="62" cy="118" r="14" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
+                        <path d="M48,118 Q48,100 62,100 Q76,100 76,118" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
+                        <circle cx="62" cy="130" r="4" fill="${accent}" opacity="0.4"/>
+                        <text x="62" y="155" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">AUDÍFONOS</text>
+                        <text x="62" y="165" text-anchor="middle" fill="#888" font-size="6" font-family="Inter,sans-serif">$12.99</text>
+                        <!-- Item 2: Case -->
+                        <rect x="110" y="90" width="75" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
+                        <rect x="133" y="100" width="30" height="40" rx="6" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
+                        <circle cx="148" cy="108" r="3" fill="${accent}" opacity="0.5"/>
+                        <text x="148" y="155" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">FUNDA</text>
+                        <text x="148" y="165" text-anchor="middle" fill="#888" font-size="6" font-family="Inter,sans-serif">$8.99</text>
+                        <!-- Item 3: Charger -->
+                        <rect x="25" y="180" width="75" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
+                        <rect x="50" y="195" width="24" height="30" rx="4" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
+                        <rect x="55" y="190" width="14" height="8" rx="2" fill="none" stroke="${accent}" stroke-width="1" opacity="0.5"/>
+                        <line x1="62" y1="225" x2="62" y2="240" stroke="${accent}" stroke-width="1.5" opacity="0.6"/>
+                        <text x="62" y="245" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">CARGADOR</text>
+                        <text x="62" y="255" text-anchor="middle" fill="#888" font-size="6" font-family="Inter,sans-serif">$14.99</text>
+                        <!-- Item 4: Screen protector -->
+                        <rect x="110" y="180" width="75" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
+                        <rect x="130" y="195" width="35" height="45" rx="4" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
+                        <line x1="135" y1="205" x2="160" y2="205" stroke="${accent}" stroke-width="0.5" opacity="0.4"/>
+                        <line x1="135" y1="212" x2="155" y2="212" stroke="${accent}" stroke-width="0.5" opacity="0.4"/>
+                        <text x="148" y="245" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">MICA</text>
+                        <text x="148" y="255" text-anchor="middle" fill="#888" font-size="6" font-family="Inter,sans-serif">$5.99</text>
+                        <!-- Promo banner -->
+                        <rect x="25" y="280" width="160" height="50" rx="10" fill="${accent}" opacity="0.15" stroke="${accent}" stroke-width="0.5"/>
+                        <text x="105" y="305" text-anchor="middle" fill="${accent}" font-size="12" font-family="Inter,sans-serif" font-weight="800">🔥 COMBO AHORRO 🔥</text>
+                        <text x="105" y="322" text-anchor="middle" fill="${accent}" font-size="8" font-family="Inter,sans-serif">Funda + Mica + Cargador = $24.99</text>
+                    </svg>`;
+
+                case 'bateria':
+                    return `
+                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
+                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
+                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
+                        <!-- Old battery (left) -->
+                        <text x="60" y="80" text-anchor="middle" fill="#F6465D" font-size="8" font-family="Inter,sans-serif" font-weight="700">ANTES</text>
+                        <rect x="30" y="95" width="60" height="100" rx="8" fill="#222" stroke="#F6465D" stroke-width="1" opacity="0.6"/>
+                        <rect x="45" y="85" width="30" height="12" rx="3" fill="#222" stroke="#F6465D" stroke-width="0.5" opacity="0.5"/>
+                        <!-- Low battery level -->
+                        <rect x="35" y="160" width="50" height="30" rx="4" fill="#F6465D" opacity="0.2"/>
+                        <text x="60" y="178" text-anchor="middle" fill="#F6465D" font-size="12" font-family="Inter,sans-serif" font-weight="800">23%</text>
+                        <text x="60" y="195" text-anchor="middle" fill="#F6465D" font-size="6" font-family="Inter,sans-serif">SALUD</text>
+                        <!-- Arrow -->
+                        <text x="105" y="140" text-anchor="middle" fill="${accent}" font-size="20" opacity="0.6">→</text>
+                        <!-- New battery (right) -->
+                        <text x="150" y="80" text-anchor="middle" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">DESPUÉS</text>
+                        <rect x="120" y="95" width="60" height="100" rx="8" fill="#222" stroke="${accent}" stroke-width="1" opacity="0.6"/>
+                        <rect x="135" y="85" width="30" height="12" rx="3" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.5"/>
+                        <!-- Full battery level -->
+                        <rect x="125" y="100" width="50" height="90" rx="4" fill="${accent}" opacity="0.15"/>
+                        <rect x="125" y="100" width="50" height="90" rx="4" fill="${accent}" opacity="0.2"/>
+                        <text x="150" y="148" text-anchor="middle" fill="${accent}" font-size="14" font-family="Inter,sans-serif" font-weight="800">100%</text>
+                        <text x="150" y="165" text-anchor="middle" fill="${accent}" font-size="6" font-family="Inter,sans-serif">SALUD</text>
+                        <!-- Battery specs -->
+                        <rect x="25" y="220" width="160" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
+                        <text x="105" y="245" text-anchor="middle" fill="${accent}" font-size="9" font-family="Inter,sans-serif" font-weight="700">ESPECIFICACIONES</text>
+                        <text x="40" y="265" fill="#888" font-size="7" font-family="Inter,sans-serif">Capacidad:</text>
+                        <text x="120" y="265" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">4,500 mAh</text>
+                        <text x="40" y="280" fill="#888" font-size="7" font-family="Inter,sans-serif">Tipo:</text>
+                        <text x="120" y="280" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">Li-Po Original</text>
+                        <text x="40" y="295" fill="#888" font-size="7" font-family="Inter,sans-serif">Ciclos:</text>
+                        <text x="120" y="295" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">0 (Nueva)</text>
+                        <!-- Lightning bolts -->
+                        <polygon points="105,330 95,350 102,350 92,370 110,348 103,348" fill="${accent}" opacity="0.6">
+                            <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
+                        </polygon>
+                    </svg>`;
+
+                case 'placa':
+                    return `
+                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
+                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
+                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
+                        <!-- PCB Board -->
+                        <rect x="30" y="65" width="150" height="200" rx="6" fill="#1a3a1a" stroke="${accent}" stroke-width="0.5" opacity="0.6"/>
+                        <!-- Circuit traces -->
+                        <line x1="40" y1="80" x2="80" y2="80" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+                        <line x1="80" y1="80" x2="80" y2="120" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+                        <line x1="80" y1="120" x2="130" y2="120" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+                        <line x1="40" y1="150" x2="100" y2="150" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+                        <line x1="100" y1="150" x2="100" y2="200" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+                        <line x1="100" y1="200" x2="160" y2="200" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+                        <line x1="140" y1="80" x2="140" y2="140" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+                        <line x1="140" y1="140" x2="170" y2="140" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
+                        <!-- Components -->
+                        <rect x="45" y="85" width="20" height="12" rx="2" fill="#2a4a2a" stroke="${accent}" stroke-width="0.8" opacity="0.6"/>
+                        <rect x="75" y="115" width="15" height="10" rx="2" fill="#2a4a2a" stroke="${accent}" stroke-width="0.8" opacity="0.6"/>
+                        <rect x="125" y="115" width="18" height="10" rx="2" fill="#2a4a2a" stroke="${accent}" stroke-width="0.8" opacity="0.6"/>
+                        <!-- Main IC Chip (center) -->
+                        <rect x="80" y="130" width="50" height="40" rx="4" fill="#2a4a2a" stroke="${accent}" stroke-width="1.5" opacity="0.8"/>
+                        <text x="105" y="153" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">IC CHIP</text>
+                        <!-- IC Pins -->
+                        <line x1="80" y1="135" x2="72" y2="135" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <line x1="80" y1="142" x2="72" y2="142" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <line x1="80" y1="149" x2="72" y2="149" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <line x1="80" y1="156" x2="72" y2="156" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <line x1="80" y1="163" x2="72" y2="163" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <line x1="130" y1="135" x2="138" y2="135" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <line x1="130" y1="142" x2="138" y2="142" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <line x1="130" y1="149" x2="138" y2="149" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <line x1="130" y1="156" x2="138" y2="156" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <line x1="130" y1="163" x2="138" y2="163" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
+                        <!-- Soldering point glow -->
+                        <circle cx="105" cy="150" r="8" fill="${accent}" opacity="0.1">
+                            <animate attributeName="r" values="5;12;5" dur="2s" repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0.15;0.05;0.15" dur="2s" repeatCount="indefinite"/>
+                        </circle>
+                        <!-- Soldering iron tip -->
+                        <line x1="105" y1="150" x2="140" y2="100" stroke="#888" stroke-width="1.5" opacity="0.4"/>
+                        <circle cx="140" cy="100" r="3" fill="${accent}" opacity="0.5">
+                            <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1s" repeatCount="indefinite"/>
+                        </circle>
+                        <!-- Status labels -->
+                        <text x="40" y="290" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">🔍 IC de carga → REPARADO</text>
+                        <text x="40" y="310" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">🔧 Condensadores → REEMPLAZADOS</text>
+                        <text x="40" y="330" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">✅ Test de corto → APROBADO</text>
+                        <text x="40" y="350" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">✅ Test final → APROBADO</text>
+                        <!-- Microscope icon -->
+                        <text x="175" y="370" fill="${accent}" font-size="16" opacity="0.4">🔬</text>
+                    </svg>`;
+            }
+        }
+
+        // ============================
+        // SELECT TEMPLATE
+        // ============================
+        function selectTemplate(key, el) {
             currentTemplate = key;
             const t = templates[key];
 
-            // Update active card
-            document.querySelectorAll('.template-card').forEach(c => c.classList.remove('active'));
-            event.currentTarget.classList.add('active');
+            document.querySelectorAll('.tmpl-card').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
 
             // Update inputs
             document.getElementById('inpTitle').value = t.title;
@@ -1404,185 +1570,97 @@
             document.getElementById('inpGuarantee').value = t.guarantee;
             document.getElementById('inpGuaranteeSub').value = t.guaranteeSub;
 
-            // Update preview
             updatePreview();
-            updateScreenContent();
+            updateMockup();
         }
 
-        // ========================
-        //     UPDATE SCREEN
-        // ========================
-        function updateScreenContent() {
+        // ============================
+        // UPDATE MOCKUP
+        // ============================
+        function updateMockup() {
             const t = templates[currentTemplate];
-            const container = document.getElementById('screenContent');
-
-            let html = `
-                <div class="screen-status-bar">
-                    <span class="screen-time">9:41</span>
-                    <div class="screen-icons">
-                        <i class="fas fa-signal"></i>
-                        <i class="fas fa-wifi"></i>
-                        <i class="fas fa-battery-full"></i>
-                    </div>
-                </div>
-                <div class="screen-main-icon">
-                    <i class="fas ${t.screenIcon}"></i>
-                </div>
-                <div class="screen-service-name">${t.screenService}</div>
-            `;
-
-            if (t.screenType === 'repair') {
-                html += `
-                    <div class="screen-progress">
-                        <div class="progress-label">
-                            <span>Progreso</span>
-                            <span>${t.screenProgress}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${t.screenProgress}%;"></div>
-                        </div>
-                    </div>
-                    <div class="screen-checklist">
-                        ${t.screenChecks.map(c => `
-                            <div class="check-item">
-                                <i class="fas fa-circle-check"></i>
-                                <span>${c}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else if (t.screenType === 'diagnostic') {
-                html += `
-                    <div class="screen-progress">
-                        <div class="progress-label">
-                            <span>Escaneando...</span>
-                            <span>${t.screenProgress}%</span>
-                        </div>
-                        <div class="progress-bar">
-                            <div class="progress-fill" style="width: ${t.screenProgress}%;"></div>
-                        </div>
-                    </div>
-                    <div class="screen-checklist">
-                        ${t.screenChecks.map(c => `
-                            <div class="check-item">
-                                <i class="fas fa-chart-simple"></i>
-                                <span>${c}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            } else if (t.screenType === 'accessories') {
-                html += `
-                    <div class="screen-acc-grid">
-                        ${t.screenAccItems.map(a => `
-                            <div class="acc-item">
-                                <i class="fas ${a.icon}"></i>
-                                <div class="acc-name">${a.name}</div>
-                                <div class="acc-price">${a.price}</div>
-                            </div>
-                        `).join('')}
-                    </div>
-                `;
-            }
-
-            container.innerHTML = html;
+            document.getElementById('phoneDisplay').innerHTML = getMockupSVG(t.phone);
+            document.getElementById('priceIconI').className = `fas ${t.icon}`;
         }
 
-        // ========================
-        //     UPDATE PREVIEW
-        // ========================
+        // ============================
+        // UPDATE PREVIEW
+        // ============================
         function updatePreview() {
             const t = templates[currentTemplate];
-
-            setText('adBrand', 'inpBrand');
-            setText('adBrandSub', 'inpBrandSub');
-            setText('adTitle', 'inpTitle');
-            setText('adHighlight', 'inpHighlight');
-            setText('adDesc', 'inpDesc');
-            setText('adService', 'inpService');
-            setText('adPrice', 'inpPrice');
-            setText('adOldPrice', 'inpOldPrice');
-            setText('adDiscount', 'inpDiscount');
-            setText('adClients', 'inpClients');
-            setText('adWarranty', 'inpWarranty');
-            setText('adTime', 'inpTime');
-            setText('adFeat1', 'inpFeat1');
-            setText('adFeat2', 'inpFeat2');
-            setText('adFeat3', 'inpFeat3');
-            setText('adGuarantee', 'inpGuarantee');
-            setText('adGuaranteeSub', 'inpGuaranteeSub');
-            setText('adWhatsapp', 'inpWhatsapp');
-            setText('adAddress', 'inpAddress');
-            setText('adSchedule', 'inpSchedule');
-            setText('adCta', 'inpCta');
-            setText('adCtaSub', 'inpCtaSub');
-
-            // Update service icon
-            const spcIconI = document.getElementById('spcIconI');
-            spcIconI.className = `fas ${t.icon}`;
-
-            // Update accent color
-            applyAccent();
+            bind('inpBrand','adBrand');
+            bind('inpBrandSub','adBrandSub');
+            bind('inpTitle','adTitle');
+            bind('inpHighlight','adHighlight');
+            bind('inpDesc','adDesc');
+            bind('inpService','adService');
+            bind('inpPrice','adPrice');
+            bind('inpOldPrice','adOldPrice');
+            bind('inpDiscount','adDiscount');
+            bind('inpClients','adClients');
+            bind('inpWarranty','adWarranty');
+            bind('inpTime','adTime');
+            bind('inpFeat1','adFeat1');
+            bind('inpFeat2','adFeat2');
+            bind('inpFeat3','adFeat3');
+            bind('inpGuarantee','adGuarantee');
+            bind('inpGuaranteeSub','adGuaranteeSub');
+            bind('inpPhone','adPhone');
+            bind('inpPhoneLabel','adPhoneLabel');
+            bind('inpAddress','adAddress');
+            bind('inpSchedule','adSchedule');
+            bind('inpCta','adCta');
+            bind('inpCtaSub','adCtaSub');
         }
 
-        function setText(adId, inpId) {
+        function bind(inpId, adId) {
             const inp = document.getElementById(inpId);
             const ad = document.getElementById(adId);
-            if (inp && ad) {
-                inp.addEventListener('input', () => { ad.textContent = inp.value; });
-                ad.textContent = inp.value;
-            }
+            if (!inp || !ad) return;
+            inp.addEventListener('input', () => { ad.textContent = inp.value; });
+            ad.textContent = inp.value;
         }
 
-        // ========================
-        //     LOGO HANDLING
-        // ========================
+        // ============================
+        // LOGO
+        // ============================
         function handleLogo(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 const preview = document.getElementById('logoPreview');
                 const area = document.getElementById('logoArea');
                 preview.src = e.target.result;
                 area.classList.add('has-logo');
-
-                // Update ad logo
-                const container = document.getElementById('adLogoContainer');
-                container.innerHTML = `<img src="${e.target.result}" alt="Logo">`;
+                document.getElementById('adLogoBox').innerHTML = `<img src="${e.target.result}" alt="Logo">`;
             };
             reader.readAsDataURL(file);
         }
 
-        // ========================
-        //     ACCENT COLOR
-        // ========================
+        // ============================
+        // ACCENT COLOR
+        // ============================
         function setAccent(color, el) {
             currentAccent = color;
-            document.querySelectorAll('.color-opt').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.color-dot').forEach(c => c.classList.remove('active'));
             el.classList.add('active');
-            applyAccent();
+            document.documentElement.style.setProperty('--accent', color);
+            document.documentElement.style.setProperty('--accent-glow', hexToRgba(color, 0.3));
+            document.documentElement.style.setProperty('--accent-soft', hexToRgba(color, 0.08));
+            updateMockup();
         }
 
-        function applyAccent() {
-            const root = document.documentElement;
-            // Update CSS variable
-            root.style.setProperty('--yellow-intense', currentAccent);
-            root.style.setProperty('--yellow-glow', hexToRgba(currentAccent, 0.3));
-            root.style.setProperty('--yellow-soft', hexToRgba(currentAccent, 0.08));
+        function hexToRgba(hex, a) {
+            const r = parseInt(hex.slice(1,3),16);
+            const g = parseInt(hex.slice(3,5),16);
+            const b = parseInt(hex.slice(5,7),16);
+            return `rgba(${r},${g},${b},${a})`;
         }
 
-        function hexToRgba(hex, alpha) {
-            const r = parseInt(hex.slice(1, 3), 16);
-            const g = parseInt(hex.slice(3, 5), 16);
-            const b = parseInt(hex.slice(5, 7), 16);
-            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-        }
-
-        // ========================
-        //     TOGGLE ELEMENTS
-        // ========================
+        // ============================
+        // TOGGLE
+        // ============================
         function toggleEl(el, targetId) {
             el.classList.toggle('active');
             const target = document.getElementById(targetId);
@@ -1591,76 +1669,176 @@
             }
         }
 
-        // ========================
-        //     RESET
-        // ========================
+        // ============================
+        // SHUFFLE LAYOUT
+        // ============================
+        function shuffleLayout() {
+            shuffleCount++;
+            const content = document.getElementById('adContent');
+            const btn = document.getElementById('btnShuffle');
+
+            // Button animation
+            btn.classList.add('spinning');
+            setTimeout(() => btn.classList.remove('spinning'), 600);
+
+            // Remove old layout classes
+            content.classList.remove(
+                'layout-stats-top', 'layout-features-grid', 'layout-title-center',
+                'layout-stats-2col', 'layout-big-price', 'layout-contact-minimal',
+                'layout-features-row'
+            );
+
+            // Randomly pick 2-4 layout modifiers
+            const layouts = [
+                'layout-stats-top',
+                'layout-features-grid',
+                'layout-title-center',
+                'layout-stats-2col',
+                'layout-big-price',
+                'layout-contact-minimal',
+                'layout-features-row'
+            ];
+
+            const numLayouts = 2 + Math.floor(Math.random() * 3); // 2 to 4
+            const shuffled = layouts.sort(() => 0.5 - Math.random());
+            const selected = shuffled.slice(0, numLayouts);
+
+            // Apply layout classes
+            selected.forEach(l => content.classList.add(l));
+
+            // Random font size variations for title
+            const titleEl = document.getElementById('adTitle');
+            const titleSizes = [28, 30, 32, 34, 36, 38, 40];
+            const randomSize = titleSizes[Math.floor(Math.random() * titleSizes.length)];
+            titleEl.style.fontSize = randomSize + 'px';
+
+            // Random phone frame rotation
+            const phoneFrame = document.querySelector('.phone-frame');
+            const rotX = (Math.random() * 10 - 5).toFixed(1);
+            const rotY = (Math.random() * 16 - 8).toFixed(1);
+            const scale = (0.9 + Math.random() * 0.2).toFixed(2);
+            phoneFrame.style.setProperty('--rotX', rotX + 'deg');
+            phoneFrame.style.setProperty('--rotY', rotY + 'deg');
+            phoneFrame.style.setProperty('--scale', scale);
+            phoneFrame.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`;
+
+            // Random stats sizes
+            const statVals = document.querySelectorAll('.s-val');
+            statVals.forEach(sv => {
+                const sizes = [14, 15, 16, 17, 18, 19, 20];
+                sv.style.fontSize = sizes[Math.floor(Math.random() * sizes.length)] + 'px';
+            });
+
+            // Random border radius for cards
+            const cards = document.querySelectorAll('.price-card, .stat-box, .phone-number-section');
+            cards.forEach(card => {
+                const radii = [10, 12, 14, 16, 18];
+                card.style.borderRadius = radii[Math.floor(Math.random() * radii.length)] + 'px';
+            });
+
+            // Random padding for price card
+            const priceCard = document.querySelector('.price-card');
+            const pads = [12, 14, 16, 18, 20];
+            priceCard.style.padding = pads[Math.floor(Math.random() * pads.length)] + 'px';
+
+            // Random accent opacity for features
+            const feats = document.querySelectorAll('.feat-item');
+            feats.forEach(f => {
+                const borders = [2, 3, 4, 5];
+                f.style.borderLeftWidth = borders[Math.floor(Math.random() * borders.length)] + 'px';
+            });
+
+            // Shuffle background elements
+            const bgElements = document.querySelectorAll('.bg-geo, .particle');
+            bgElements.forEach(bg => {
+                const opacity = (0.3 + Math.random() * 0.5).toFixed(2);
+                bg.style.opacity = opacity;
+            });
+
+            // Trigger re-animation
+            content.classList.add('shuffle-transition');
+            setTimeout(() => content.classList.remove('shuffle-transition'), 800);
+        }
+
+        // ============================
+        // RESET
+        // ============================
         function resetAll() {
-            selectTemplate('pantalla');
-            // Reset inputs to defaults
+            selectTemplate('pantalla', document.querySelector('.tmpl-card'));
             document.getElementById('inpBrand').value = 'CELLFIX PRO';
             document.getElementById('inpBrandSub').value = 'Reparación Express';
-            document.getElementById('inpWhatsapp').value = '+52 55 1234 5678';
+            document.getElementById('inpPhone').value = '+52 55 1234 5678';
+            document.getElementById('inpPhoneLabel').value = 'Llamadas y WhatsApp';
             document.getElementById('inpAddress').value = 'Av. Reforma #456, CDMX';
-            document.getElementById('inpSchedule').value = 'Lun-Sáb 9:00AM - 8:00PM';
+            document.getElementById('inpSchedule').value = 'Lun-Sáb 9AM - 8PM';
             document.getElementById('inpCta').value = 'AGENDAR POR WHATSAPP';
             document.getElementById('inpCtaSub').value = 'Respuesta inmediata • Sin compromiso';
 
             // Reset logo
-            const area = document.getElementById('logoArea');
-            area.classList.remove('has-logo');
+            document.getElementById('logoArea').classList.remove('has-logo');
             document.getElementById('logoPreview').src = '';
-            document.getElementById('adLogoContainer').innerHTML = '<i class="fas fa-screwdriver-wrench"></i>';
+            document.getElementById('adLogoBox').innerHTML = '<i class="fas fa-screwdriver-wrench"></i>';
 
             // Reset accent
-            setAccent('#F3BA2F', document.querySelector('.color-opt'));
+            setAccent('#F3BA2F', document.querySelector('.color-dot'));
+
+            // Reset layout classes
+            const content = document.getElementById('adContent');
+            content.classList.remove(
+                'layout-stats-top', 'layout-features-grid', 'layout-title-center',
+                'layout-stats-2col', 'layout-big-price', 'layout-contact-minimal',
+                'layout-features-row'
+            );
+
+            // Reset inline styles
+            document.getElementById('adTitle').style.fontSize = '';
+            document.querySelectorAll('.s-val').forEach(sv => sv.style.fontSize = '');
+            document.querySelectorAll('.price-card, .stat-box, .phone-number-section').forEach(c => c.style.borderRadius = '');
+            document.querySelector('.phone-frame').style.transform = '';
 
             updatePreview();
-            updateScreenContent();
+            updateMockup();
         }
 
-        // ========================
-        //     DOWNLOAD PNG
-        // ========================
+        // ============================
+        // DOWNLOAD
+        // ============================
         async function downloadAd() {
             const btn = event.currentTarget;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
             btn.style.pointerEvents = 'none';
 
-            const adContainer = document.getElementById('adContainer');
-            const currentTransform = adContainer.style.transform;
-            const currentWidth = adContainer.style.width;
-            const currentHeight = adContainer.style.height;
+            const container = document.getElementById('adContainer');
+            const savedTransform = container.style.transform;
+            const savedW = container.style.width;
+            const savedH = container.style.height;
+            const savedR = container.style.borderRadius;
 
-            adContainer.style.transform = 'none';
-            adContainer.style.width = '1080px';
-            adContainer.style.height = '1920px';
-            adContainer.style.borderRadius = '0';
+            container.style.transform = 'none';
+            container.style.width = '1080px';
+            container.style.height = '1920px';
+            container.style.borderRadius = '0';
 
             try {
-                const canvas = await html2canvas(adContainer, {
-                    scale: 1,
-                    width: 1080,
-                    height: 1920,
-                    useCORS: true,
-                    backgroundColor: '#0B0E11',
-                    logging: false,
+                const canvas = await html2canvas(container, {
+                    scale: 1, width: 1080, height: 1920,
+                    useCORS: true, backgroundColor: '#0B0E11', logging: false,
                 });
 
                 const link = document.createElement('a');
-                link.download = `cellfix-ad-${currentTemplate}-${Date.now()}.png`;
+                link.download = `cellfix-${currentTemplate}-${Date.now()}.png`;
                 link.href = canvas.toDataURL('image/png', 1.0);
                 link.click();
-
                 showToast();
-            } catch (err) {
-                console.error('Error:', err);
+            } catch(err) {
+                console.error(err);
                 alert('Error al generar la imagen.');
             } finally {
-                adContainer.style.transform = currentTransform;
-                adContainer.style.width = currentWidth || '540px';
-                adContainer.style.height = currentHeight || '960px';
-                adContainer.style.borderRadius = '16px';
-                btn.innerHTML = '<i class="fas fa-download"></i> Descargar PNG';
+                container.style.transform = savedTransform;
+                container.style.width = savedW || '540px';
+                container.style.height = savedH || '960px';
+                container.style.borderRadius = savedR || '16px';
+                btn.innerHTML = '<i class="fas fa-download"></i> PNG';
                 btn.style.pointerEvents = 'auto';
             }
         }
@@ -1671,40 +1849,34 @@
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ========================
-        //     SCALE ADJUST
-        // ========================
+        // ============================
+        // SCALE
+        // ============================
         function adjustScale() {
-            const workspace = document.querySelector('.workspace');
-            const container = document.getElementById('adContainer');
-            const aw = workspace.clientWidth - 60;
-            const ah = workspace.clientHeight - 60;
-            const scale = Math.min(aw / 540, ah / 960, 1);
-            container.style.transform = `scale(${scale})`;
+            const ws = document.querySelector('.workspace');
+            const c = document.getElementById('adContainer');
+            const s = Math.min((ws.clientWidth - 50) / 540, (ws.clientHeight - 50) / 960, 1);
+            c.style.transform = `scale(${s})`;
         }
 
-        // ========================
-        //     INIT
-        // ========================
+        // ============================
+        // INIT
+        // ============================
         document.addEventListener('DOMContentLoaded', () => {
             updatePreview();
-            updateScreenContent();
+            updateMockup();
             adjustScale();
             window.addEventListener('resize', adjustScale);
 
-            // Bind all inputs
             ['inpBrand','inpBrandSub','inpTitle','inpHighlight','inpDesc',
              'inpService','inpPrice','inpOldPrice','inpDiscount',
+             'inpPhone','inpPhoneLabel','inpAddress','inpSchedule',
              'inpClients','inpWarranty','inpTime',
              'inpFeat1','inpFeat2','inpFeat3',
-             'inpGuarantee','inpGuaranteeSub',
-             'inpWhatsapp','inpAddress','inpSchedule',
-             'inpCta','inpCtaSub'
+             'inpGuarantee','inpGuaranteeSub','inpCta','inpCtaSub'
             ].forEach(id => {
                 const inp = document.getElementById(id);
-                if (inp) {
-                    inp.addEventListener('input', updatePreview);
-                }
+                if (inp) inp.addEventListener('input', updatePreview);
             });
         });
     </script>
