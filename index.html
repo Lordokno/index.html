@@ -3,1883 +3,1684 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CellFix Ad Generator Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <title>📱 AdGen Pro - Generador de Anuncios WhatsApp</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
+        /* ============================================
+           VARIABLES GLOBALES Y RESET
+           ============================================ */
         :root {
-            --carbon: #0B0E11;
-            --carbon-dark: #141619;
-            --carbon-card: #1E2026;
-            --accent: #F3BA2F;
-            --accent-glow: rgba(243,186,47,0.3);
-            --accent-soft: rgba(243,186,47,0.08);
-            --white: #FFFFFF;
-            --white-70: rgba(255,255,255,0.7);
-            --white-50: rgba(255,255,255,0.5);
-            --white-30: rgba(255,255,255,0.3);
-            --green: #0ECB81;
-            --blue: #1E90FF;
-            --red: #F6465D;
-            --glass: rgba(30,32,38,0.7);
-            --glass-border: rgba(243,186,47,0.12);
+            --bg-primary: #0f0f1a;
+            --bg-secondary: #1a1a2e;
+            --bg-glass: rgba(255, 255, 255, 0.05);
+            --border-glass: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b8;
+            --accent: #00d4ff;
+            --accent2: #7c3aed;
+            --sidebar-width: 380px;
+            --radius: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        * { margin:0; padding:0; box-sizing:border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
-            font-family:'Inter',sans-serif;
-            background:#080A0D;
-            color:var(--white);
-            min-height:100vh;
-            display:flex;
-            overflow-x:hidden;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        /* ============ PANEL ============ */
-        .panel {
-            position:fixed; left:0; top:0;
-            width:380px; height:100vh;
-            background:var(--carbon-dark);
-            border-right:1px solid var(--glass-border);
-            padding:20px 18px;
-            overflow-y:auto;
-            z-index:1000;
-            display:flex;
-            flex-direction:column;
-            gap:14px;
-        }
-
-        .panel::-webkit-scrollbar { width:3px; }
-        .panel::-webkit-scrollbar-thumb { background:var(--accent); border-radius:3px; }
-
-        .panel-top {
-            display:flex; align-items:center; gap:10px;
-            padding-bottom:14px;
-            border-bottom:1px solid var(--glass-border);
-        }
-
-        .panel-top i { font-size:24px; color:var(--accent); }
-        .panel-top h2 {
-            font-size:13px; font-weight:800; text-transform:uppercase;
-            letter-spacing:2px;
-            background:linear-gradient(135deg,var(--accent),#FFD966);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-        }
-
-        .section-title {
-            font-size:9px; font-weight:700; text-transform:uppercase;
-            letter-spacing:3px; color:var(--accent);
-            padding-bottom:5px;
-            border-bottom:1px solid rgba(243,186,47,0.1);
-            display:flex; align-items:center; gap:6px;
-        }
-
-        .section-title i { font-size:10px; }
-
-        .ctrl { display:flex; flex-direction:column; gap:6px; }
-
-        .ctrl label {
-            font-size:10px; font-weight:600; color:var(--white-70);
-            letter-spacing:0.5px;
-        }
-
-        .ctrl input, .ctrl textarea, .ctrl select {
-            background:rgba(11,14,17,0.8);
-            border:1px solid var(--glass-border);
-            border-radius:8px; padding:8px 11px;
-            color:var(--white);
-            font-family:'Inter',sans-serif;
-            font-size:12px; font-weight:500;
-            transition:all 0.3s;
-            outline:none;
-        }
-
-        .ctrl input:focus, .ctrl textarea:focus {
-            border-color:var(--accent);
-            box-shadow:0 0 0 3px var(--accent-glow);
-        }
-
-        .ctrl textarea { resize:vertical; min-height:45px; }
-
-        /* Template Grid */
-        .tmpl-grid {
-            display:grid; grid-template-columns:1fr 1fr 1fr;
-            gap:6px;
-        }
-
-        .tmpl-card {
-            background:rgba(11,14,17,0.8);
-            border:1px solid var(--glass-border);
-            border-radius:10px;
-            padding:10px 6px;
-            text-align:center;
-            cursor:pointer;
-            transition:all 0.3s;
-        }
-
-        .tmpl-card:hover {
-            border-color:rgba(243,186,47,0.3);
-            transform:translateY(-2px);
-        }
-
-        .tmpl-card.active {
-            border-color:var(--accent);
-            background:rgba(243,186,47,0.08);
-            box-shadow:0 0 15px rgba(243,186,47,0.1);
-        }
-
-        .tmpl-card i { font-size:20px; margin-bottom:4px; display:block; }
-        .tmpl-card span {
-            font-size:8px; font-weight:700; text-transform:uppercase;
-            letter-spacing:0.5px; color:var(--white-70);
-        }
-
-        .tmpl-card.active span { color:var(--accent); }
-
-        /* Logo Upload */
-        .logo-area {
-            width:100%; height:70px;
-            border:2px dashed var(--glass-border);
-            border-radius:10px;
-            display:flex; align-items:center; justify-content:center;
-            flex-direction:column; gap:4px;
-            cursor:pointer;
-            transition:all 0.3s;
-            position:relative; overflow:hidden;
-        }
-
-        .logo-area:hover { border-color:var(--accent); background:var(--accent-soft); }
-        .logo-area.has-logo { border-style:solid; border-color:var(--green); }
-        .logo-area i { font-size:18px; color:var(--white-50); }
-        .logo-area span { font-size:9px; color:var(--white-50); }
-
-        .logo-preview {
-            position:absolute; top:50%; left:50%;
-            transform:translate(-50%,-50%);
-            max-width:60px; max-height:55px;
-            object-fit:contain;
-            display:none;
-        }
-
-        .logo-area.has-logo .logo-preview { display:block; }
-        .logo-area.has-logo .upload-ph { display:none; }
-
-        #logoInput { display:none; }
-
-        /* Color Options */
-        .color-row { display:flex; gap:7px; flex-wrap:wrap; }
-
-        .color-dot {
-            width:28px; height:28px;
-            border-radius:7px;
-            border:2px solid transparent;
-            cursor:pointer;
-            transition:all 0.2s;
-            position:relative;
-        }
-
-        .color-dot:hover, .color-dot.active {
-            border-color:var(--white);
-            transform:scale(1.15);
-        }
-
-        .color-dot.active::after {
-            content:'✓'; position:absolute;
-            top:50%; left:50%; transform:translate(-50%,-50%);
-            font-size:12px; font-weight:800;
-            color:var(--carbon);
-        }
-
-        /* Buttons */
-        .btn-row { display:flex; gap:6px; }
-
-        .btn-primary {
-            flex:1; display:flex; align-items:center; justify-content:center;
-            gap:7px; padding:12px 16px;
-            background:linear-gradient(135deg,var(--accent),#E5A820);
-            color:var(--carbon); border:none; border-radius:10px;
-            font-family:'Inter',sans-serif;
-            font-size:10px; font-weight:800;
-            text-transform:uppercase; letter-spacing:1.5px;
-            cursor:pointer; transition:all 0.3s;
-        }
-
-        .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 25px var(--accent-glow); }
-
-        .btn-shuffle {
-            flex:1; display:flex; align-items:center; justify-content:center;
-            gap:7px; padding:12px 16px;
-            background:linear-gradient(135deg,#A855F7,#7C3AED);
-            color:var(--white); border:none; border-radius:10px;
-            font-family:'Inter',sans-serif;
-            font-size:10px; font-weight:800;
-            text-transform:uppercase; letter-spacing:1.5px;
-            cursor:pointer; transition:all 0.3s;
-        }
-
-        .btn-shuffle:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(168,85,247,0.3); }
-
-        .btn-shuffle.spinning i { animation: spin 0.6s ease; }
-
-        @keyframes spin {
-            from { transform:rotate(0deg); }
-            to { transform:rotate(360deg); }
-        }
-
-        .btn-secondary {
-            display:flex; align-items:center; justify-content:center;
-            gap:7px; padding:12px 16px;
-            background:rgba(30,32,38,0.8);
-            color:var(--white-70);
-            border:1px solid var(--glass-border);
-            border-radius:10px;
-            font-family:'Inter',sans-serif;
-            font-size:10px; font-weight:700;
-            text-transform:uppercase; letter-spacing:1.5px;
-            cursor:pointer; transition:all 0.3s;
-        }
-
-        .btn-secondary:hover { border-color:var(--accent); color:var(--accent); }
-
-        /* Toggle */
-        .toggle-row {
-            display:flex; align-items:center; justify-content:space-between;
-        }
-
-        .toggle-row label { font-size:10px; font-weight:600; color:var(--white-70); }
-
-        .toggle {
-            width:38px; height:20px;
-            background:rgba(30,32,38,0.8);
-            border:1px solid var(--glass-border);
-            border-radius:10px;
-            cursor:pointer; position:relative;
-            transition:all 0.3s;
-        }
-
-        .toggle.active { background:var(--accent); border-color:var(--accent); }
-
-        .toggle::after {
-            content:''; position:absolute;
-            width:14px; height:14px;
-            background:var(--white);
-            border-radius:50%;
-            top:2px; left:2px;
-            transition:all 0.3s;
-        }
-
-        .toggle.active::after { left:20px; }
-
-        /* ============ WORKSPACE ============ */
-        .workspace {
-            margin-left:380px;
-            width:calc(100% - 380px);
-            min-height:100vh;
-            display:flex; align-items:center; justify-content:center;
-            padding:25px;
-            background:radial-gradient(ellipse at center,#12151A 0%,#080A0D 100%);
-        }
-
-        /* ============ AD CONTAINER ============ */
-        .ad-container {
-            width:540px; height:960px;
-            position:relative;
-            overflow:hidden;
-            border-radius:16px;
-            box-shadow:0 20px 80px rgba(0,0,0,0.6), 0 0 60px rgba(243,186,47,0.06);
-            transition:all 0.5s ease;
-        }
-
-        .ad-bg { position:absolute; top:0; left:0; right:0; bottom:0; background:var(--carbon); z-index:0; }
-
-        .bg-geo {
-            position:absolute; pointer-events:none; z-index:1;
-        }
-
-        .bg1 {
-            width:130%; height:500px; top:-80px; right:-200px;
-            background:linear-gradient(135deg,transparent 35%,var(--accent-soft) 100%);
-            transform:rotate(-15deg);
-        }
-
-        .bg2 {
-            width:100%; height:350px; bottom:-30px; left:-100px;
-            background:linear-gradient(225deg,transparent 25%,rgba(243,186,47,0.03) 100%);
-            transform:rotate(10deg);
-        }
-
-        .bg3 {
-            width:220px; height:220px; top:160px; left:-50px;
-            border:1px solid rgba(243,186,47,0.05);
-            border-radius:50%; transform:rotate(45deg);
-        }
-
-        .bg4 {
-            width:380px; height:1px; top:280px; left:-20px;
-            background:linear-gradient(90deg,transparent,var(--accent-glow),transparent);
-            transform:rotate(-20deg);
-        }
-
-        .bg5 {
-            width:320px; height:1px; top:620px; right:-20px;
-            background:linear-gradient(90deg,transparent,rgba(14,203,129,0.08),transparent);
-            transform:rotate(15deg);
-        }
-
-        .bg6 {
-            width:1px; height:350px; top:180px; right:110px;
-            background:linear-gradient(180deg,transparent,rgba(243,186,47,0.06),transparent);
+        /* ============================================
+           FONDO ANIMADO CON PARTÍCULAS
+           ============================================ */
+        .bg-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            pointer-events: none;
         }
 
         .particle {
-            position:absolute; border-radius:50%;
-            animation:pFloat 8s ease-in-out infinite;
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.15;
+            animation: floatParticle 20s infinite ease-in-out;
         }
 
-        .pt1 { width:5px; height:5px; top:10%; left:15%; background:var(--accent); opacity:0.07; }
-        .pt2 { width:3px; height:3px; top:40%; right:10%; background:var(--green); opacity:0.1; animation-delay:2s; }
-        .pt3 { width:7px; height:7px; bottom:20%; left:22%; background:var(--accent); opacity:0.06; animation-delay:4s; }
-        .pt4 { width:4px; height:4px; top:65%; right:18%; background:var(--blue); opacity:0.08; animation-delay:1s; }
-        .pt5 { width:6px; height:6px; top:28%; left:38%; background:var(--accent); opacity:0.05; animation-delay:3s; }
-
-        @keyframes pFloat {
-            0%,100% { transform:translateY(0) scale(1); }
-            50% { transform:translateY(-18px) scale(1.2); }
+        @keyframes floatParticle {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(50px, -80px) rotate(90deg); }
+            50% { transform: translate(-30px, -150px) rotate(180deg); }
+            75% { transform: translate(70px, -60px) rotate(270deg); }
         }
 
-        /* AD Content */
-        .ad-content {
-            position:relative; z-index:10;
-            width:100%; height:100%;
-            display:flex; flex-direction:column;
-            padding:36px 32px 32px;
+        /* ============================================
+           LAYOUT PRINCIPAL
+           ============================================ */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            z-index: 1;
         }
 
-        /* Header */
-        .ad-header {
-            display:flex; align-items:center; justify-content:space-between;
-            margin-bottom:16px;
+        /* ============================================
+           HEADER SUPERIOR
+           ============================================ */
+        .top-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: rgba(15, 15, 26, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
         }
 
-        .ad-brand { display:flex; align-items:center; gap:10px; }
-
-        .ad-logo-box {
-            width:38px; height:38px;
-            background:linear-gradient(135deg,var(--accent),#FFD966);
-            border-radius:9px;
-            display:flex; align-items:center; justify-content:center;
-            overflow:hidden;
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
         }
 
-        .ad-logo-box img { width:100%; height:100%; object-fit:contain; }
-        .ad-logo-box i { font-size:18px; color:var(--carbon); }
-
-        .brand-name {
-            font-size:13px; font-weight:800;
-            letter-spacing:2px; text-transform:uppercase;
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
         }
 
-        .brand-sub {
-            font-size:8px; color:var(--white-50);
-            letter-spacing:1px; text-transform:uppercase;
+        .logo span {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .badge-live {
-            padding:4px 10px;
-            background:rgba(14,203,129,0.12);
-            border:1px solid rgba(14,203,129,0.25);
-            border-radius:16px;
-            font-size:8px; font-weight:700;
-            color:var(--green);
-            text-transform:uppercase; letter-spacing:1px;
-            display:flex; align-items:center; gap:4px;
+        .top-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
 
-        .badge-live .dot {
-            width:5px; height:5px;
-            background:var(--green);
-            border-radius:50%;
-            animation:pulse 2s infinite;
+        /* ============================================
+           SIDEBAR - PANEL DE CONTROL
+           ============================================ */
+        .sidebar {
+            width: var(--sidebar-width);
+            min-height: 100vh;
+            padding: 80px 20px 20px;
+            overflow-y: auto;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: rgba(26, 26, 46, 0.6);
+            backdrop-filter: blur(30px);
+            border-right: 1px solid var(--border-glass);
+            z-index: 50;
+            transition: transform 0.3s ease;
         }
 
-        @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-
-        /* Title Section */
-        .title-section { margin-bottom:5px; }
-
-        .ad-title {
-            font-size:34px; font-weight:900;
-            line-height:1.05; text-transform:uppercase;
-            letter-spacing:-0.5px;
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
         }
 
-        .ad-title .hl {
-            background:linear-gradient(135deg,var(--accent),#FFD966);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-            display:block;
+        .sidebar::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        .ad-desc {
-            font-size:12px; font-weight:400;
-            color:var(--white-50); line-height:1.5;
-            margin-bottom:18px;
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
         }
 
-        /* Service Price Card */
-        .price-card {
-            background:var(--glass);
-            backdrop-filter:blur(14px);
-            border:1px solid var(--glass-border);
-            border-radius:14px;
-            padding:16px 18px;
-            margin-bottom:18px;
-            display:flex; align-items:center; justify-content:space-between;
+        .section {
+            margin-bottom: 20px;
         }
 
-        .price-left { display:flex; align-items:center; gap:12px; }
-
-        .price-icon {
-            width:44px; height:44px;
-            background:linear-gradient(135deg,var(--accent),#FFD966);
-            border-radius:11px;
-            display:flex; align-items:center; justify-content:center;
-        }
-
-        .price-icon i { font-size:20px; color:var(--carbon); }
-
-        .price-name {
-            font-size:13px; font-weight:700; color:var(--white);
-            text-transform:uppercase; letter-spacing:0.5px;
-        }
-
-        .price-desc-sm { font-size:9px; color:var(--white-50); margin-top:2px; }
-
-        .price-right { text-align:right; }
-
-        .price-old { font-size:11px; color:var(--white-30); text-decoration:line-through; }
-
-        .price-val {
-            font-size:24px; font-weight:900; color:var(--accent);
-        }
-
-        .price-badge {
-            font-size:9px; font-weight:700;
-            color:var(--green);
-            background:rgba(14,203,129,0.1);
-            padding:2px 7px; border-radius:5px;
-            display:inline-block; margin-top:3px;
-        }
-
-        /* ============ PHONE MOCKUP ============ */
-        .phone-area {
-            display:flex; justify-content:center;
-            margin-bottom:18px;
-            position:relative;
-        }
-
-        .phone-glow {
-            position:absolute;
-            width:260px; height:260px;
-            top:50%; left:50%;
-            transform:translate(-50%,-50%);
-            border-radius:50%;
-            background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);
-            pointer-events:none;
-            animation:glowP 4s ease-in-out infinite;
-        }
-
-        @keyframes glowP {
-            0%,100% { opacity:0.35; transform:translate(-50%,-50%) scale(1); }
-            50% { opacity:0.6; transform:translate(-50%,-50%) scale(1.08); }
-        }
-
-        .phone-frame {
-            width:210px; height:420px;
-            background:linear-gradient(145deg,#1a1d24,#0f1115);
-            border-radius:28px;
-            border:2px solid rgba(243,186,47,0.12);
-            padding:10px;
-            position:relative;
-            transform:rotateX(5deg) rotateY(-8deg);
-            animation:phoneF 6s ease-in-out infinite;
-            box-shadow:0 25px 60px rgba(0,0,0,0.5), 0 0 35px rgba(243,186,47,0.05), inset 0 1px 0 rgba(255,255,255,0.04);
-        }
-
-        @keyframes phoneF {
-            0%,100% { transform:rotateX(5deg) rotateY(-8deg) translateY(0); }
-            50% { transform:rotateX(3deg) rotateY(-6deg) translateY(-10px); }
-        }
-
-        .notch {
-            position:absolute; top:10px; left:50%;
-            transform:translateX(-50%);
-            width:75px; height:20px;
-            background:#0f1115;
-            border-radius:0 0 11px 11px;
-            z-index:20;
-        }
-
-        .phone-display {
-            width:100%; height:100%;
-            background:var(--carbon);
-            border-radius:20px;
-            overflow:hidden;
-            position:relative;
-        }
-
-        .phone-display svg {
-            width:100%; height:100%;
-        }
-
-        /* ============ STATS ============ */
-        .stats-row {
-            display:grid;
-            grid-template-columns:1fr 1fr 1fr;
-            gap:8px;
-            margin-bottom:16px;
-        }
-
-        .stat-box {
-            background:var(--glass);
-            backdrop-filter:blur(12px);
-            border:1px solid var(--glass-border);
-            border-radius:11px;
-            padding:12px 8px;
-            text-align:center;
-        }
-
-        .stat-box i { font-size:14px; margin-bottom:3px; display:block; }
-
-        .stat-box .s-val { font-size:16px; font-weight:800; margin-bottom:1px; }
-
-        .stat-box .s-lbl {
-            font-size:7px; font-weight:600;
-            color:var(--white-50);
-            text-transform:uppercase; letter-spacing:1px;
-        }
-
-        /* ============ FEATURES ============ */
-        .feat-list {
-            display:flex; flex-direction:column;
-            gap:6px; margin-bottom:14px;
-        }
-
-        .feat-item {
-            display:flex; align-items:center; gap:8px;
-            padding:7px 10px;
-            background:rgba(30,32,38,0.4);
-            border-radius:9px;
-            border-left:3px solid var(--accent);
-        }
-
-        .feat-item i { font-size:12px; color:var(--accent); }
-
-        .feat-item .f-text {
-            font-size:10px; font-weight:600; color:var(--white-70);
-        }
-
-        /* ============ GUARANTEE ============ */
-        .guarantee-box {
-            display:flex; align-items:center; justify-content:center;
-            gap:8px;
-            padding:10px 16px;
-            background:rgba(14,203,129,0.08);
-            border:1px solid rgba(14,203,129,0.15);
-            border-radius:11px;
-            margin-bottom:14px;
-        }
-
-        .guarantee-box i { font-size:18px; color:var(--green); }
-
-        .guarantee-box .gb-main {
-            font-size:11px; font-weight:700; color:var(--green);
-            text-transform:uppercase; letter-spacing:1px;
-        }
-
-        .guarantee-box .gb-sub {
-            font-size:8px; color:rgba(14,203,129,0.6);
-        }
-
-        /* ============ PHONE NUMBER SECTION ============ */
-        .phone-number-section {
-            background:var(--glass);
-            backdrop-filter:blur(14px);
-            border:1px solid var(--glass-border);
-            border-radius:14px;
-            padding:14px 18px;
-            margin-bottom:14px;
-            display:flex;
-            align-items:center;
-            gap:14px;
-        }
-
-        .phone-number-icon {
-            width:44px; height:44px;
-            background:linear-gradient(135deg,#25D366,#128C7E);
-            border-radius:12px;
-            display:flex; align-items:center; justify-content:center;
-            flex-shrink:0;
-        }
-
-        .phone-number-icon i { font-size:22px; color:var(--white); }
-
-        .phone-number-info { flex:1; }
-
-        .phone-number-label {
-            font-size:9px; color:var(--white-50);
-            text-transform:uppercase; letter-spacing:1px;
-            margin-bottom:2px;
-        }
-
-        .phone-number-value {
-            font-size:18px; font-weight:800; color:var(--white);
-            letter-spacing:0.5px;
-        }
-
-        .phone-number-extra {
-            display:flex; gap:12px; margin-top:4px;
-        }
-
-        .phone-number-extra span {
-            font-size:9px; color:var(--white-50);
-            display:flex; align-items:center; gap:3px;
-        }
-
-        .phone-number-extra span i { font-size:8px; color:var(--accent); }
-
-        .phone-call-btn {
-            width:40px; height:40px;
-            background:var(--green);
-            border-radius:50%;
-            display:flex; align-items:center; justify-content:center;
-            flex-shrink:0;
-            animation:callPulse 2s infinite;
-        }
-
-        .phone-call-btn i { font-size:18px; color:var(--white); }
-
-        @keyframes callPulse {
-            0%,100% { box-shadow:0 0 0 0 rgba(14,203,129,0.4); }
-            50% { box-shadow:0 0 0 10px rgba(14,203,129,0); }
-        }
-
-        /* ============ CTA ============ */
-        .ad-cta { margin-top:auto; }
-
-        .cta-btn {
-            width:100%;
-            padding:15px 24px;
-            background:linear-gradient(135deg,var(--accent),#E5A820);
-            border:none; border-radius:13px;
-            font-family:'Inter',sans-serif;
-            font-size:13px; font-weight:800;
-            text-transform:uppercase; letter-spacing:2px;
-            color:var(--carbon);
-            cursor:pointer;
-            position:relative; overflow:hidden;
-            transition:all 0.3s;
-        }
-
-        .cta-btn::before {
-            content:''; position:absolute;
-            top:0; left:-100%;
-            width:100%; height:100%;
-            background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
-            transition:left 0.5s;
-        }
-
-        .cta-btn:hover::before { left:100%; }
-        .cta-btn:hover { box-shadow:0 8px 25px var(--accent-glow); transform:translateY(-2px); }
-
-        .cta-sub {
-            text-align:center;
-            font-size:8px; color:var(--white-30);
-            margin-top:6px; letter-spacing:0.3px;
-        }
-
-        /* ============ ANIMATIONS ============ */
-        .ad-content > * {
-            animation:fadeUp 0.5s ease forwards;
-            opacity:0;
-        }
-
-        .ad-content > *:nth-child(1) { animation-delay:0.08s; }
-        .ad-content > *:nth-child(2) { animation-delay:0.14s; }
-        .ad-content > *:nth-child(3) { animation-delay:0.2s; }
-        .ad-content > *:nth-child(4) { animation-delay:0.26s; }
-        .ad-content > *:nth-child(5) { animation-delay:0.32s; }
-        .ad-content > *:nth-child(6) { animation-delay:0.38s; }
-        .ad-content > *:nth-child(7) { animation-delay:0.44s; }
-        .ad-content > *:nth-child(8) { animation-delay:0.5s; }
-        .ad-content > *:nth-child(9) { animation-delay:0.56s; }
-        .ad-content > *:nth-child(10) { animation-delay:0.62s; }
-
-        @keyframes fadeUp {
-            from { opacity:0; transform:translateY(16px); }
-            to { opacity:1; transform:translateY(0); }
-        }
-
-        /* ============ TOAST ============ */
-        .toast {
-            position:fixed; bottom:25px; right:25px;
-            background:var(--carbon-card);
-            border:1px solid var(--green);
-            border-radius:11px;
-            padding:12px 20px;
-            display:flex; align-items:center; gap:10px;
-            z-index:9999;
-            transform:translateY(100px); opacity:0;
-            transition:all 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
-            box-shadow:0 10px 40px rgba(14,203,129,0.15);
-        }
-
-        .toast.show { transform:translateY(0); opacity:1; }
-        .toast i { color:var(--green); font-size:16px; }
-        .toast span { font-size:11px; font-weight:600; }
-
-        /* ============ LAYOUT VARIANTS ============ */
-        /* Layout: Stats arriba, features abajo */
-        .layout-stats-top .stats-row { order: -1; margin-bottom: 16px; margin-top: 0; }
-
-        /* Layout: Features como grid 2x2 */
-        .layout-features-grid .feat-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+        .section-title {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
             gap: 8px;
         }
 
-        .layout-features-grid .feat-item {
-            flex-direction: column;
+        .section-title i {
+            color: var(--accent);
+        }
+
+        .glass-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-glass);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--shadow);
+        }
+
+        /* Inputs */
+        .input-group {
+            margin-bottom: 14px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .input-group input[type="text"],
+        .input-group input[type="number"],
+        .input-group textarea,
+        .input-group select {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .input-group input:focus,
+        .input-group textarea:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .input-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a0a0b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        .input-group select option {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Color Pickers */
+        .color-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .color-picker-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .color-picker-wrapper input[type="color"] {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background: none;
+            padding: 0;
+        }
+
+        .color-picker-wrapper input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 2px;
+        }
+
+        .color-picker-wrapper input[type="color"]::-webkit-color-swatch {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+        }
+
+        .color-picker-wrapper .hex-value {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Sliders */
+        .slider-group {
+            margin-bottom: 14px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .slider-header label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .slider-header .slider-value {
+            font-size: 0.75rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 212, 255, 0.3);
+            transition: transform 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Template Selector */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .template-btn {
+            padding: 12px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            cursor: pointer;
             text-align: center;
-            border-left: none;
-            border-top: 3px solid var(--accent);
-            padding: 10px 8px;
+            transition: all 0.3s ease;
+            font-size: 0.75rem;
         }
 
-        /* Layout: Title centrado */
-        .layout-title-center .title-section { text-align: center; }
-        .layout-title-center .ad-desc { text-align: center; }
-
-        /* Layout: Stats en 2 columnas */
-        .layout-stats-2col .stats-row {
-            grid-template-columns: 1fr 1fr;
+        .template-btn:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
         }
 
-        /* Layout: Precio grande */
-        .layout-big-price .price-card {
+        .template-btn.active {
+            border-color: var(--accent);
+            background: rgba(0, 212, 255, 0.1);
+            color: var(--accent);
+        }
+
+        .template-btn i {
+            display: block;
+            font-size: 1.3rem;
+            margin-bottom: 4px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: inherit;
+        }
+
+        .btn-magic {
+            width: 100%;
+            background: linear-gradient(135deg, #f093fb, #f5576c, #4facfe, #00f2fe);
+            background-size: 300% 300%;
+            animation: gradientShift 3s ease infinite;
+            color: white;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .btn-magic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(240, 147, 251, 0.3);
+        }
+
+        .btn-export {
+            width: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: white;
+            margin-top: 8px;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .btn-reset {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        .btn-reset:hover {
+            border-color: #f5576c;
+            color: #f5576c;
+        }
+
+        /* ============================================
+           ÁREA PRINCIPAL - CANVAS
+           ============================================ */
+        .main-area {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            display: flex;
             flex-direction: column;
-            text-align: center;
-            gap: 12px;
-            padding: 20px;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 24px 24px;
+            min-height: 100vh;
         }
 
-        .layout-big-price .price-left {
-            flex-direction: column;
-        }
-
-        .layout-big-price .price-val {
-            font-size: 32px;
-        }
-
-        /* Layout: Contacto minimal */
-        .layout-contact-minimal .phone-number-section {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .layout-contact-minimal .phone-number-extra {
+        .canvas-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
             justify-content: center;
         }
 
-        /* Layout: Features horizontales */
-        .layout-features-row .feat-list {
-            flex-direction: row;
-            gap: 8px;
+        .canvas-frame {
+            width: 360px;
+            height: 640px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 
+                0 25px 60px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+            transform-origin: center center;
         }
 
-        .layout-features-row .feat-item {
-            flex: 1;
-            flex-direction: column;
+        .canvas-label {
             text-align: center;
-            border-left: none;
-            border-top: 3px solid var(--accent);
-            padding: 8px 6px;
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
-        /* Shuffle transition */
-        .shuffle-transition {
-            animation: shuffleAnim 0.8s ease;
+        .canvas-label span {
+            color: var(--accent);
+            font-weight: 600;
         }
 
-        @keyframes shuffleAnim {
-            0% { opacity: 0; transform: scale(0.95) rotate(2deg); }
-            50% { opacity: 0.5; transform: scale(0.98) rotate(-1deg); }
-            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        /* ============================================
+           CANVAS DE ANUNCIO (1080x1920 escalado)
+           ============================================ */
+        .ad-canvas {
+            width: 1080px;
+            height: 1920px;
+            position: relative;
+            overflow: hidden;
+            transform-origin: top left;
         }
 
-        /* Responsive */
-        @media (max-width: 1300px) {
-            .ad-container { transform: scale(0.75); }
+        /* ---------- ELEMENTOS DECORATIVOS DEL CANVAS ---------- */
+        .ad-bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
         }
-        @media (max-width: 1050px) {
-            .ad-container { transform: scale(0.6); }
+
+        .ad-geometric {
+            position: absolute;
+            z-index: 1;
+            opacity: 0.15;
+        }
+
+        .ad-grid-pattern {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+            z-index: 1;
+        }
+
+        .ad-content {
+            position: relative;
+            z-index: 10;
+            padding: 60px 50px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ad-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .ad-logo-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .ad-logo-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+        }
+
+        .ad-brand-name {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .ad-title {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+        }
+
+        .ad-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.7;
+            line-height: 1.4;
+        }
+
+        .ad-divider {
+            width: 80px;
+            height: 4px;
+            border-radius: 2px;
+            margin: 30px auto;
+        }
+
+        .ad-services {
+            flex: 1;
+        }
+
+        .ad-service-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 24px;
+            margin-bottom: 14px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+
+        .ad-service-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .ad-service-text {
+            flex: 1;
+        }
+
+        .ad-service-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+
+        .ad-service-desc {
+            font-size: 0.95rem;
+            opacity: 0.6;
+        }
+
+        .ad-price-tag {
+            font-size: 1.4rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        .ad-cta-area {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .ad-cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 22px 50px;
+            border-radius: 50px;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .ad-contact-info {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1rem;
+            opacity: 0.6;
+        }
+
+        .ad-contact-info i {
+            margin-right: 8px;
+        }
+
+        .ad-footer {
+            text-align: center;
+            padding-top: 20px;
+            font-size: 0.85rem;
+            opacity: 0.4;
+        }
+
+        /* ============================================
+           ESTILOS DE PLANTILLAS
+           ============================================ */
+
+        /* --- MINIMALISTA --- */
+        .template-minimalist .ad-canvas {
+            background: #ffffff;
+            color: #1a1a2e;
+        }
+
+        .template-minimalist .ad-grid-pattern {
+            display: none;
+        }
+
+        .template-minimalist .ad-geometric {
+            opacity: 0.05;
+        }
+
+        .template-minimalist .ad-service-item {
+            background: #f8f9fa;
+            border-color: #e9ecef;
+            border-radius: 12px;
+        }
+
+        .template-minimalist .ad-service-name {
+            color: #1a1a2e;
+        }
+
+        .template-minimalist .ad-service-desc {
+            color: #6c757d;
+        }
+
+        .template-minimalist .ad-subtitle {
+            color: #6c757d;
+        }
+
+        /* --- GAMING / HIGH-TECH --- */
+        .template-gaming .ad-canvas {
+            background: #0a0a1a;
+        }
+
+        .template-gaming .ad-geometric {
+            opacity: 0.2;
+        }
+
+        .template-gaming .ad-service-item {
+            border-color: rgba(0, 212, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.05);
+        }
+
+        .template-gaming .ad-cta-button {
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3), 0 0 60px rgba(0, 212, 255, 0.1);
+        }
+
+        /* --- CORPORATIVA --- */
+        .template-corporate .ad-canvas {
+            background: #1e293b;
+        }
+
+        .template-corporate .ad-service-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid;
+            border-radius: 8px;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            border-right: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        /* --- DINÁMICA --- */
+        .template-dynamic .ad-canvas {
+            clip-path: none;
+        }
+
+        .template-dynamic .ad-bg-layer {
+            clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+        }
+
+        .template-dynamic .ad-geometric {
+            opacity: 0.12;
+        }
+
+        .template-dynamic .ad-service-item {
+            transform: rotate(-1deg);
+            border-radius: 12px;
+        }
+
+        .template-dynamic .ad-service-item:nth-child(even) {
+            transform: rotate(1deg);
+        }
+
+        /* ============================================
+           TOGGLE SIDEBAR (MOBILE)
+           ============================================ */
+        .sidebar-toggle {
+            display: none;
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            color: white;
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 200;
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        /* ============================================
+           PRESETS RÁPIDOS
+           ============================================ */
+        .preset-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .preset-btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 900px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .main-area {
+                margin-left: 0;
+            }
+
+            .sidebar-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .canvas-frame {
+                width: 280px;
+                height: 498px;
+            }
+        }
+
+        /* ============================================
+           ANIMACIONES
+           ============================================ */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.05s; }
+        .section:nth-child(2) { animation-delay: 0.1s; }
+        .section:nth-child(3) { animation-delay: 0.15s; }
+        .section:nth-child(4) { animation-delay: 0.2s; }
+        .section:nth-child(5) { animation-delay: 0.25s; }
+        .section:nth-child(6) { animation-delay: 0.3s; }
+        .section:nth-child(7) { animation-delay: 0.35s; }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: rgba(0, 212, 255, 0.9);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            z-index: 1000;
+            transition: transform 0.4s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Loading spinner */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
 <body>
 
-    <!-- ============ PANEL ============ -->
-    <aside class="panel">
-        <div class="panel-top">
-            <i class="fas fa-mobile-screen-button"></i>
-            <div>
-                <h2>CellFix Ad Generator</h2>
-                <span style="font-size:9px; color:var(--white-50); letter-spacing:1px;">v2.0 — Shuffle Edition</span>
-            </div>
-        </div>
+    <!-- FONDO DE PARTÍCULAS -->
+    <div class="bg-particles" id="particles"></div>
 
-        <!-- Templates -->
-        <div>
-            <div class="section-title"><i class="fas fa-layer-group"></i> Plantilla</div>
-            <div class="tmpl-grid" id="tmplGrid">
-                <div class="tmpl-card active" onclick="selectTemplate('pantalla', this)">
-                    <i class="fas fa-mobile-screen" style="color:#F3BA2F;"></i>
-                    <span>Pantalla</span>
-                </div>
-                <div class="tmpl-card" onclick="selectTemplate('carga', this)">
-                    <i class="fas fa-plug-circle-bolt" style="color:#0ECB81;"></i>
-                    <span>P. Carga</span>
-                </div>
-                <div class="tmpl-card" onclick="selectTemplate('diagnostico', this)">
-                    <i class="fas fa-magnifying-glass-chart" style="color:#1E90FF;"></i>
-                    <span>Diagnóstico</span>
-                </div>
-                <div class="tmpl-card" onclick="selectTemplate('accesorios', this)">
-                    <i class="fas fa-headphones-simple" style="color:#F3BA2F;"></i>
-                    <span>Accesorios</span>
-                </div>
-                <div class="tmpl-card" onclick="selectTemplate('bateria', this)">
-                    <i class="fas fa-battery-full" style="color:#0ECB81;"></i>
-                    <span>Batería</span>
-                </div>
-                <div class="tmpl-card" onclick="selectTemplate('placa', this)">
-                    <i class="fas fa-microchip" style="color:#1E90FF;"></i>
-                    <span>Micro-sold.</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Logo -->
-        <div>
-            <div class="section-title"><i class="fas fa-image"></i> Logo del Taller</div>
-            <div class="logo-area" id="logoArea" onclick="document.getElementById('logoInput').click()">
-                <input type="file" id="logoInput" accept="image/*" onchange="handleLogo(event)">
-                <div class="upload-ph">
-                    <i class="fas fa-cloud-arrow-up"></i>
-                    <span>Subir logo</span>
-                </div>
-                <img class="logo-preview" id="logoPreview" src="" alt="">
-            </div>
-        </div>
-
-        <!-- Textos -->
-        <div>
-            <div class="section-title"><i class="fas fa-font"></i> Textos</div>
-            <div class="ctrl">
-                <label>Nombre del Taller</label>
-                <input type="text" id="inpBrand" value="CELLFIX PRO">
-            </div>
-            <div class="ctrl">
-                <label>Eslogan</label>
-                <input type="text" id="inpBrandSub" value="Reparación Express">
-            </div>
-            <div class="ctrl">
-                <label>Título Principal</label>
-                <input type="text" id="inpTitle" value="CAMBIO DE PANTALLA">
-            </div>
-            <div class="ctrl">
-                <label>Texto Destacado</label>
-                <input type="text" id="inpHighlight" value="CALIDAD ORIGINAL">
-            </div>
-            <div class="ctrl">
-                <label>Descripción</label>
-                <textarea id="inpDesc">Reemplazo de pantalla con repuestos de grado original. Garantía incluida en todos los servicios.</textarea>
-            </div>
-        </div>
-
-        <!-- Precio -->
-        <div>
-            <div class="section-title"><i class="fas fa-tag"></i> Precio</div>
-            <div class="ctrl">
-                <label>Nombre del Servicio</label>
-                <input type="text" id="inpService" value="Cambio de Pantalla LCD">
-            </div>
-            <div style="display:flex; gap:6px;">
-                <div class="ctrl" style="flex:1;">
-                    <label>Precio</label>
-                    <input type="text" id="inpPrice" value="$49.99">
-                </div>
-                <div class="ctrl" style="flex:1;">
-                    <label>Precio Anterior</label>
-                    <input type="text" id="inpOldPrice" value="$79.99">
-                </div>
-            </div>
-            <div class="ctrl">
-                <label>Badge Descuento</label>
-                <input type="text" id="inpDiscount" value="-37% OFF">
-            </div>
-        </div>
-
-        <!-- Teléfono -->
-        <div>
-            <div class="section-title"><i class="fab fa-whatsapp"></i> Teléfono / WhatsApp</div>
-            <div class="ctrl">
-                <label>Número Principal</label>
-                <input type="text" id="inpPhone" value="+52 55 1234 5678">
-            </div>
-            <div class="ctrl">
-                <label>Llamadas / WhatsApp</label>
-                <input type="text" id="inpPhoneLabel" value="Llamadas y WhatsApp">
-            </div>
-            <div class="ctrl">
-                <label>Dirección</label>
-                <input type="text" id="inpAddress" value="Av. Reforma #456, CDMX">
-            </div>
-            <div class="ctrl">
-                <label>Horario</label>
-                <input type="text" id="inpSchedule" value="Lun-Sáb 9AM - 8PM">
-            </div>
-        </div>
-
-        <!-- Stats -->
-        <div>
-            <div class="section-title"><i class="fas fa-chart-bar"></i> Estadísticas</div>
-            <div style="display:flex; gap:6px;">
-                <div class="ctrl" style="flex:1;">
-                    <label>Clientes</label>
-                    <input type="text" id="inpClients" value="5,200+">
-                </div>
-                <div class="ctrl" style="flex:1;">
-                    <label>Garantía</label>
-                    <input type="text" id="inpWarranty" value="6 Meses">
-                </div>
-                <div class="ctrl" style="flex:1;">
-                    <label>Tiempo</label>
-                    <input type="text" id="inpTime" value="30 min">
-                </div>
-            </div>
-        </div>
-
-        <!-- Features -->
-        <div>
-            <div class="section-title"><i class="fas fa-list-check"></i> Características</div>
-            <div class="ctrl"><label>Feature 1</label><input type="text" id="inpFeat1" value="Repuestos de grado original"></div>
-            <div class="ctrl"><label>Feature 2</label><input type="text" id="inpFeat2" value="Reparación en el momento"></div>
-            <div class="ctrl"><label>Feature 3</label><input type="text" id="inpFeat3" value="Garantía por escrito"></div>
-        </div>
-
-        <!-- Garantía -->
-        <div>
-            <div class="section-title"><i class="fas fa-shield-halved"></i> Garantía</div>
-            <div class="toggle-row">
-                <label>Mostrar badge</label>
-                <div class="toggle active" id="togGuarantee" onclick="toggleEl(this,'guaranteeBox')"></div>
-            </div>
-            <div class="ctrl" style="margin-top:6px;"><label>Texto</label><input type="text" id="inpGuarantee" value="GARANTÍA DE 6 MESES"></div>
-            <div class="ctrl"><label>Subtexto</label><input type="text" id="inpGuaranteeSub" value="En todos nuestros servicios"></div>
-        </div>
-
-        <!-- CTA -->
-        <div>
-            <div class="section-title"><i class="fas fa-hand-pointer"></i> Botón</div>
-            <div class="ctrl"><label>Texto</label><input type="text" id="inpCta" value="AGENDAR POR WHATSAPP"></div>
-            <div class="ctrl"><label>Subtexto</label><input type="text" id="inpCtaSub" value="Respuesta inmediata • Sin compromiso"></div>
-        </div>
-
-        <!-- Color -->
-        <div>
-            <div class="section-title"><i class="fas fa-palette"></i> Color de Acento</div>
-            <div class="color-row">
-                <div class="color-dot active" style="background:#F3BA2F;" onclick="setAccent('#F3BA2F',this)"></div>
-                <div class="color-dot" style="background:#0ECB81;" onclick="setAccent('#0ECB81',this)"></div>
-                <div class="color-dot" style="background:#1E90FF;" onclick="setAccent('#1E90FF',this)"></div>
-                <div class="color-dot" style="background:#F6465D;" onclick="setAccent('#F6465D',this)"></div>
-                <div class="color-dot" style="background:#A855F7;" onclick="setAccent('#A855F7',this)"></div>
-                <div class="color-dot" style="background:#FFFFFF;" onclick="setAccent('#FFFFFF',this)"></div>
-            </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="btn-row">
-            <button class="btn-shuffle" id="btnShuffle" onclick="shuffleLayout()">
-                <i class="fas fa-shuffle"></i> Mezclar
-            </button>
-            <button class="btn-primary" onclick="downloadAd()">
-                <i class="fas fa-download"></i> PNG
-            </button>
-        </div>
-        <div class="btn-row">
-            <button class="btn-secondary" onclick="resetAll()" style="flex:1;">
-                <i class="fas fa-rotate-left"></i> Reset
-            </button>
-        </div>
-    </aside>
-
-    <!-- ============ WORKSPACE ============ -->
-    <main class="workspace">
-        <div class="ad-container" id="adContainer">
-            <div class="ad-bg"></div>
-            <div class="bg-geo bg1"></div>
-            <div class="bg-geo bg2"></div>
-            <div class="bg-geo bg3"></div>
-            <div class="bg-geo bg4"></div>
-            <div class="bg-geo bg5"></div>
-            <div class="bg-geo bg6"></div>
-            <div class="particle pt1"></div>
-            <div class="particle pt2"></div>
-            <div class="particle pt3"></div>
-            <div class="particle pt4"></div>
-            <div class="particle pt5"></div>
-
-            <div class="ad-content" id="adContent">
-                <!-- Header -->
-                <div class="ad-header">
-                    <div class="ad-brand">
-                        <div class="ad-logo-box" id="adLogoBox">
-                            <i class="fas fa-screwdriver-wrench"></i>
-                        </div>
-                        <div>
-                            <div class="brand-name" id="adBrand">CELLFIX PRO</div>
-                            <div class="brand-sub" id="adBrandSub">Reparación Express</div>
-                        </div>
-                    </div>
-                    <div class="badge-live"><span class="dot"></span> Disponible</div>
-                </div>
-
-                <!-- Title -->
-                <div class="title-section">
-                    <div class="ad-title">
-                        <span id="adTitle">CAMBIO DE PANTALLA</span>
-                        <span class="hl" id="adHighlight">CALIDAD ORIGINAL</span>
-                    </div>
-                </div>
-                <p class="ad-desc" id="adDesc">Reemplazo de pantalla con repuestos de grado original.</p>
-
-                <!-- Price Card -->
-                <div class="price-card">
-                    <div class="price-left">
-                        <div class="price-icon"><i class="fas fa-mobile-screen" id="priceIconI"></i></div>
-                        <div>
-                            <div class="price-name" id="adService">Cambio de Pantalla LCD</div>
-                            <div class="price-desc-sm">Incluye instalación</div>
-                        </div>
-                    </div>
-                    <div class="price-right">
-                        <div class="price-old" id="adOldPrice">$79.99</div>
-                        <div class="price-val" id="adPrice">$49.99</div>
-                        <div class="price-badge" id="adDiscount">-37% OFF</div>
-                    </div>
-                </div>
-
-                <!-- Phone Mockup -->
-                <div class="phone-area">
-                    <div class="phone-glow"></div>
-                    <div class="phone-frame">
-                        <div class="notch"></div>
-                        <div class="phone-display" id="phoneDisplay">
-                            <!-- SVG Mockup injected here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="stats-row">
-                    <div class="stat-box">
-                        <i class="fas fa-users" style="color:var(--accent);"></i>
-                        <div class="s-val" id="adClients" style="color:var(--accent);">5,200+</div>
-                        <div class="s-lbl">Clientes</div>
-                    </div>
-                    <div class="stat-box">
-                        <i class="fas fa-clock" style="color:var(--green);"></i>
-                        <div class="s-val" id="adTime" style="color:var(--green);">30 min</div>
-                        <div class="s-lbl">Tiempo</div>
-                    </div>
-                    <div class="stat-box">
-                        <i class="fas fa-shield-halved" style="color:var(--blue);"></i>
-                        <div class="s-val" id="adWarranty" style="color:var(--blue);">6 Meses</div>
-                        <div class="s-lbl">Garantía</div>
-                    </div>
-                </div>
-
-                <!-- Features -->
-                <div class="feat-list">
-                    <div class="feat-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span class="f-text" id="adFeat1">Repuestos de grado original</span>
-                    </div>
-                    <div class="feat-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span class="f-text" id="adFeat2">Reparación en el momento</span>
-                    </div>
-                    <div class="feat-item">
-                        <i class="fas fa-check-circle"></i>
-                        <span class="f-text" id="adFeat3">Garantía por escrito</span>
-                    </div>
-                </div>
-
-                <!-- Guarantee -->
-                <div class="guarantee-box" id="guaranteeBox">
-                    <i class="fas fa-shield-check"></i>
-                    <div>
-                        <div class="gb-main" id="adGuarantee">GARANTÍA DE 6 MESES</div>
-                        <div class="gb-sub" id="adGuaranteeSub">En todos nuestros servicios</div>
-                    </div>
-                </div>
-
-                <!-- Phone Number Section -->
-                <div class="phone-number-section" id="phoneSection">
-                    <div class="phone-number-icon">
-                        <i class="fab fa-whatsapp"></i>
-                    </div>
-                    <div class="phone-number-info">
-                        <div class="phone-number-label" id="adPhoneLabel">Llamadas y WhatsApp</div>
-                        <div class="phone-number-value" id="adPhone">+52 55 1234 5678</div>
-                        <div class="phone-number-extra">
-                            <span><i class="fas fa-location-dot"></i> <span id="adAddress">Av. Reforma #456, CDMX</span></span>
-                            <span><i class="fas fa-clock"></i> <span id="adSchedule">Lun-Sáb 9AM - 8PM</span></span>
-                        </div>
-                    </div>
-                    <div class="phone-call-btn">
-                        <i class="fas fa-phone"></i>
-                    </div>
-                </div>
-
-                <!-- CTA -->
-                <div class="ad-cta">
-                    <button class="cta-btn" id="adCta">AGENDAR POR WHATSAPP</button>
-                    <p class="cta-sub" id="adCtaSub">Respuesta inmediata • Sin compromiso</p>
-                </div>
-            </div>
-        </div>
-    </main>
-
-    <!-- Toast -->
-    <div class="toast" id="toast">
-        <i class="fas fa-check-circle"></i>
-        <span>¡Imagen descargada a 1080×1920!</span>
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
     </div>
 
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <!-- BARRA SUPERIOR -->
+    <div class="top-bar">
+        <div class="logo">
+            <div class="logo-icon"><i class="fas fa-mobile-screen-button"></i></div>
+            <span>AdGen Pro</span>
+        </div>
+        <div class="top-actions">
+            <button class="btn btn-export" onclick="exportImage()" style="padding: 8px 20px; font-size: 0.8rem;">
+                <i class="fas fa-download"></i> Exportar PNG
+            </button>
+        </div>
+    </div>
+
+    <!-- APP CONTAINER -->
+    <div class="app-container">
+
+        <!-- SIDEBAR -->
+        <aside class="sidebar" id="sidebar">
+
+            <!-- PLANTILLAS -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-palette"></i> Plantilla</div>
+                <div class="template-grid">
+                    <button class="template-btn active" data-template="minimalist" onclick="setTemplate('minimalist')">
+                        <i class="fas fa-feather-pointed"></i> Minimalista
+                    </button>
+                    <button class="template-btn" data-template="gaming" onclick="setTemplate('gaming')">
+                        <i class="fas fa-gamepad"></i> High-Tech
+                    </button>
+                    <button class="template-btn" data-template="corporate" onclick="setTemplate('corporate')">
+                        <i class="fas fa-building"></i> Corporativa
+                    </button>
+                    <button class="template-btn" data-template="dynamic" onclick="setTemplate('dynamic')">
+                        <i class="fas fa-bolt"></i> Dinámica
+                    </button>
+                </div>
+            </div>
+
+            <!-- PRESETS RÁPIDOS -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-wand-magic-sparkles"></i> Presets</div>
+                <div class="preset-row">
+                    <button class="preset-btn" onclick="applyPreset('dark')">🌙 Modo Oscuro</button>
+                    <button class="preset-btn" onclick="applyPreset('tech')">💻 Modo Tech</button>
+                    <button class="preset-btn" onclick="applyPreset('offer')">🔥 Modo Oferta</button>
+                    <button class="preset-btn" onclick="applyPreset('elegant')">✨ Elegante</button>
+                </div>
+                <button class="btn btn-magic" onclick="magicButton()">
+                    <i class="fas fa-dice"></i> <span>✨ Magic - Combinación Aleatoria</span>
+                </button>
+            </div>
+
+            <!-- CONTENIDO -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-pen-nib"></i> Contenido</div>
+                <div class="glass-card">
+                    <div class="input-group">
+                        <label>Nombre del Negocio</label>
+                        <input type="text" id="brandName" value="TechFix Pro" oninput="updateCanvas()">
+                    </div>
+                    <div class="input-group">
+                        <label>Título Principal</label>
+                        <input type="text" id="adTitle" value="Reparación Profesional de Celulares" oninput="updateCanvas()">
+                    </div>
+                    <div class="input-group">
+                        <label>Subtítulo</label>
+                        <input type="text" id="adSubtitle" value="Servicio rápido, garantizado y al mejor precio" oninput="updateCanvas()">
+                    </div>
+                    <div class="input-group">
+                        <label>Servicios (uno por línea)</label>
+                        <textarea id="adServices" rows="5" oninput="updateCanvas()">Cambio de Pantalla
+Reemplazo de Batería
+Mantenimiento Preventivo
+Reparación de Software
+Diagnóstico Gratis</textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>Precio / Oferta (opcional)</label>
+                        <input type="text" id="adPrice" value="Desde $29.99" oninput="updateCanvas()">
+                    </div>
+                    <div class="input-group">
+                        <label>Texto del Botón CTA</label>
+                        <input type="text" id="adCTA" value="¡Agenda Tu Cita Ahora!" oninput="updateCanvas()">
+                    </div>
+                    <div class="input-group">
+                        <label>Teléfono / WhatsApp</label>
+                        <input type="text" id="adPhone" value="+1 (555) 123-4567" oninput="updateCanvas()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLORES -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-swatchbook"></i> Colores</div>
+                <div class="glass-card">
+                    <div class="color-row">
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="colorBg" value="#0a0a1a" oninput="updateColors()">
+                            <span class="hex-value" id="colorBgHex">#0a0a1a</span>
+                            <label style="font-size:0.7rem; color: var(--text-secondary);">Fondo</label>
+                        </div>
+                    </div>
+                    <div class="color-row">
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="colorAccent" value="#00d4ff" oninput="updateColors()">
+                            <span class="hex-value" id="colorAccentHex">#00d4ff</span>
+                            <label style="font-size:0.7rem; color: var(--text-secondary);">Acento</label>
+                        </div>
+                    </div>
+                    <div class="color-row">
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="colorText" value="#ffffff" oninput="updateColors()">
+                            <span class="hex-value" id="colorTextHex">#ffffff</span>
+                            <label style="font-size:0.7rem; color: var(--text-secondary);">Texto</label>
+                        </div>
+                    </div>
+                    <div class="color-row">
+                        <div class="color-picker-wrapper">
+                            <input type="color" id="colorAccent2" value="#7c3aed" oninput="updateColors()">
+                            <span class="hex-value" id="colorAccent2Hex">#7c3aed</span>
+                            <label style="font-size:0.7rem; color: var(--text-secondary);">Acento 2</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AJUSTES -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-sliders"></i> Ajustes</div>
+                <div class="glass-card">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Redondeo de esquinas</label>
+                            <span class="slider-value" id="radiusValue">16px</span>
+                        </div>
+                        <input type="range" id="borderRadius" min="0" max="40" value="16" oninput="updateStyles()">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Intensidad de sombra</label>
+                            <span class="slider-value" id="shadowValue">8</span>
+                        </div>
+                        <input type="range" id="shadowIntensity" min="0" max="30" value="8" oninput="updateStyles()">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Opacidad de servicios</label>
+                            <span class="slider-value" id="opacityValue">0.85</span>
+                        </div>
+                        <input type="range" id="serviceOpacity" min="20" max="100" value="85" oninput="updateStyles()">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Tamaño del título</label>
+                            <span class="slider-value" id="titleSizeValue">3.2rem</span>
+                        </div>
+                        <input type="range" id="titleSize" min="20" max="50" value="32" oninput="updateStyles()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- DECORACIÓN -->
+            <div class="section">
+                <div class="section-title"><i class="fas fa-shapes"></i> Decoración</div>
+                <div class="glass-card">
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Opacidad de formas</label>
+                            <span class="slider-value" id="geoOpacityValue">0.15</span>
+                        </div>
+                        <input type="range" id="geoOpacity" min="0" max="50" value="15" oninput="updateStyles()">
+                    </div>
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>Opacidad de grid</label>
+                            <span class="slider-value" id="gridOpacityValue">0.03</span>
+                        </div>
+                        <input type="range" id="gridOpacity" min="0" max="15" value="3" oninput="updateStyles()">
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTONES FINALES -->
+            <div class="section" style="padding-bottom: 40px;">
+                <button class="btn btn-export" onclick="exportImage()">
+                    <i class="fas fa-download"></i> Exportar como Imagen (PNG)
+                </button>
+                <button class="btn btn-reset" onclick="resetAll()">
+                    <i class="fas fa-rotate-left"></i> Resetear Todo
+                </button>
+            </div>
+
+        </aside>
+
+        <!-- ÁREA PRINCIPAL -->
+        <main class="main-area">
+            <div class="canvas-wrapper">
+                <div class="canvas-frame" id="canvasFrame">
+                    <div id="adCanvas" class="ad-canvas template-gaming">
+                        <!-- Capa de fondo -->
+                        <div class="ad-bg-layer" id="adBgLayer"></div>
+
+                        <!-- Formas geométricas -->
+                        <div id="geometricShapes"></div>
+
+                        <!-- Grid pattern -->
+                        <div class="ad-grid-pattern" id="adGridPattern"></div>
+
+                        <!-- Contenido -->
+                        <div class="ad-content" id="adContent">
+                            <!-- Header -->
+                            <div class="ad-header">
+                                <div class="ad-logo-area">
+                                    <div class="ad-logo-icon" id="adLogoIcon" style="background: linear-gradient(135deg, #00d4ff, #7c3aed);">
+                                        <i class="fas fa-screwdriver-wrench"></i>
+                                    </div>
+                                    <div class="ad-brand-name" id="adBrandDisplay" style="color: #ffffff;">TechFix Pro</div>
+                                </div>
+                                <div class="ad-title" id="adTitleDisplay" style="color: #ffffff;">Reparación Profesional de Celulares</div>
+                                <div class="ad-subtitle" id="adSubtitleDisplay" style="color: #ffffff;">Servicio rápido, garantizado y al mejor precio</div>
+                                <div class="ad-divider" id="adDivider" style="background: linear-gradient(90deg, #00d4ff, #7c3aed);"></div>
+                            </div>
+
+                            <!-- Servicios -->
+                            <div class="ad-services" id="adServicesContainer">
+                                <!-- Se genera dinámicamente -->
+                            </div>
+
+                            <!-- CTA -->
+                            <div class="ad-cta-area">
+                                <button class="ad-cta-button" id="adCtaButton" style="background: linear-gradient(135deg, #00d4ff, #7c3aed); color: #ffffff;">
+                                    <i class="fab fa-whatsapp"></i>
+                                    <span id="adCTADisplay">¡Agenda Tu Cita Ahora!</span>
+                                </button>
+                                <div class="ad-contact-info" id="adContactInfo" style="color: #ffffff;">
+                                    <i class="fas fa-phone"></i> +1 (555) 123-4567
+                                </div>
+                            </div>
+
+                            <!-- Footer -->
+                            <div class="ad-footer" style="color: #ffffff;">
+                                <i class="fas fa-shield-halved"></i> Garantía en todas las reparaciones • Servicio a domicilio disponible
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="canvas-label">Vista previa • Tamaño real: <span>1080 x 1920 px</span> (WhatsApp Status)</div>
+        </main>
+    </div>
+
+    <!-- TOGGLE MOBILE -->
+    <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+        <i class="fas fa-sliders"></i>
+    </button>
+
     <script>
-        // ============================
-        // TEMPLATE DATA
-        // ============================
-        const templates = {
-            pantalla: {
-                icon:'fa-mobile-screen',
-                title:'CAMBIO DE PANTALLA',
-                highlight:'CALIDAD ORIGINAL',
-                desc:'Reemplazo de pantalla con repuestos de grado original. Garantía incluida en todos los servicios.',
-                service:'Cambio de Pantalla LCD',
-                price:'$49.99', oldPrice:'$79.99', discount:'-37% OFF',
-                clients:'5,200+', warranty:'6 Meses', time:'30 min',
-                feat1:'Pantalla AMOLED / LCD original', feat2:'Instalación en 30 minutos', feat3:'Garantía de 6 meses',
-                guarantee:'GARANTÍA DE 6 MESES', guaranteeSub:'En pantalla instalada',
-                phone:'pantalla'
-            },
-            carga: {
-                icon:'fa-plug-circle-bolt',
-                title:'PUERTO DE CARGA',
-                highlight:'CARGA RESTAURADA',
-                desc:'¿Tu celular no carga? Reparamos o reemplazamos el puerto de carga en minutos.',
-                service:'Reparación Puerto de Carga',
-                price:'$24.99', oldPrice:'$44.99', discount:'-44% OFF',
-                clients:'3,800+', warranty:'3 Meses', time:'20 min',
-                feat1:'Diagnóstico gratuito', feat2:'Carga rápida restaurada', feat3:'Compatible con todos los modelos',
-                guarantee:'GARANTÍA DE 3 MESES', guaranteeSub:'En reparación de puerto',
-                phone:'carga'
-            },
-            diagnostico: {
-                icon:'fa-magnifying-glass-chart',
-                title:'DIAGNÓSTICO',
-                highlight:'GRATIS HOY',
-                desc:'Diagnóstico completo y gratuito. Identificamos el problema exacto de tu dispositivo.',
-                service:'Diagnóstico Completo',
-                price:'GRATIS', oldPrice:'$15.00', discount:'100% OFF',
-                clients:'8,100+', warranty:'N/A', time:'15 min',
-                feat1:'Evaluación de hardware completa', feat2:'Reporte detallado del estado', feat3:'Presupuesto sin compromiso',
-                guarantee:'DIAGNÓSTICO GRATUITO', guaranteeSub:'Sin costo ni compromiso',
-                phone:'diagnostico'
-            },
-            accesorios: {
-                icon:'fa-headphones-simple',
-                title:'ACCESORIOS',
-                highlight:'PREMIUM SHOP',
-                desc:'Los mejores accesorios para tu celular. Cargadores, fundas, micas y más.',
-                service:'Catálogo de Accesorios',
-                price:'Desde $5.99', oldPrice:'', discount:'NUEVO',
-                clients:'12,000+', warranty:'1 Mes', time:'En stock',
-                feat1:'Marcas originales certificadas', feat2:'Envío a domicilio disponible', feat3:'Ofertas semanales exclusivas',
-                guarantee:'GARANTÍA DE SATISFACCIÓN', guaranteeSub:'Devolución en 7 días',
-                phone:'accesorios'
-            },
-            bateria: {
-                icon:'fa-battery-full',
-                title:'CAMBIO DE BATERÍA',
-                highlight:'VUELVE A VIVIR',
-                desc:'¿Tu batería no dura nada? Instalamos baterías nuevas con capacidad original.',
-                service:'Reemplazo de Batería',
-                price:'$29.99', oldPrice:'$54.99', discount:'-45% OFF',
-                clients:'4,500+', warranty:'6 Meses', time:'25 min',
-                feat1:'Batería de capacidad original', feat2:'Calibración incluida', feat3:'Test de rendimiento post-cambio',
-                guarantee:'GARANTÍA DE 6 MESES', guaranteeSub:'En batería instalada',
-                phone:'bateria'
-            },
-            placa: {
-                icon:'fa-microchip',
-                title:'MICRO-SOLDADURA',
-                highlight:'REPARACIÓN EXPERTA',
-                desc:'Reparación a nivel de componente con micro-soldadura de precisión profesional.',
-                service:'Micro-soldadura de Placa',
-                price:'$59.99', oldPrice:'$99.99', discount:'-40% OFF',
-                clients:'2,100+', warranty:'3 Meses', time:'2-4 hrs',
-                feat1:'Técnico certificado', feat2:'Equipo de precisión profesional', feat3:'IC, condensadores, FPC',
-                guarantee:'GARANTÍA DE 3 MESES', guaranteeSub:'En micro-soldadura',
-                phone:'placa'
-            }
+        /* ============================================
+           CONFIGURACIÓN E ICONOS DE SERVICIOS
+           ============================================ */
+        const serviceIcons = {
+            'pantalla': { icon: 'fa-mobile-screen', label: 'Pantalla' },
+            'batería': { icon: 'fa-battery-full', label: 'Batería' },
+            'bateria': { icon: 'fa-battery-full', label: 'Batería' },
+            'mantenimiento': { icon: 'fa-gears', label: 'Mantenimiento' },
+            'software': { icon: 'fa-code', label: 'Software' },
+            'diagnóstico': { icon: 'fa-magnifying-glass', label: 'Diagnóstico' },
+            'diagnostico': { icon: 'fa-magnifying-glass', label: 'Diagnóstico' },
+            'cámara': { icon: 'fa-camera', label: 'Cámara' },
+            'camara': { icon: 'fa-camera', label: 'Cámara' },
+            'carga': { icon: 'fa-plug', label: 'Puerto de Carga' },
+            'altavoz': { icon: 'fa-volume-high', label: 'Altavoz' },
+            'botón': { icon: 'fa-power-off', label: 'Botones' },
+            'boton': { icon: 'fa-power-off', label: 'Botones' },
+            'agua': { icon: 'fa-droplet', label: 'Daño por Agua' },
+            'datos': { icon: 'fa-database', label: 'Recuperación de Datos' },
+            'liberación': { icon: 'fa-unlock', label: 'Liberación' },
+            'liberacion': { icon: 'fa-unlock', label: 'Liberación' },
+            'default': { icon: 'fa-screwdriver-wrench', label: 'Servicio' }
         };
 
-        let currentTemplate = 'pantalla';
-        let currentAccent = '#F3BA2F';
-        let shuffleCount = 0;
+        function getServiceIcon(serviceName) {
+            const lower = serviceName.toLowerCase();
+            for (const [key, value] of Object.entries(serviceIcons)) {
+                if (lower.includes(key)) return value;
+            }
+            return serviceIcons.default;
+        }
 
-        // ============================
-        // SVG MOCKUP GENERATORS
-        // ============================
-        function getMockupSVG(type) {
-            const accent = currentAccent;
-
-            switch(type) {
-                case 'pantalla':
-                    return `
-                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
-                        <!-- Phone body -->
-                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
-                        <!-- Screen background -->
-                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
-                        <!-- Status bar -->
-                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
-                        <text x="155" y="50" fill="#666" font-size="9" font-family="Inter,sans-serif">📶 🔋</text>
-                        <!-- Broken screen effect -->
-                        <rect x="18" y="30" width="174" height="360" rx="8" fill="none" stroke="#444" stroke-width="0.5"/>
-                        <!-- Crack lines - major cracks -->
-                        <line x1="60" y1="60" x2="120" y2="180" stroke="${accent}" stroke-width="1.5" opacity="0.6"/>
-                        <line x1="120" y1="180" x2="170" y2="250" stroke="${accent}" stroke-width="1.2" opacity="0.5"/>
-                        <line x1="60" y1="60" x2="40" y2="200" stroke="${accent}" stroke-width="1" opacity="0.4"/>
-                        <line x1="120" y1="180" x2="90" y2="320" stroke="${accent}" stroke-width="1.3" opacity="0.5"/>
-                        <line x1="170" y1="250" x2="150" y2="350" stroke="${accent}" stroke-width="1" opacity="0.4"/>
-                        <line x1="40" y1="200" x2="80" y2="280" stroke="${accent}" stroke-width="0.8" opacity="0.3"/>
-                        <line x1="90" y1="320" x2="130" y2="370" stroke="${accent}" stroke-width="0.8" opacity="0.3"/>
-                        <!-- Spider web cracks from center -->
-                        <line x1="110" y1="150" x2="50" y2="100" stroke="${accent}" stroke-width="0.8" opacity="0.35"/>
-                        <line x1="110" y1="150" x2="170" y2="120" stroke="${accent}" stroke-width="0.8" opacity="0.35"/>
-                        <line x1="110" y1="150" x2="140" y2="200" stroke="${accent}" stroke-width="0.8" opacity="0.35"/>
-                        <line x1="110" y1="150" x2="70" y2="170" stroke="${accent}" stroke-width="0.8" opacity="0.35"/>
-                        <!-- Impact points -->
-                        <circle cx="110" cy="150" r="12" fill="none" stroke="${accent}" stroke-width="1" opacity="0.5"/>
-                        <circle cx="110" cy="150" r="6" fill="${accent}" opacity="0.15"/>
-                        <circle cx="60" cy="60" r="8" fill="none" stroke="${accent}" stroke-width="0.8" opacity="0.4"/>
-                        <!-- Crack shards (triangles) -->
-                        <polygon points="60,60 80,80 70,100" fill="${accent}" opacity="0.06"/>
-                        <polygon points="120,180 140,170 130,200" fill="${accent}" opacity="0.06"/>
-                        <polygon points="170,250 160,270 180,260" fill="${accent}" opacity="0.06"/>
-                        <!-- "SCREEN BROKEN" text -->
-                        <text x="105" y="300" text-anchor="middle" fill="${accent}" font-size="11" font-family="Inter,sans-serif" font-weight="800" opacity="0.8">SCREEN</text>
-                        <text x="105" y="315" text-anchor="middle" fill="${accent}" font-size="11" font-family="Inter,sans-serif" font-weight="800" opacity="0.8">BROKEN</text>
-                        <!-- Warning triangle -->
-                        <polygon points="105,340 90,365 120,365" fill="none" stroke="${accent}" stroke-width="1" opacity="0.6"/>
-                        <text x="105" y="358" text-anchor="middle" fill="${accent}" font-size="12" font-weight="800" opacity="0.7">!</text>
-                        <!-- Arrow pointing down -->
-                        <text x="105" y="390" text-anchor="middle" fill="${accent}" font-size="9" font-family="Inter,sans-serif" font-weight="700" opacity="0.5">↓ REPARACIÓN ↓</text>
-                        <!-- Screen reflection -->
-                        <rect x="18" y="30" width="174" height="360" rx="8" fill="url(#screenRef)" opacity="0.3"/>
-                        <defs>
-                            <linearGradient id="screenRef" x1="0" y1="0" x2="1" y2="1">
-                                <stop offset="0%" stop-color="white" stop-opacity="0.1"/>
-                                <stop offset="50%" stop-color="white" stop-opacity="0"/>
-                            </linearGradient>
-                        </defs>
-                    </svg>`;
-
-                case 'carga':
-                    return `
-                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
-                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
-                        <!-- Time -->
-                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
-                        <!-- Battery icon - EMPTY -->
-                        <rect x="145" y="38" width="24" height="12" rx="3" fill="none" stroke="#F6465D" stroke-width="1.5"/>
-                        <rect x="169" y="41" width="4" height="6" rx="1" fill="#F6465D" opacity="0.6"/>
-                        <rect x="148" y="41" width="4" height="6" rx="1" fill="#F6465D" opacity="0.3"/>
-                        <text x="105" y="100" text-anchor="middle" fill="#F6465D" font-size="10" font-family="Inter,sans-serif" font-weight="800">5%</text>
-                        <!-- Charging cable -->
-                        <rect x="90" y="385" width="30" height="20" rx="3" fill="#333" stroke="#555" stroke-width="0.5"/>
-                        <rect x="100" y="370" width="10" height="18" rx="2" fill="#444"/>
-                        <line x1="105" y1="370" x2="105" y2="340" stroke="#666" stroke-width="2"/>
-                        <!-- Lightning bolts -->
-                        <polygon points="105,280 95,300 102,300 92,320 110,298 103,298" fill="${accent}" opacity="0.8"/>
-                        <polygon points="105,200 98,215 103,215 96,230 108,213 104,213" fill="${accent}" opacity="0.4"/>
-                        <!-- Phone charging animation -->
-                        <text x="105" y="160" text-anchor="middle" fill="${accent}" font-size="9" font-family="Inter,sans-serif" font-weight="700">CARGANDO...</text>
-                        <!-- Progress bar -->
-                        <rect x="40" y="175" width="130" height="6" rx="3" fill="#333"/>
-                        <rect x="40" y="175" width="30" height="6" rx="3" fill="${accent}">
-                            <animate attributeName="width" from="10" to="130" dur="3s" repeatCount="indefinite"/>
-                        </rect>
-                        <!-- Port closeup -->
-                        <rect x="70" y="230" width="70" height="35" rx="8" fill="#222" stroke="${accent}" stroke-width="1" opacity="0.6"/>
-                        <rect x="85" y="238" width="40" height="8" rx="4" fill="#333"/>
-                        <circle cx="105" cy="242" r="2" fill="${accent}" opacity="0.8">
-                            <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
-                        </circle>
-                        <text x="105" y="262" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="600">USB-C / LIGHTNING</text>
-                        <!-- Before/After arrows -->
-                        <text x="55" y="320" fill="#F6465D" font-size="8" font-family="Inter,sans-serif" font-weight="700">✗ NO CARGA</text>
-                        <text x="155" y="320" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">✓ CARGANDO</text>
-                        <line x1="90" y1="318" x2="130" y2="318" stroke="${accent}" stroke-width="0.5" stroke-dasharray="3,2" opacity="0.5"/>
-                        <!-- Arrow -->
-                        <text x="110" y="318" text-anchor="middle" fill="${accent}" font-size="10" opacity="0.6">→</text>
-                    </svg>`;
-
-                case 'diagnostico':
-                    return `
-                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
-                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
-                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
-                        <!-- Scan animation -->
-                        <text x="105" y="80" text-anchor="middle" fill="${accent}" font-size="9" font-family="Inter,sans-serif" font-weight="700">DIAGNÓSTICO EN CURSO</text>
-                        <!-- Scanning line -->
-                        <line x1="25" y1="100" x2="185" y2="100" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
-                        <line x1="25" y1="100" x2="185" y2="100" stroke="${accent}" stroke-width="1" opacity="0.6">
-                            <animate attributeName="y1" values="100;350;100" dur="4s" repeatCount="indefinite"/>
-                            <animate attributeName="y2" values="100;350;100" dur="4s" repeatCount="indefinite"/>
-                        </line>
-                        <!-- Health bars -->
-                        <g transform="translate(30, 110)">
-                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Batería</text>
-                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
-                            <rect x="0" y="5" width="115" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
-                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">78%</text>
-                        </g>
-                        <g transform="translate(30, 140)">
-                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Pantalla</text>
-                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
-                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
-                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">100%</text>
-                        </g>
-                        <g transform="translate(30, 170)">
-                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Memoria</text>
-                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
-                            <rect x="0" y="5" width="90" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
-                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">60%</text>
-                        </g>
-                        <g transform="translate(30, 200)">
-                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Señal</text>
-                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
-                            <rect x="0" y="5" width="135" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
-                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">90%</text>
-                        </g>
-                        <g transform="translate(30, 230)">
-                            <text x="0" y="0" fill="#888" font-size="8" font-family="Inter,sans-serif">Sensores</text>
-                            <rect x="0" y="5" width="150" height="5" rx="2.5" fill="#333"/>
-                            <rect x="0" y="5" width="120" height="5" rx="2.5" fill="${accent}" opacity="0.8"/>
-                            <text x="140" y="10" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">80%</text>
-                        </g>
-                        <!-- Result card -->
-                        <rect x="25" y="270" width="160" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
-                        <text x="105" y="295" text-anchor="middle" fill="${accent}" font-size="10" font-family="Inter,sans-serif" font-weight="800">RESULTADO GENERAL</text>
-                        <text x="105" y="320" text-anchor="middle" fill="${accent}" font-size="22" font-family="Inter,sans-serif" font-weight="900">B+</text>
-                        <text x="105" y="340" text-anchor="middle" fill="#888" font-size="8" font-family="Inter,sans-serif">El dispositivo necesita mantenimiento</text>
-                    </svg>`;
-
-                case 'accesorios':
-                    return `
-                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
-                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
-                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
-                        <!-- Header -->
-                        <text x="105" y="75" text-anchor="middle" fill="${accent}" font-size="11" font-family="Inter,sans-serif" font-weight="800">ACCESORIOS PREMIUM</text>
-                        <!-- Grid items -->
-                        <!-- Item 1: Headphones -->
-                        <rect x="25" y="90" width="75" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
-                        <circle cx="62" cy="118" r="14" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
-                        <path d="M48,118 Q48,100 62,100 Q76,100 76,118" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
-                        <circle cx="62" cy="130" r="4" fill="${accent}" opacity="0.4"/>
-                        <text x="62" y="155" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">AUDÍFONOS</text>
-                        <text x="62" y="165" text-anchor="middle" fill="#888" font-size="6" font-family="Inter,sans-serif">$12.99</text>
-                        <!-- Item 2: Case -->
-                        <rect x="110" y="90" width="75" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
-                        <rect x="133" y="100" width="30" height="40" rx="6" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
-                        <circle cx="148" cy="108" r="3" fill="${accent}" opacity="0.5"/>
-                        <text x="148" y="155" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">FUNDA</text>
-                        <text x="148" y="165" text-anchor="middle" fill="#888" font-size="6" font-family="Inter,sans-serif">$8.99</text>
-                        <!-- Item 3: Charger -->
-                        <rect x="25" y="180" width="75" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
-                        <rect x="50" y="195" width="24" height="30" rx="4" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
-                        <rect x="55" y="190" width="14" height="8" rx="2" fill="none" stroke="${accent}" stroke-width="1" opacity="0.5"/>
-                        <line x1="62" y1="225" x2="62" y2="240" stroke="${accent}" stroke-width="1.5" opacity="0.6"/>
-                        <text x="62" y="245" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">CARGADOR</text>
-                        <text x="62" y="255" text-anchor="middle" fill="#888" font-size="6" font-family="Inter,sans-serif">$14.99</text>
-                        <!-- Item 4: Screen protector -->
-                        <rect x="110" y="180" width="75" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
-                        <rect x="130" y="195" width="35" height="45" rx="4" fill="none" stroke="${accent}" stroke-width="1.5" opacity="0.7"/>
-                        <line x1="135" y1="205" x2="160" y2="205" stroke="${accent}" stroke-width="0.5" opacity="0.4"/>
-                        <line x1="135" y1="212" x2="155" y2="212" stroke="${accent}" stroke-width="0.5" opacity="0.4"/>
-                        <text x="148" y="245" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">MICA</text>
-                        <text x="148" y="255" text-anchor="middle" fill="#888" font-size="6" font-family="Inter,sans-serif">$5.99</text>
-                        <!-- Promo banner -->
-                        <rect x="25" y="280" width="160" height="50" rx="10" fill="${accent}" opacity="0.15" stroke="${accent}" stroke-width="0.5"/>
-                        <text x="105" y="305" text-anchor="middle" fill="${accent}" font-size="12" font-family="Inter,sans-serif" font-weight="800">🔥 COMBO AHORRO 🔥</text>
-                        <text x="105" y="322" text-anchor="middle" fill="${accent}" font-size="8" font-family="Inter,sans-serif">Funda + Mica + Cargador = $24.99</text>
-                    </svg>`;
-
-                case 'bateria':
-                    return `
-                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
-                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
-                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
-                        <!-- Old battery (left) -->
-                        <text x="60" y="80" text-anchor="middle" fill="#F6465D" font-size="8" font-family="Inter,sans-serif" font-weight="700">ANTES</text>
-                        <rect x="30" y="95" width="60" height="100" rx="8" fill="#222" stroke="#F6465D" stroke-width="1" opacity="0.6"/>
-                        <rect x="45" y="85" width="30" height="12" rx="3" fill="#222" stroke="#F6465D" stroke-width="0.5" opacity="0.5"/>
-                        <!-- Low battery level -->
-                        <rect x="35" y="160" width="50" height="30" rx="4" fill="#F6465D" opacity="0.2"/>
-                        <text x="60" y="178" text-anchor="middle" fill="#F6465D" font-size="12" font-family="Inter,sans-serif" font-weight="800">23%</text>
-                        <text x="60" y="195" text-anchor="middle" fill="#F6465D" font-size="6" font-family="Inter,sans-serif">SALUD</text>
-                        <!-- Arrow -->
-                        <text x="105" y="140" text-anchor="middle" fill="${accent}" font-size="20" opacity="0.6">→</text>
-                        <!-- New battery (right) -->
-                        <text x="150" y="80" text-anchor="middle" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">DESPUÉS</text>
-                        <rect x="120" y="95" width="60" height="100" rx="8" fill="#222" stroke="${accent}" stroke-width="1" opacity="0.6"/>
-                        <rect x="135" y="85" width="30" height="12" rx="3" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.5"/>
-                        <!-- Full battery level -->
-                        <rect x="125" y="100" width="50" height="90" rx="4" fill="${accent}" opacity="0.15"/>
-                        <rect x="125" y="100" width="50" height="90" rx="4" fill="${accent}" opacity="0.2"/>
-                        <text x="150" y="148" text-anchor="middle" fill="${accent}" font-size="14" font-family="Inter,sans-serif" font-weight="800">100%</text>
-                        <text x="150" y="165" text-anchor="middle" fill="${accent}" font-size="6" font-family="Inter,sans-serif">SALUD</text>
-                        <!-- Battery specs -->
-                        <rect x="25" y="220" width="160" height="80" rx="10" fill="#222" stroke="${accent}" stroke-width="0.5" opacity="0.8"/>
-                        <text x="105" y="245" text-anchor="middle" fill="${accent}" font-size="9" font-family="Inter,sans-serif" font-weight="700">ESPECIFICACIONES</text>
-                        <text x="40" y="265" fill="#888" font-size="7" font-family="Inter,sans-serif">Capacidad:</text>
-                        <text x="120" y="265" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">4,500 mAh</text>
-                        <text x="40" y="280" fill="#888" font-size="7" font-family="Inter,sans-serif">Tipo:</text>
-                        <text x="120" y="280" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">Li-Po Original</text>
-                        <text x="40" y="295" fill="#888" font-size="7" font-family="Inter,sans-serif">Ciclos:</text>
-                        <text x="120" y="295" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">0 (Nueva)</text>
-                        <!-- Lightning bolts -->
-                        <polygon points="105,330 95,350 102,350 92,370 110,348 103,348" fill="${accent}" opacity="0.6">
-                            <animate attributeName="opacity" values="0.3;0.8;0.3" dur="2s" repeatCount="indefinite"/>
-                        </polygon>
-                    </svg>`;
-
-                case 'placa':
-                    return `
-                    <svg viewBox="0 0 210 420" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="10" y="10" width="190" height="400" rx="18" fill="#111" stroke="#333" stroke-width="1"/>
-                        <rect x="18" y="30" width="174" height="360" rx="8" fill="#1a1a2e"/>
-                        <text x="25" y="50" fill="#666" font-size="10" font-family="Inter,sans-serif" font-weight="700">9:41</text>
-                        <!-- PCB Board -->
-                        <rect x="30" y="65" width="150" height="200" rx="6" fill="#1a3a1a" stroke="${accent}" stroke-width="0.5" opacity="0.6"/>
-                        <!-- Circuit traces -->
-                        <line x1="40" y1="80" x2="80" y2="80" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
-                        <line x1="80" y1="80" x2="80" y2="120" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
-                        <line x1="80" y1="120" x2="130" y2="120" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
-                        <line x1="40" y1="150" x2="100" y2="150" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
-                        <line x1="100" y1="150" x2="100" y2="200" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
-                        <line x1="100" y1="200" x2="160" y2="200" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
-                        <line x1="140" y1="80" x2="140" y2="140" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
-                        <line x1="140" y1="140" x2="170" y2="140" stroke="${accent}" stroke-width="0.5" opacity="0.3"/>
-                        <!-- Components -->
-                        <rect x="45" y="85" width="20" height="12" rx="2" fill="#2a4a2a" stroke="${accent}" stroke-width="0.8" opacity="0.6"/>
-                        <rect x="75" y="115" width="15" height="10" rx="2" fill="#2a4a2a" stroke="${accent}" stroke-width="0.8" opacity="0.6"/>
-                        <rect x="125" y="115" width="18" height="10" rx="2" fill="#2a4a2a" stroke="${accent}" stroke-width="0.8" opacity="0.6"/>
-                        <!-- Main IC Chip (center) -->
-                        <rect x="80" y="130" width="50" height="40" rx="4" fill="#2a4a2a" stroke="${accent}" stroke-width="1.5" opacity="0.8"/>
-                        <text x="105" y="153" text-anchor="middle" fill="${accent}" font-size="7" font-family="Inter,sans-serif" font-weight="700">IC CHIP</text>
-                        <!-- IC Pins -->
-                        <line x1="80" y1="135" x2="72" y2="135" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <line x1="80" y1="142" x2="72" y2="142" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <line x1="80" y1="149" x2="72" y2="149" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <line x1="80" y1="156" x2="72" y2="156" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <line x1="80" y1="163" x2="72" y2="163" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <line x1="130" y1="135" x2="138" y2="135" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <line x1="130" y1="142" x2="138" y2="142" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <line x1="130" y1="149" x2="138" y2="149" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <line x1="130" y1="156" x2="138" y2="156" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <line x1="130" y1="163" x2="138" y2="163" stroke="${accent}" stroke-width="0.8" opacity="0.5"/>
-                        <!-- Soldering point glow -->
-                        <circle cx="105" cy="150" r="8" fill="${accent}" opacity="0.1">
-                            <animate attributeName="r" values="5;12;5" dur="2s" repeatCount="indefinite"/>
-                            <animate attributeName="opacity" values="0.15;0.05;0.15" dur="2s" repeatCount="indefinite"/>
-                        </circle>
-                        <!-- Soldering iron tip -->
-                        <line x1="105" y1="150" x2="140" y2="100" stroke="#888" stroke-width="1.5" opacity="0.4"/>
-                        <circle cx="140" cy="100" r="3" fill="${accent}" opacity="0.5">
-                            <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1s" repeatCount="indefinite"/>
-                        </circle>
-                        <!-- Status labels -->
-                        <text x="40" y="290" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">🔍 IC de carga → REPARADO</text>
-                        <text x="40" y="310" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">🔧 Condensadores → REEMPLAZADOS</text>
-                        <text x="40" y="330" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">✅ Test de corto → APROBADO</text>
-                        <text x="40" y="350" fill="${accent}" font-size="8" font-family="Inter,sans-serif" font-weight="700">✅ Test final → APROBADO</text>
-                        <!-- Microscope icon -->
-                        <text x="175" y="370" fill="${accent}" font-size="16" opacity="0.4">🔬</text>
-                    </svg>`;
+        /* ============================================
+           GENERAR PARTÍCULAS DE FONDO
+           ============================================ */
+        function createParticles() {
+            const container = document.getElementById('particles');
+            const colors = ['#00d4ff', '#7c3aed', '#f093fb', '#f5576c', '#4facfe'];
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 200 + 50;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDuration = (Math.random() * 20 + 15) + 's';
+                particle.style.animationDelay = (Math.random() * -20) + 's';
+                container.appendChild(particle);
             }
         }
+        createParticles();
 
-        // ============================
-        // SELECT TEMPLATE
-        // ============================
-        function selectTemplate(key, el) {
-            currentTemplate = key;
-            const t = templates[key];
-
-            document.querySelectorAll('.tmpl-card').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-
-            // Update inputs
-            document.getElementById('inpTitle').value = t.title;
-            document.getElementById('inpHighlight').value = t.highlight;
-            document.getElementById('inpDesc').value = t.desc;
-            document.getElementById('inpService').value = t.service;
-            document.getElementById('inpPrice').value = t.price;
-            document.getElementById('inpOldPrice').value = t.oldPrice;
-            document.getElementById('inpDiscount').value = t.discount;
-            document.getElementById('inpClients').value = t.clients;
-            document.getElementById('inpWarranty').value = t.warranty;
-            document.getElementById('inpTime').value = t.time;
-            document.getElementById('inpFeat1').value = t.feat1;
-            document.getElementById('inpFeat2').value = t.feat2;
-            document.getElementById('inpFeat3').value = t.feat3;
-            document.getElementById('inpGuarantee').value = t.guarantee;
-            document.getElementById('inpGuaranteeSub').value = t.guaranteeSub;
-
-            updatePreview();
-            updateMockup();
-        }
-
-        // ============================
-        // UPDATE MOCKUP
-        // ============================
-        function updateMockup() {
-            const t = templates[currentTemplate];
-            document.getElementById('phoneDisplay').innerHTML = getMockupSVG(t.phone);
-            document.getElementById('priceIconI').className = `fas ${t.icon}`;
-        }
-
-        // ============================
-        // UPDATE PREVIEW
-        // ============================
-        function updatePreview() {
-            const t = templates[currentTemplate];
-            bind('inpBrand','adBrand');
-            bind('inpBrandSub','adBrandSub');
-            bind('inpTitle','adTitle');
-            bind('inpHighlight','adHighlight');
-            bind('inpDesc','adDesc');
-            bind('inpService','adService');
-            bind('inpPrice','adPrice');
-            bind('inpOldPrice','adOldPrice');
-            bind('inpDiscount','adDiscount');
-            bind('inpClients','adClients');
-            bind('inpWarranty','adWarranty');
-            bind('inpTime','adTime');
-            bind('inpFeat1','adFeat1');
-            bind('inpFeat2','adFeat2');
-            bind('inpFeat3','adFeat3');
-            bind('inpGuarantee','adGuarantee');
-            bind('inpGuaranteeSub','adGuaranteeSub');
-            bind('inpPhone','adPhone');
-            bind('inpPhoneLabel','adPhoneLabel');
-            bind('inpAddress','adAddress');
-            bind('inpSchedule','adSchedule');
-            bind('inpCta','adCta');
-            bind('inpCtaSub','adCtaSub');
-        }
-
-        function bind(inpId, adId) {
-            const inp = document.getElementById(inpId);
-            const ad = document.getElementById(adId);
-            if (!inp || !ad) return;
-            inp.addEventListener('input', () => { ad.textContent = inp.value; });
-            ad.textContent = inp.value;
-        }
-
-        // ============================
-        // LOGO
-        // ============================
-        function handleLogo(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('logoPreview');
-                const area = document.getElementById('logoArea');
-                preview.src = e.target.result;
-                area.classList.add('has-logo');
-                document.getElementById('adLogoBox').innerHTML = `<img src="${e.target.result}" alt="Logo">`;
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // ============================
-        // ACCENT COLOR
-        // ============================
-        function setAccent(color, el) {
-            currentAccent = color;
-            document.querySelectorAll('.color-dot').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-            document.documentElement.style.setProperty('--accent', color);
-            document.documentElement.style.setProperty('--accent-glow', hexToRgba(color, 0.3));
-            document.documentElement.style.setProperty('--accent-soft', hexToRgba(color, 0.08));
-            updateMockup();
-        }
-
-        function hexToRgba(hex, a) {
-            const r = parseInt(hex.slice(1,3),16);
-            const g = parseInt(hex.slice(3,5),16);
-            const b = parseInt(hex.slice(5,7),16);
-            return `rgba(${r},${g},${b},${a})`;
-        }
-
-        // ============================
-        // TOGGLE
-        // ============================
-        function toggleEl(el, targetId) {
-            el.classList.toggle('active');
-            const target = document.getElementById(targetId);
-            if (target) {
-                target.style.display = el.classList.contains('active') ? 'flex' : 'none';
-            }
-        }
-
-        // ============================
-        // SHUFFLE LAYOUT
-        // ============================
-        function shuffleLayout() {
-            shuffleCount++;
-            const content = document.getElementById('adContent');
-            const btn = document.getElementById('btnShuffle');
-
-            // Button animation
-            btn.classList.add('spinning');
-            setTimeout(() => btn.classList.remove('spinning'), 600);
-
-            // Remove old layout classes
-            content.classList.remove(
-                'layout-stats-top', 'layout-features-grid', 'layout-title-center',
-                'layout-stats-2col', 'layout-big-price', 'layout-contact-minimal',
-                'layout-features-row'
-            );
-
-            // Randomly pick 2-4 layout modifiers
-            const layouts = [
-                'layout-stats-top',
-                'layout-features-grid',
-                'layout-title-center',
-                'layout-stats-2col',
-                'layout-big-price',
-                'layout-contact-minimal',
-                'layout-features-row'
+        /* ============================================
+           GENERAR FORMAS GEOMÉTRICAS EN EL CANVAS
+           ============================================ */
+        function generateGeometricShapes() {
+            const container = document.getElementById('geometricShapes');
+            container.innerHTML = '';
+            const shapes = [
+                { type: 'circle', w: 300, h: 300, x: -50, y: -80, border: true },
+                { type: 'circle', w: 200, h: 200, x: 850, y: 1400, border: true },
+                { type: 'rect', w: 250, h: 250, x: 750, y: 200, rotate: 45 },
+                { type: 'rect', w: 150, h: 150, x: 50, y: 800, rotate: 30 },
+                { type: 'circle', w: 120, h: 120, x: 900, y: 900, border: false },
+                { type: 'rect', w: 180, h: 180, x: 400, y: 1600, rotate: 60, border: true },
             ];
 
-            const numLayouts = 2 + Math.floor(Math.random() * 3); // 2 to 4
-            const shuffled = layouts.sort(() => 0.5 - Math.random());
-            const selected = shuffled.slice(0, numLayouts);
+            const accentColor = document.getElementById('colorAccent').value;
 
-            // Apply layout classes
-            selected.forEach(l => content.classList.add(l));
+            shapes.forEach((s, i) => {
+                const el = document.createElement('div');
+                el.className = 'ad-geometric';
+                el.style.width = s.w + 'px';
+                el.style.height = s.h + 'px';
+                el.style.left = s.x + 'px';
+                el.style.top = s.y + 'px';
 
-            // Random font size variations for title
-            const titleEl = document.getElementById('adTitle');
-            const titleSizes = [28, 30, 32, 34, 36, 38, 40];
-            const randomSize = titleSizes[Math.floor(Math.random() * titleSizes.length)];
-            titleEl.style.fontSize = randomSize + 'px';
+                if (s.rotate) el.style.transform = `rotate(${s.rotate}deg)`;
 
-            // Random phone frame rotation
-            const phoneFrame = document.querySelector('.phone-frame');
-            const rotX = (Math.random() * 10 - 5).toFixed(1);
-            const rotY = (Math.random() * 16 - 8).toFixed(1);
-            const scale = (0.9 + Math.random() * 0.2).toFixed(2);
-            phoneFrame.style.setProperty('--rotX', rotX + 'deg');
-            phoneFrame.style.setProperty('--rotY', rotY + 'deg');
-            phoneFrame.style.setProperty('--scale', scale);
-            phoneFrame.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg) scale(${scale})`;
+                if (s.type === 'circle') {
+                    el.style.borderRadius = '50%';
+                    if (s.border) {
+                        el.style.border = `2px solid ${accentColor}`;
+                    } else {
+                        el.style.background = accentColor;
+                    }
+                } else {
+                    if (s.border) {
+                        el.style.border = `2px solid ${accentColor}`;
+                    } else {
+                        el.style.background = accentColor;
+                    }
+                }
 
-            // Random stats sizes
-            const statVals = document.querySelectorAll('.s-val');
-            statVals.forEach(sv => {
-                const sizes = [14, 15, 16, 17, 18, 19, 20];
-                sv.style.fontSize = sizes[Math.floor(Math.random() * sizes.length)] + 'px';
+                container.appendChild(el);
             });
+        }
+        generateGeometricShapes();
 
-            // Random border radius for cards
-            const cards = document.querySelectorAll('.price-card, .stat-box, .phone-number-section');
-            cards.forEach(card => {
-                const radii = [10, 12, 14, 16, 18];
-                card.style.borderRadius = radii[Math.floor(Math.random() * radii.length)] + 'px';
-            });
-
-            // Random padding for price card
-            const priceCard = document.querySelector('.price-card');
-            const pads = [12, 14, 16, 18, 20];
-            priceCard.style.padding = pads[Math.floor(Math.random() * pads.length)] + 'px';
-
-            // Random accent opacity for features
-            const feats = document.querySelectorAll('.feat-item');
-            feats.forEach(f => {
-                const borders = [2, 3, 4, 5];
-                f.style.borderLeftWidth = borders[Math.floor(Math.random() * borders.length)] + 'px';
-            });
-
-            // Shuffle background elements
-            const bgElements = document.querySelectorAll('.bg-geo, .particle');
-            bgElements.forEach(bg => {
-                const opacity = (0.3 + Math.random() * 0.5).toFixed(2);
-                bg.style.opacity = opacity;
-            });
-
-            // Trigger re-animation
-            content.classList.add('shuffle-transition');
-            setTimeout(() => content.classList.remove('shuffle-transition'), 800);
+        /* ============================================
+           ESCALAR CANVAS PARA VISTA PREVIA
+           ============================================ */
+        function scaleCanvas() {
+            const canvas = document.getElementById('adCanvas');
+            const frame = document.getElementById('canvasFrame');
+            const frameWidth = frame.offsetWidth;
+            const scale = frameWidth / 1080;
+            canvas.style.transform = `scale(${scale})`;
+            canvas.style.transformOrigin = 'top left';
         }
 
-        // ============================
-        // RESET
-        // ============================
-        function resetAll() {
-            selectTemplate('pantalla', document.querySelector('.tmpl-card'));
-            document.getElementById('inpBrand').value = 'CELLFIX PRO';
-            document.getElementById('inpBrandSub').value = 'Reparación Express';
-            document.getElementById('inpPhone').value = '+52 55 1234 5678';
-            document.getElementById('inpPhoneLabel').value = 'Llamadas y WhatsApp';
-            document.getElementById('inpAddress').value = 'Av. Reforma #456, CDMX';
-            document.getElementById('inpSchedule').value = 'Lun-Sáb 9AM - 8PM';
-            document.getElementById('inpCta').value = 'AGENDAR POR WHATSAPP';
-            document.getElementById('inpCtaSub').value = 'Respuesta inmediata • Sin compromiso';
+        window.addEventListener('resize', scaleCanvas);
+        setTimeout(scaleCanvas, 100);
 
-            // Reset logo
-            document.getElementById('logoArea').classList.remove('has-logo');
-            document.getElementById('logoPreview').src = '';
-            document.getElementById('adLogoBox').innerHTML = '<i class="fas fa-screwdriver-wrench"></i>';
+        /* ============================================
+           ACTUALIZAR CANVAS EN TIEMPO REAL
+           ============================================ */
+        function updateCanvas() {
+            const brandName = document.getElementById('brandName').value || 'Tu Negocio';
+            const title = document.getElementById('adTitle').value || 'Reparación de Celulares';
+            const subtitle = document.getElementById('adSubtitle').value || 'Servicio profesional';
+            const servicesText = document.getElementById('adServices').value;
+            const price = document.getElementById('adPrice').value;
+            const cta = document.getElementById('adCTA').value || 'Contáctanos';
+            const phone = document.getElementById('adPhone').value;
 
-            // Reset accent
-            setAccent('#F3BA2F', document.querySelector('.color-dot'));
+            document.getElementById('adBrandDisplay').textContent = brandName;
+            document.getElementById('adTitleDisplay').textContent = title;
+            document.getElementById('adSubtitleDisplay').textContent = subtitle;
+            document.getElementById('adCTADisplay').textContent = cta;
 
-            // Reset layout classes
-            const content = document.getElementById('adContent');
-            content.classList.remove(
-                'layout-stats-top', 'layout-features-grid', 'layout-title-center',
-                'layout-stats-2col', 'layout-big-price', 'layout-contact-minimal',
-                'layout-features-row'
-            );
+            // Servicios
+            const servicesContainer = document.getElementById('adServicesContainer');
+            servicesContainer.innerHTML = '';
 
-            // Reset inline styles
-            document.getElementById('adTitle').style.fontSize = '';
-            document.querySelectorAll('.s-val').forEach(sv => sv.style.fontSize = '');
-            document.querySelectorAll('.price-card, .stat-box, .phone-number-section').forEach(c => c.style.borderRadius = '');
-            document.querySelector('.phone-frame').style.transform = '';
+            const services = servicesText.split('\n').filter(s => s.trim() !== '');
+            const accentColor = document.getElementById('colorAccent').value;
+            const accentColor2 = document.getElementById('colorAccent2').value;
+            const textColor = document.getElementById('colorText').value;
 
-            updatePreview();
-            updateMockup();
+            services.forEach((service, index) => {
+                const trimmed = service.trim();
+                const iconData = getServiceIcon(trimmed);
+                const gradient = index % 2 === 0
+                    ? `linear-gradient(135deg, ${accentColor}, ${accentColor2})`
+                    : `linear-gradient(135deg, ${accentColor2}, ${accentColor})`;
+
+                const item = document.createElement('div');
+                item.className = 'ad-service-item';
+                item.innerHTML = `
+                    <div class="ad-service-icon" style="background: ${gradient}; color: #ffffff;">
+                        <i class="fas ${iconData.icon}"></i>
+                    </div>
+                    <div class="ad-service-text">
+                        <div class="ad-service-name" style="color: ${textColor};">${trimmed}</div>
+                        <div class="ad-service-desc" style="color: ${textColor};">Servicio profesional con garantía</div>
+                    </div>
+                    ${price ? `<div class="ad-price-tag" style="color: ${accentColor};">${price}</div>` : ''}
+                `;
+                servicesContainer.appendChild(item);
+            });
+
+            // Contacto
+            document.getElementById('adContactInfo').innerHTML = phone
+                ? `<i class="fas fa-phone"></i> ${phone}`
+                : '';
         }
 
-        // ============================
-        // DOWNLOAD
-        // ============================
-        async function downloadAd() {
-            const btn = event.currentTarget;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
-            btn.style.pointerEvents = 'none';
+        /* ============================================
+           ACTUALIZAR COLORES
+           ============================================ */
+        function updateColors() {
+            const bg = document.getElementById('colorBg').value;
+            const accent = document.getElementById('colorAccent').value;
+            const text = document.getElementById('colorText').value;
+            const accent2 = document.getElementById('colorAccent2').value;
 
-            const container = document.getElementById('adContainer');
-            const savedTransform = container.style.transform;
-            const savedW = container.style.width;
-            const savedH = container.style.height;
-            const savedR = container.style.borderRadius;
+            // Actualizar hex labels
+            document.getElementById('colorBgHex').textContent = bg;
+            document.getElementById('colorAccentHex').textContent = accent;
+            document.getElementById('colorTextHex').textContent = text;
+            document.getElementById('colorAccent2Hex').textContent = accent2;
 
-            container.style.transform = 'none';
-            container.style.width = '1080px';
-            container.style.height = '1920px';
-            container.style.borderRadius = '0';
+            // Aplicar colores al canvas
+            const canvas = document.getElementById('adCanvas');
+
+            // Fondo con degradado sutil
+            const bgLayer = document.getElementById('adBgLayer');
+            bgLayer.style.background = `linear-gradient(135deg, ${bg}, ${adjustColor(bg, 15)})`;
+
+            // Textos
+            document.getElementById('adBrandDisplay').style.color = text;
+            document.getElementById('adTitleDisplay').style.color = text;
+            document.getElementById('adSubtitleDisplay').style.color = text;
+
+            // Divider
+            document.getElementById('adDivider').style.background = `linear-gradient(90deg, ${accent}, ${accent2})`;
+
+            // CTA Button
+            document.getElementById('adCtaButton').style.background = `linear-gradient(135deg, ${accent}, ${accent2})`;
+            document.getElementById('adCtaButton').style.color = getContrastColor(accent);
+
+            // Contact info
+            document.getElementById('adContactInfo').style.color = text;
+
+            // Logo icon
+            document.getElementById('adLogoIcon').style.background = `linear-gradient(135deg, ${accent}, ${accent2})`;
+
+            // Formas geométricas
+            generateGeometricShapes();
+
+            // Re-renderizar servicios con nuevos colores
+            updateCanvas();
+
+            // Grid opacity
+            const gridVal = document.getElementById('gridOpacity').value;
+            document.getElementById('adGridPattern').style.backgroundImage = `
+                linear-gradient(rgba(255,255,255,${gridVal/100}) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,${gridVal/100}) 1px, transparent 1px)
+            `;
+        }
+
+        /* ============================================
+           ACTUALIZAR ESTILOS (SLIDERS)
+           ============================================ */
+        function updateStyles() {
+            const radius = document.getElementById('borderRadius').value;
+            const shadow = document.getElementById('shadowIntensity').value;
+            const opacity = document.getElementById('serviceOpacity').value;
+            const titleSize = document.getElementById('titleSize').value;
+            const geoOpacity = document.getElementById('geoOpacity').value;
+            const gridOpacity = document.getElementById('gridOpacity').value;
+
+            document.getElementById('radiusValue').textContent = radius + 'px';
+            document.getElementById('shadowValue').textContent = shadow;
+            document.getElementById('opacityValue').textContent = (opacity / 100).toFixed(2);
+            document.getElementById('titleSizeValue').textContent = (titleSize / 10).toFixed(1) + 'rem';
+            document.getElementById('geoOpacityValue').textContent = (geoOpacity / 100).toFixed(2);
+            document.getElementById('gridOpacityValue').textContent = (gridOpacity / 100).toFixed(2);
+
+            // Aplicar a servicios
+            const serviceItems = document.querySelectorAll('.ad-service-item');
+            serviceItems.forEach(item => {
+                item.style.opacity = opacity / 100;
+                item.style.borderRadius = radius + 'px';
+            });
+
+            // Título
+            document.getElementById('adTitleDisplay').style.fontSize = (titleSize / 10) + 'rem';
+
+            // Formas geométricas
+            const geos = document.querySelectorAll('.ad-geometric');
+            geos.forEach(g => g.style.opacity = geoOpacity / 100);
+
+            // Grid
+            const gridVal = document.getElementById('gridOpacity').value;
+            document.getElementById('adGridPattern').style.backgroundImage = `
+                linear-gradient(rgba(255,255,255,${gridVal/100}) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,${gridVal/100}) 1px, transparent 1px)
+            `;
+
+            // Sombra del frame
+            document.getElementById('canvasFrame').style.boxShadow = `
+                0 ${shadow}px ${shadow * 3}px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.1)
+            `;
+        }
+
+        /* ============================================
+           CAMBIAR PLANTILLA
+           ============================================ */
+        function setTemplate(template) {
+            const canvas = document.getElementById('adCanvas');
+
+            // Remover clases previas
+            canvas.classList.remove('template-minimalist', 'template-gaming', 'template-corporate', 'template-dynamic');
+            canvas.classList.add(`template-${template}`);
+
+            // Actualizar botones activos
+            document.querySelectorAll('.template-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.template === template);
+            });
+
+            // Configurar colores según plantilla
+            const presets = {
+                minimalist: {
+                    bg: '#ffffff', accent: '#2563eb', text: '#1a1a2e', accent2: '#3b82f6',
+                    logoIcon: 'fa-mobile-screen-button'
+                },
+                gaming: {
+                    bg: '#0a0a1a', accent: '#00d4ff', text: '#ffffff', accent2: '#7c3aed',
+                    logoIcon: 'fa-screwdriver-wrench'
+                },
+                corporate: {
+                    bg: '#1e293b', accent: '#3b82f6', text: '#f1f5f9', accent2: '#6366f1',
+                    logoIcon: 'fa-building'
+                },
+                dynamic: {
+                    bg: '#0f172a', accent: '#f59e0b', text: '#ffffff', accent2: '#ef4444',
+                    logoIcon: 'fa-bolt'
+                }
+            };
+
+            const p = presets[template];
+            document.getElementById('colorBg').value = p.bg;
+            document.getElementById('colorAccent').value = p.accent;
+            document.getElementById('colorText').value = p.text;
+            document.getElementById('colorAccent2').value = p.accent2;
+
+            // Actualizar logo icon
+            document.querySelector('#adLogoIcon i').className = `fas ${p.logoIcon}`;
+
+            updateColors();
+            showToast(`Plantilla "${template.charAt(0).toUpperCase() + template.slice(1)}" aplicada`);
+        }
+
+        /* ============================================
+           PRESETS RÁPIDOS
+           ============================================ */
+        function applyPreset(preset) {
+            const presets = {
+                dark: { bg: '#0a0a0f', accent: '#6366f1', text: '#e2e8f0', accent2: '#8b5cf6' },
+                tech: { bg: '#0c1929', accent: '#00d4ff', text: '#ffffff', accent2: '#0ea5e9' },
+                offer: { bg: '#1a0a0a', accent: '#ef4444', text: '#ffffff', accent2: '#f97316' },
+                elegant: { bg: '#1a1a2e', accent: '#d4af37', text: '#ffffff', accent2: '#c9a227' }
+            };
+
+            const p = presets[preset];
+            document.getElementById('colorBg').value = p.bg;
+            document.getElementById('colorAccent').value = p.accent;
+            document.getElementById('colorText').value = p.text;
+            document.getElementById('colorAccent2').value = p.accent2;
+
+            updateColors();
+            showToast(`Preset "${preset}" aplicado`);
+        }
+
+        /* ============================================
+           BOTÓN MAGIC (ALEATORIO)
+           ============================================ */
+        function magicButton() {
+            const templates = ['minimalist', 'gaming', 'corporate', 'dynamic'];
+            const randomTemplate = templates[Math.floor(Math.random() * templates.length)];
+
+            // Colores aleatorios
+            const randomColor = () => '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
+            const randomDarkColor = () => {
+                const h = Math.floor(Math.random() * 360);
+                return `hsl(${h}, 30%, 8%)`;
+            };
+
+            const palettes = [
+                { bg: '#0a0a1a', accent: '#00d4ff', accent2: '#7c3aed', text: '#ffffff' },
+                { bg: '#1a0a2e', accent: '#f093fb', accent2: '#f5576c', text: '#ffffff' },
+                { bg: '#0a1a0a', accent: '#22c55e', accent2: '#10b981', text: '#ffffff' },
+                { bg: '#1a0a0a', accent: '#ef4444', accent2: '#f97316', text: '#ffffff' },
+                { bg: '#0f172a', accent: '#f59e0b', accent2: '#eab308', text: '#ffffff' },
+                { bg: '#1e1b4b', accent: '#818cf8', accent2: '#c084fc', text: '#ffffff' },
+                { bg: '#0c0a09', accent: '#d4a574', accent2: '#c9a227', text: '#f5f5f4' },
+                { bg: '#ffffff', accent: '#2563eb', accent2: '#7c3aed', text: '#0f172a' },
+                { bg: '#fafafa', accent: '#059669', accent2: '#0891b2', text: '#1a1a2e' },
+                { bg: '#0a0a0f', accent: '#a78bfa', accent2: '#60a5fa', text: '#e2e8f0' },
+            ];
+
+            const palette = palettes[Math.floor(Math.random() * palettes.length)];
+
+            // Aplicar
+            document.getElementById('colorBg').value = palette.bg.startsWith('#') ? palette.bg : hslToHex(palette.bg);
+            document.getElementById('colorAccent').value = palette.accent.startsWith('#') ? palette.accent : hslToHex(palette.accent);
+            document.getElementById('colorText').value = palette.text.startsWith('#') ? palette.text : hslToHex(palette.text);
+            document.getElementById('colorAccent2').value = palette.accent2.startsWith('#') ? palette.accent2 : hslToHex(palette.accent2);
+
+            setTemplate(randomTemplate);
+
+            // Variar sliders aleatoriamente
+            document.getElementById('borderRadius').value = Math.floor(Math.random() * 30) + 5;
+            document.getElementById('shadowIntensity').value = Math.floor(Math.random() * 20) + 5;
+            document.getElementById('geoOpacity').value = Math.floor(Math.random() * 30) + 5;
+
+            updateColors();
+            updateStyles();
+
+            showToast('✨ ¡Combinación mágica generada!');
+        }
+
+        function hslToHex(hsl) {
+            // Simple fallback - if it's already hex, return it
+            if (hsl.startsWith('#')) return hsl;
+            return '#0a0a1a'; // fallback
+        }
+
+        /* ============================================
+           EXPORTAR COMO IMAGEN
+           ============================================ */
+        async function exportImage() {
+            const loading = document.getElementById('loadingOverlay');
+            loading.classList.add('active');
 
             try {
-                const canvas = await html2canvas(container, {
-                    scale: 1, width: 1080, height: 1920,
-                    useCORS: true, backgroundColor: '#0B0E11', logging: false,
+                const canvas = document.getElementById('adCanvas');
+
+                // Temporarily remove transform for full-size capture
+                const originalTransform = canvas.style.transform;
+                canvas.style.transform = 'none';
+
+                const result = await html2canvas(canvas, {
+                    width: 1080,
+                    height: 1920,
+                    scale: 1,
+                    useCORS: true,
+                    backgroundColor: null,
+                    logging: false,
+                    allowTaint: true
                 });
 
+                // Restore transform
+                canvas.style.transform = originalTransform;
+
+                // Download
                 const link = document.createElement('a');
-                link.download = `cellfix-${currentTemplate}-${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png', 1.0);
+                link.download = `whatsapp-ad-${Date.now()}.png`;
+                link.href = result.toDataURL('image/png');
                 link.click();
-                showToast();
-            } catch(err) {
-                console.error(err);
-                alert('Error al generar la imagen.');
+
+                showToast('✅ Imagen exportada correctamente');
+            } catch (error) {
+                console.error('Error exporting:', error);
+                showToast('❌ Error al exportar. Intenta de nuevo.');
             } finally {
-                container.style.transform = savedTransform;
-                container.style.width = savedW || '540px';
-                container.style.height = savedH || '960px';
-                container.style.borderRadius = savedR || '16px';
-                btn.innerHTML = '<i class="fas fa-download"></i> PNG';
-                btn.style.pointerEvents = 'auto';
+                loading.classList.remove('active');
             }
         }
 
-        function showToast() {
+        /* ============================================
+           RESET
+           ============================================ */
+        function resetAll() {
+            document.getElementById('brandName').value = 'TechFix Pro';
+            document.getElementById('adTitle').value = 'Reparación Profesional de Celulares';
+            document.getElementById('adSubtitle').value = 'Servicio rápido, garantizado y al mejor precio';
+            document.getElementById('adServices').value = 'Cambio de Pantalla\nReemplazo de Batería\nMantenimiento Preventivo\nReparación de Software\nDiagnóstico Gratis';
+            document.getElementById('adPrice').value = 'Desde $29.99';
+            document.getElementById('adCTA').value = '¡Agenda Tu Cita Ahora!';
+            document.getElementById('adPhone').value = '+1 (555) 123-4567';
+
+            document.getElementById('colorBg').value = '#0a0a1a';
+            document.getElementById('colorAccent').value = '#00d4ff';
+            document.getElementById('colorText').value = '#ffffff';
+            document.getElementById('colorAccent2').value = '#7c3aed';
+
+            document.getElementById('borderRadius').value = 16;
+            document.getElementById('shadowIntensity').value = 8;
+            document.getElementById('serviceOpacity').value = 85;
+            document.getElementById('titleSize').value = 32;
+            document.getElementById('geoOpacity').value = 15;
+            document.getElementById('gridOpacity').value = 3;
+
+            setTemplate('gaming');
+            updateColors();
+            updateStyles();
+            updateCanvas();
+
+            showToast('🔄 Todo reseteado');
+        }
+
+        /* ============================================
+           TOGGLE SIDEBAR (MOBILE)
+           ============================================ */
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        /* ============================================
+           TOAST NOTIFICATION
+           ============================================ */
+        function showToast(message) {
             const toast = document.getElementById('toast');
+            toast.textContent = message;
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
 
-        // ============================
-        // SCALE
-        // ============================
-        function adjustScale() {
-            const ws = document.querySelector('.workspace');
-            const c = document.getElementById('adContainer');
-            const s = Math.min((ws.clientWidth - 50) / 540, (ws.clientHeight - 50) / 960, 1);
-            c.style.transform = `scale(${s})`;
+        /* ============================================
+           UTILIDADES DE COLOR
+           ============================================ */
+        function adjustColor(hex, amount) {
+            hex = hex.replace('#', '');
+            const num = parseInt(hex, 16);
+            let r = Math.min(255, ((num >> 16) & 0xff) + amount);
+            let g = Math.min(255, ((num >> 8) & 0xff) + amount);
+            let b = Math.min(255, (num & 0xff) + amount);
+            return `rgb(${r},${g},${b})`;
         }
 
-        // ============================
-        // INIT
-        // ============================
-        document.addEventListener('DOMContentLoaded', () => {
-            updatePreview();
-            updateMockup();
-            adjustScale();
-            window.addEventListener('resize', adjustScale);
+        function getContrastColor(hex) {
+            hex = hex.replace('#', '');
+            const r = parseInt(hex.substr(0, 2), 16);
+            const g = parseInt(hex.substr(2, 2), 16);
+            const b = parseInt(hex.substr(4, 2), 16);
+            const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return luminance > 0.5 ? '#000000' : '#ffffff';
+        }
 
-            ['inpBrand','inpBrandSub','inpTitle','inpHighlight','inpDesc',
-             'inpService','inpPrice','inpOldPrice','inpDiscount',
-             'inpPhone','inpPhoneLabel','inpAddress','inpSchedule',
-             'inpClients','inpWarranty','inpTime',
-             'inpFeat1','inpFeat2','inpFeat3',
-             'inpGuarantee','inpGuaranteeSub','inpCta','inpCtaSub'
-            ].forEach(id => {
-                const inp = document.getElementById(id);
-                if (inp) inp.addEventListener('input', updatePreview);
-            });
+        /* ============================================
+           INICIALIZACIÓN
+           ============================================ */
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCanvas();
+            updateColors();
+            updateStyles();
         });
     </script>
-
 </body>
 </html>
