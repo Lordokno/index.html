@@ -204,7 +204,7 @@
 
   <!-- MODAL DE VISTA PREVIA DE PRODUCTO -->
   <div id="product-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden relative border dark:border-gray-700 max-h-[90vh] overflow-y-auto">
+    <div id="product-modal-content" class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden relative border dark:border-gray-700 max-h-[90vh] overflow-y-auto">
       <button id="close-product-modal-btn" class="absolute top-3 right-3 bg-white/90 dark:bg-gray-900/90 rounded-full w-9 h-9 flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white z-10 shadow">
         <i class="fa-solid fa-xmark"></i>
       </button>
@@ -214,6 +214,12 @@
         <h2 id="modal-title" class="text-2xl font-bold text-gray-900 dark:text-white mt-2"></h2>
         <p id="modal-price" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2"></p>
         <div id="modal-attributes" class="mt-4 space-y-3"></div>
+        <div id="modal-similar-wrap" class="hidden mt-6 pt-6 border-t dark:border-gray-700">
+          <p class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+            <i class="fa-solid fa-shapes text-indigo-500"></i> Productos similares
+          </p>
+          <div id="modal-similar" class="grid grid-cols-3 gap-3"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -323,6 +329,8 @@
     const modalTitle = document.getElementById('modal-title');
     const modalPrice = document.getElementById('modal-price');
     const modalAttributes = document.getElementById('modal-attributes');
+    const modalSimilarWrap = document.getElementById('modal-similar-wrap');
+    const modalSimilar = document.getElementById('modal-similar');
 
     // MODO CLARO / OSCURO
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -576,13 +584,15 @@
       filterTallasWrap.classList.toggle('hidden', tallas.length === 0);
       filterColoresWrap.classList.toggle('hidden', colores.length === 0);
 
-      filterTallasContainer.innerHTML = tallas.map(t => `
-        <button type="button" data-value="${t.value.toLowerCase()}" class="talla-filter-btn px-3 py-1 rounded-full text-xs font-medium border transition ${selectedTallas.has(t.value.toLowerCase()) ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-indigo-400'}">${t.value}</button>
-      `).join('');
+      filterTallasContainer.innerHTML = tallas.map(t => {
+        const active = selectedTallas.has(t.value.toLowerCase());
+        return `<button type="button" data-value="${t.value.toLowerCase()}" class="talla-filter-btn min-w-[2.75rem] h-9 px-2 flex items-center justify-center rounded-lg border text-sm font-semibold transition ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-indigo-400'}">${t.value}</button>`;
+      }).join('');
 
-      filterColoresContainer.innerHTML = colores.map(c => `
-        <button type="button" data-value="${c.value.toLowerCase()}" title="${c.value}" class="color-filter-btn w-7 h-7 rounded-full border-2 transition ${selectedColores.has(c.value.toLowerCase()) ? 'border-indigo-600 ring-2 ring-indigo-300 dark:ring-indigo-800' : 'border-gray-300 dark:border-gray-700'}" style="background-color:${c.hex || '#ccc'}"></button>
-      `).join('');
+      filterColoresContainer.innerHTML = colores.map(c => {
+        const active = selectedColores.has(c.value.toLowerCase());
+        return `<button type="button" data-value="${c.value.toLowerCase()}" title="${c.value}" class="color-filter-btn relative w-8 h-8 rounded-full border-2 flex items-center justify-center transition ${active ? 'border-indigo-600 ring-2 ring-indigo-300 dark:ring-indigo-800' : 'border-gray-300 dark:border-gray-700 hover:border-indigo-400'}" style="background-color:${c.hex || '#ccc'}">${active ? '<i class="fa-solid fa-check text-white text-xs" style="text-shadow:0 0 2px rgba(0,0,0,.6)"></i>' : ''}</button>`;
+      }).join('');
 
       document.querySelectorAll('.talla-filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -648,9 +658,56 @@
       }
       modalAttributes.innerHTML = html;
 
+      // Productos similares: prioriza misma categoría y coincidencia de talla/color
+      const similar = getSimilarProducts(prod);
+      if (similar.length > 0) {
+        modalSimilarWrap.classList.remove('hidden');
+        modalSimilar.innerHTML = similar.map(p => `
+          <div class="similar-card cursor-pointer group" data-id="${p.id}">
+            <div class="rounded-lg overflow-hidden border dark:border-gray-700 bg-gray-100 dark:bg-gray-900">
+              <img src="${p.image}" alt="${p.title}" class="w-full h-20 sm:h-24 object-cover group-hover:opacity-80 transition">
+            </div>
+            <p class="text-xs font-medium text-gray-700 dark:text-gray-300 mt-1 truncate">${p.title}</p>
+            <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400">$${parseFloat(p.price).toFixed(2)}</p>
+          </div>
+        `).join('');
+        document.querySelectorAll('.similar-card').forEach(card => {
+          card.addEventListener('click', () => openProductModal(card.dataset.id));
+        });
+      } else {
+        modalSimilarWrap.classList.add('hidden');
+        modalSimilar.innerHTML = '';
+      }
+
       productModal.classList.remove('hidden');
       productModal.classList.add('flex');
+      document.getElementById('product-modal-content').scrollTop = 0;
     };
+
+    // Calcula productos similares: mismo categoria y/o coincidencia de talla/color
+    function getSimilarProducts(prod, limit = 6) {
+      const prodColors = new Set((prod.attributes || []).filter(a => a.type === 'Color').map(a => a.value.toLowerCase()));
+      const prodTallas = new Set((prod.attributes || []).filter(a => a.type === 'Talla').map(a => a.value.toLowerCase()));
+      const prodCategory = prod.category.toLowerCase().trim();
+
+      const scored = allProducts
+        .filter(p => p.id !== prod.id)
+        .map(p => {
+          let score = 0;
+          if (p.category.toLowerCase().trim() === prodCategory) score += 3;
+          const pColors = (p.attributes || []).filter(a => a.type === 'Color').map(a => a.value.toLowerCase());
+          if (pColors.some(c => prodColors.has(c))) score += 1;
+          const pTallas = (p.attributes || []).filter(a => a.type === 'Talla').map(a => a.value.toLowerCase());
+          if (pTallas.some(t => prodTallas.has(t))) score += 1;
+          return { p, score };
+        })
+        .sort((a, b) => b.score - a.score)
+        .filter(x => x.score > 0)
+        .slice(0, limit)
+        .map(x => x.p);
+
+      return scored;
+    }
 
     function closeProductModal() {
       productModal.classList.add('hidden');
