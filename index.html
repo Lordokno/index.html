@@ -144,10 +144,11 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Imagen (Subir desde Galería o Cámara)
+              Imágenes (puedes subir varias desde Galería o Cámara)
             </label>
-            <input type="file" id="prod-file" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-gray-700 dark:file:text-indigo-300">
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">La imagen se comprimirá automáticamente antes de guardarse.</p>
+            <input type="file" id="prod-file" accept="image/*" multiple class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-gray-700 dark:file:text-indigo-300">
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Cada imagen se comprimirá automáticamente. La primera será la imagen principal en el catálogo.</p>
+            <div id="img-previews" class="flex flex-wrap gap-2 mt-2"></div>
           </div>
 
           <!-- Características (Tallas, Colores, etc.) -->
@@ -209,10 +210,20 @@
         <i class="fa-solid fa-xmark"></i>
       </button>
       <img id="modal-image" src="" alt="" class="w-full h-72 sm:h-80 object-cover bg-gray-100 dark:bg-gray-900">
+      <button id="modal-img-prev" class="hidden absolute left-3 top-32 sm:top-36 -translate-y-1/2 bg-white/90 dark:bg-gray-900/90 rounded-full w-9 h-9 items-center justify-center text-gray-700 dark:text-gray-200 shadow z-10">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <button id="modal-img-next" class="hidden absolute right-3 top-32 sm:top-36 -translate-y-1/2 bg-white/90 dark:bg-gray-900/90 rounded-full w-9 h-9 items-center justify-center text-gray-700 dark:text-gray-200 shadow z-10">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+      <div id="modal-thumbnails" class="hidden gap-2 px-4 py-3 overflow-x-auto border-b dark:border-gray-700"></div>
       <div class="p-6">
         <span id="modal-category" class="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-semibold px-2 py-1 rounded-md uppercase"></span>
         <h2 id="modal-title" class="text-2xl font-bold text-gray-900 dark:text-white mt-2"></h2>
         <p id="modal-price" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2"></p>
+        <a id="modal-whatsapp-btn" href="#" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe57] text-white font-semibold px-4 py-2.5 rounded-lg transition shadow-sm w-full sm:w-auto justify-center">
+          <i class="fa-brands fa-whatsapp text-lg"></i> Solicitar producto
+        </a>
         <div id="modal-attributes" class="mt-4 space-y-3"></div>
         <div id="modal-similar-wrap" class="hidden mt-6 pt-6 border-t dark:border-gray-700">
           <p class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -273,8 +284,11 @@
     // Estado global
     let allProducts = [];
     let selectedCategory = 'todos';
-    let currentEditImageData = '';
     let formAttributes = []; // características (talla/color/otro) del producto en edición
+    let formImages = []; // imágenes (base64) del producto en edición/creación
+    let modalImages = []; // imágenes del producto abierto en el modal de vista previa
+    let modalImageIndex = 0;
+    const WHATSAPP_NUMBER = '50368401719';
     let selectedTallas = new Set();   // filtro activo de tallas (valores en minúsculas)
     let selectedColores = new Set();  // filtro activo de colores (valores en minúsculas)
     let viewMode = localStorage.getItem('viewMode') || 'grid'; // 'single' | 'grid' | 'list'
@@ -311,6 +325,7 @@
     const attrHexInput = document.getElementById('attr-hex');
     const attrChipsContainer = document.getElementById('attr-chips');
     const addAttrBtn = document.getElementById('add-attr-btn');
+    const imgPreviewsContainer = document.getElementById('img-previews');
 
     // Referencias de filtros y vista (catálogo)
     const filterPriceMin = document.getElementById('filter-price-min');
@@ -325,6 +340,10 @@
     const productModal = document.getElementById('product-modal');
     const closeProductModalBtn = document.getElementById('close-product-modal-btn');
     const modalImage = document.getElementById('modal-image');
+    const modalImgPrev = document.getElementById('modal-img-prev');
+    const modalImgNext = document.getElementById('modal-img-next');
+    const modalThumbnails = document.getElementById('modal-thumbnails');
+    const modalWhatsappBtn = document.getElementById('modal-whatsapp-btn');
     const modalCategory = document.getElementById('modal-category');
     const modalTitle = document.getElementById('modal-title');
     const modalPrice = document.getElementById('modal-price');
@@ -385,6 +404,42 @@
           img.onerror = (err) => reject(err);
         };
         reader.onerror = (err) => reject(err);
+      });
+    }
+
+    // Manejo de selección múltiple de imágenes: comprime cada una al instante y la agrega a la lista
+    prodFileInput.addEventListener('change', async () => {
+      const files = Array.from(prodFileInput.files);
+      if (files.length === 0) return;
+
+      for (const file of files) {
+        try {
+          const compressed = await compressImage(file, 800, 0.7);
+          formImages.push(compressed);
+        } catch (err) {
+          console.error('Error comprimiendo imagen:', err);
+        }
+      }
+      prodFileInput.value = ''; // permite volver a seleccionar los mismos archivos si se desea
+      renderImgPreviews();
+    });
+
+    function renderImgPreviews() {
+      imgPreviewsContainer.innerHTML = formImages.map((img, idx) => `
+        <div class="relative w-16 h-16 rounded-lg overflow-hidden border dark:border-gray-700">
+          <img src="${img}" class="w-full h-full object-cover">
+          <button type="button" data-idx="${idx}" class="remove-img-btn absolute top-0.5 right-0.5 bg-black/60 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          ${idx === 0 ? '<span class="absolute bottom-0 left-0 right-0 bg-indigo-600 text-white text-[9px] text-center py-0.5">Principal</span>' : ''}
+        </div>
+      `).join('');
+
+      document.querySelectorAll('.remove-img-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          formImages.splice(parseInt(btn.dataset.idx), 1);
+          renderImgPreviews();
+        });
       });
     }
 
@@ -636,11 +691,17 @@
       const prod = allProducts.find(p => p.id === id);
       if (!prod) return;
 
-      modalImage.src = prod.image;
+      modalImages = (prod.images && prod.images.length) ? prod.images : (prod.image ? [prod.image] : []);
+      modalImageIndex = 0;
       modalImage.alt = prod.title;
+      updateModalImage();
+
       modalCategory.textContent = prod.category;
       modalTitle.textContent = prod.title;
       modalPrice.textContent = `$${parseFloat(prod.price).toFixed(2)}`;
+
+      const waMessage = encodeURIComponent(`Hola, me interesa este artículo: ${prod.title}`);
+      modalWhatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
 
       const tallas = (prod.attributes || []).filter(a => a.type === 'Talla');
       const colores = (prod.attributes || []).filter(a => a.type === 'Color');
@@ -708,6 +769,43 @@
 
       return scored;
     }
+
+    // Galería de imágenes del modal: muestra la imagen activa y controla flechas/miniaturas
+    function updateModalImage() {
+      if (modalImages.length === 0) return;
+      modalImage.src = modalImages[modalImageIndex];
+      const multiple = modalImages.length > 1;
+
+      modalImgPrev.classList.toggle('hidden', !multiple);
+      modalImgPrev.classList.toggle('flex', multiple);
+      modalImgNext.classList.toggle('hidden', !multiple);
+      modalImgNext.classList.toggle('flex', multiple);
+      modalThumbnails.classList.toggle('hidden', !multiple);
+      modalThumbnails.classList.toggle('flex', multiple);
+
+      if (multiple) {
+        modalThumbnails.innerHTML = modalImages.map((img, idx) => `
+          <button type="button" data-idx="${idx}" class="modal-thumb-btn flex-shrink-0 w-14 h-14 rounded-lg overflow-hidden border-2 transition ${idx === modalImageIndex ? 'border-indigo-600' : 'border-transparent opacity-70 hover:opacity-100'}">
+            <img src="${img}" class="w-full h-full object-cover">
+          </button>
+        `).join('');
+        document.querySelectorAll('.modal-thumb-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            modalImageIndex = parseInt(btn.dataset.idx);
+            updateModalImage();
+          });
+        });
+      }
+    }
+
+    modalImgPrev.addEventListener('click', () => {
+      modalImageIndex = (modalImageIndex - 1 + modalImages.length) % modalImages.length;
+      updateModalImage();
+    });
+    modalImgNext.addEventListener('click', () => {
+      modalImageIndex = (modalImageIndex + 1) % modalImages.length;
+      updateModalImage();
+    });
 
     function closeProductModal() {
       productModal.classList.add('hidden');
@@ -782,11 +880,10 @@
       const title = document.getElementById('prod-title').value;
       const category = document.getElementById('prod-category').value.trim();
       const price = parseFloat(document.getElementById('prod-price').value);
-      const file = prodFileInput.files[0];
       const isEditing = !!editProdId.value;
 
-      if (!isEditing && !file) {
-        alert("Por favor selecciona una imagen o toma una foto.");
+      if (formImages.length === 0) {
+        alert("Por favor selecciona al menos una imagen o toma una foto.");
         return;
       }
 
@@ -795,14 +892,7 @@
       submitBtnText.textContent = isEditing ? "Actualizando..." : "Guardando...";
 
       try {
-        let imageData = currentEditImageData;
-        
-        // Si el usuario seleccionó un nuevo archivo, comprimirlo
-        if (file) {
-          imageData = await compressImage(file, 800, 0.7);
-        }
-
-        const productData = { title, category, price, image: imageData, attributes: formAttributes };
+        const productData = { title, category, price, image: formImages[0], images: formImages, attributes: formAttributes };
 
         if (isEditing) {
           await updateDoc(doc(db, 'productos', editProdId.value), productData);
@@ -824,14 +914,14 @@
     function resetForm() {
       addProductForm.reset();
       editProdId.value = '';
-      currentEditImageData = '';
       formAttributes = [];
       renderAttrChips();
+      formImages = [];
+      renderImgPreviews();
       attrHexInput.classList.add('hidden');
       formTitle.innerHTML = `<i class="fa-solid fa-plus text-indigo-600 dark:text-indigo-400"></i> Agregar Nuevo Artículo`;
       submitBtnText.textContent = "Guardar Artículo";
       cancelEditBtn.classList.add('hidden');
-      prodFileInput.required = true;
     }
 
     // Resumen de características para la tabla de administración
@@ -870,8 +960,9 @@
       document.getElementById('prod-title').value = prod.title;
       document.getElementById('prod-category').value = prod.category;
       document.getElementById('prod-price').value = prod.price;
-      currentEditImageData = prod.image;
-      prodFileInput.required = false; // No es obligatorio subir nueva imagen al editar
+
+      formImages = (prod.images && prod.images.length) ? [...prod.images] : (prod.image ? [prod.image] : []);
+      renderImgPreviews();
 
       formAttributes = prod.attributes ? JSON.parse(JSON.stringify(prod.attributes)) : [];
       renderAttrChips();
