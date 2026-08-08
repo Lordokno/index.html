@@ -221,9 +221,14 @@
         <span id="modal-category" class="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-semibold px-2 py-1 rounded-md uppercase"></span>
         <h2 id="modal-title" class="text-2xl font-bold text-gray-900 dark:text-white mt-2"></h2>
         <p id="modal-price" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2"></p>
-        <a id="modal-whatsapp-btn" href="#" target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe57] text-white font-semibold px-4 py-2.5 rounded-lg transition shadow-sm w-full sm:w-auto justify-center">
-          <i class="fa-brands fa-whatsapp text-lg"></i> Solicitar producto
-        </a>
+        <div class="mt-3 flex flex-col sm:flex-row gap-2">
+          <a id="modal-whatsapp-btn" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe57] text-white font-semibold px-4 py-2.5 rounded-lg transition shadow-sm w-full sm:w-auto justify-center">
+            <i class="fa-brands fa-whatsapp text-lg"></i> Solicitar producto
+          </a>
+          <button id="modal-copy-link-btn" type="button" class="inline-flex items-center gap-2 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 font-semibold px-4 py-2.5 rounded-lg transition shadow-sm w-full sm:w-auto justify-center">
+            <i class="fa-solid fa-link"></i> <span id="modal-copy-link-text">Copiar enlace del producto</span>
+          </button>
+        </div>
         <div id="modal-attributes" class="mt-4 space-y-3"></div>
         <div id="modal-similar-wrap" class="hidden mt-6 pt-6 border-t dark:border-gray-700">
           <p class="text-sm font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -350,6 +355,8 @@
     const modalAttributes = document.getElementById('modal-attributes');
     const modalSimilarWrap = document.getElementById('modal-similar-wrap');
     const modalSimilar = document.getElementById('modal-similar');
+    const modalCopyLinkBtn = document.getElementById('modal-copy-link-btn');
+    const modalCopyLinkText = document.getElementById('modal-copy-link-text');
 
     // MODO CLARO / OSCURO
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -496,6 +503,7 @@
       });
       renderCatalog();
       renderAdminTable();
+      checkPendingProductLink();
     });
 
     // ---------- CARACTERÍSTICAS (TALLA / COLOR / OTRO) ----------
@@ -687,6 +695,16 @@
 
     // ---------- MODAL DE VISTA PREVIA ----------
 
+    // Construye el enlace individual y compartible de un producto.
+    // Al abrirse, este mismo enlace hace que el catálogo abra automáticamente
+    // el modal de ese producto (ver checkProductLinkOnLoad).
+    function getProductLink(id) {
+      const url = new URL(window.location.href);
+      url.hash = '';
+      url.searchParams.set('producto', id);
+      return url.toString();
+    }
+
     window.openProductModal = (id) => {
       const prod = allProducts.find(p => p.id === id);
       if (!prod) return;
@@ -700,8 +718,18 @@
       modalTitle.textContent = prod.title;
       modalPrice.textContent = `$${parseFloat(prod.price).toFixed(2)}`;
 
-      const waMessage = encodeURIComponent(`Hola, me interesa este artículo: ${prod.title}`);
+      // Enlace individual del producto: al abrirlo, el catálogo muestra
+      // automáticamente este mismo producto (con su imagen) en el modal.
+      const productLink = getProductLink(prod.id);
+
+      const waMessage = encodeURIComponent(`Hola, me interesa este artículo: ${prod.title}\n${productLink}`);
       modalWhatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
+
+      // Actualiza la URL del navegador para que se pueda copiar/compartir
+      // directamente desde la barra de direcciones también.
+      const url = new URL(window.location.href);
+      url.searchParams.set('producto', prod.id);
+      history.pushState({ productId: prod.id }, '', url);
 
       const tallas = (prod.attributes || []).filter(a => a.type === 'Talla');
       const colores = (prod.attributes || []).filter(a => a.type === 'Color');
@@ -807,15 +835,71 @@
       updateModalImage();
     });
 
-    function closeProductModal() {
+    function closeProductModal(skipHistory) {
       productModal.classList.add('hidden');
       productModal.classList.remove('flex');
+
+      // Quita el parámetro "producto" de la URL al cerrar el modal.
+      if (!skipHistory) {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has('producto')) {
+          url.searchParams.delete('producto');
+          history.pushState({}, '', url);
+        }
+      }
     }
 
-    closeProductModalBtn.addEventListener('click', closeProductModal);
+    closeProductModalBtn.addEventListener('click', () => closeProductModal());
     productModal.addEventListener('click', (e) => {
       if (e.target === productModal) closeProductModal();
     });
+
+    // Soporta el botón "Atrás" del navegador para abrir/cerrar el modal
+    // según el parámetro "producto" de la URL.
+    window.addEventListener('popstate', () => {
+      const id = new URL(window.location.href).searchParams.get('producto');
+      if (id) {
+        const prod = allProducts.find(p => p.id === id);
+        if (prod) openProductModal(id);
+      } else {
+        closeProductModal(true);
+      }
+    });
+
+    // Copiar enlace individual del producto (para compartir por cualquier medio)
+    modalCopyLinkBtn.addEventListener('click', async () => {
+      const id = new URL(window.location.href).searchParams.get('producto');
+      if (!id) return;
+      const link = getProductLink(id);
+      try {
+        await navigator.clipboard.writeText(link);
+      } catch (err) {
+        // Respaldo por si el navegador bloquea la API del portapapeles
+        const tempInput = document.createElement('textarea');
+        tempInput.value = link;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+      }
+      const original = modalCopyLinkText.textContent;
+      modalCopyLinkText.textContent = '¡Enlace copiado!';
+      setTimeout(() => { modalCopyLinkText.textContent = original; }, 2000);
+    });
+
+    // Si la página se abre con un enlace individual (?producto=ID),
+    // abre automáticamente el modal de ese producto en cuanto los
+    // productos se hayan cargado desde Firestore.
+    let pendingProductId = new URL(window.location.href).searchParams.get('producto');
+    function checkPendingProductLink() {
+      if (pendingProductId) {
+        const prod = allProducts.find(p => p.id === pendingProductId);
+        if (prod) {
+          openProductModal(pendingProductId);
+          pendingProductId = null;
+        }
+      }
+    }
 
     // RENDERIZAR CATÁLOGO
     function renderCatalog() {
