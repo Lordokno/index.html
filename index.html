@@ -1,1416 +1,489 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NETXCOM Ad Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <style>
-        :root {
-            --bg: #0d0d0d;
-            --bg2: #1a1a1a;
-            --bg3: #252525;
-            --blue: #45a9f5;
-            --blue-dark: #2d8dd4;
-            --text: #e0e0e0;
-            --text-light: #b0b0b0;
-            --toolbar-h: 120px;
-            --accent-green: #4caf50;
-            --accent-orange: #ff9800;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* ===== TOP BAR ===== */
-        .top-bar {
-            position: fixed;
-            top: 0; left: 0; right: 0;
-            height: 56px;
-            background: var(--bg2);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 100;
-        }
-
-        .top-bar .logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .top-bar .logo .n-logo {
-            width: 32px; height: 32px;
-            background: var(--blue);
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 1.2rem;
-            color: var(--bg);
-        }
-
-        .top-bar .logo span { color: var(--blue); }
-
-        .top-actions { display: flex; gap: 10px; }
-
-        .btn {
-            padding: 8px 18px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.82rem;
-            font-weight: 600;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-family: inherit;
-        }
-
-        .btn-export {
-            background: var(--blue);
-            color: var(--bg);
-        }
-        .btn-export:hover { background: var(--blue-dark); transform: translateY(-1px); }
-
-        .btn-magic {
-            background: linear-gradient(135deg, #f093fb, #f5576c);
-            color: white;
-        }
-        .btn-magic:hover { transform: translateY(-1px); }
-
-        /* ===== TOOLBAR SCROLLABLE ===== */
-        .toolbar-wrapper {
-            position: fixed;
-            top: 56px;
-            left: 0;
-            right: 0;
-            height: var(--toolbar-h);
-            background: var(--bg2);
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            z-index: 90;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .toolbar-label {
-            padding: 6px 20px 4px;
-            font-size: 0.65rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-light);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .toolbar-label i { color: var(--blue); }
-
-        .toolbar-scroll {
-            flex: 1;
-            overflow-x: auto;
-            overflow-y: hidden;
-            padding: 8px 16px 12px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            scroll-behavior: smooth;
-        }
-
-        .toolbar-scroll::-webkit-scrollbar {
-            height: 4px;
-        }
-        .toolbar-scroll::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.03);
-            border-radius: 2px;
-        }
-        .toolbar-scroll::-webkit-scrollbar-thumb {
-            background: var(--blue);
-            border-radius: 2px;
-        }
-
-        .tool-card {
-            min-width: 90px;
-            height: 80px;
-            background: var(--bg3);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            cursor: pointer;
-            transition: all 0.2s;
-            flex-shrink: 0;
-        }
-
-        .tool-card:hover {
-            border-color: rgba(69, 169, 245, 0.3);
-            background: rgba(69, 169, 245, 0.05);
-        }
-
-        .tool-card.active {
-            border-color: var(--blue);
-            background: rgba(69, 169, 245, 0.1);
-            box-shadow: 0 0 15px rgba(69, 169, 245, 0.15);
-        }
-
-        .tool-card .tool-icon {
-            font-size: 1.6rem;
-            color: var(--blue);
-        }
-
-        .tool-card .tool-label {
-            font-size: 0.6rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-light);
-            text-align: center;
-            line-height: 1.2;
-            max-width: 80px;
-        }
-
-        .tool-card.active .tool-label { color: var(--blue); }
-
-        /* ===== MAIN CONTENT ===== */
-        .main-content {
-            margin-top: calc(var(--toolbar-h) + 56px);
-            display: flex;
-            min-height: calc(100vh - var(--toolbar-h) - 56px);
-        }
-
-        /* ===== EDITOR PANEL ===== */
-        .editor-panel {
-            width: 340px;
-            background: var(--bg2);
-            border-right: 1px solid rgba(255,255,255,0.08);
-            overflow-y: auto;
-            padding: 20px;
-            flex-shrink: 0;
-        }
-
-        .editor-panel::-webkit-scrollbar { width: 4px; }
-        .editor-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-
-        .editor-section {
-            margin-bottom: 20px;
-        }
-
-        .editor-section h3 {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--text-light);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .editor-section h3 i { color: var(--blue); }
-
-        .glass-box {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 12px;
-            padding: 14px;
-        }
-
-        .field { margin-bottom: 12px; }
-        .field:last-child { margin-bottom: 0; }
-
-        .field label {
-            display: block;
-            font-size: 0.72rem;
-            color: var(--text-light);
-            margin-bottom: 5px;
-        }
-
-        .field input[type="text"],
-        .field input[type="number"],
-        .field textarea,
-        .field select {
-            width: 100%;
-            padding: 9px 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: var(--text);
-            font-size: 0.85rem;
-            font-family: inherit;
-            transition: border-color 0.2s;
-        }
-
-        .field input:focus,
-        .field textarea:focus,
-        .field select:focus {
-            outline: none;
-            border-color: var(--blue);
-        }
-
-        .field textarea { resize: vertical; min-height: 60px; }
-
-        .color-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .color-row input[type="color"] {
-            width: 34px;
-            height: 34px;
-            border: 2px solid rgba(255,255,255,0.15);
-            border-radius: 8px;
-            cursor: pointer;
-            background: none;
-            padding: 2px;
-        }
-
-        .color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 1px; }
-        .color-row input[type="color"]::-webkit-color-swatch { border: none; border-radius: 5px; }
-
-        .color-row .color-hex {
-            font-size: 0.78rem;
-            color: var(--text-light);
-            font-family: monospace;
-        }
-
-        .color-row .color-name {
-            font-size: 0.7rem;
-            color: var(--text-light);
-            flex: 1;
-        }
-
-        .slider-field { margin-bottom: 12px; }
-
-        .slider-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-
-        .slider-header label { font-size: 0.72rem; color: var(--text-light); }
-        .slider-header .val { font-size: 0.72rem; color: var(--blue); font-weight: 600; }
-
-        input[type="range"] {
-            width: 100%;
-            height: 4px;
-            -webkit-appearance: none;
-            background: rgba(255,255,255,0.1);
-            border-radius: 2px;
-            outline: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px; height: 16px;
-            border-radius: 50%;
-            background: var(--blue);
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(69, 169, 245, 0.3);
-        }
-
-        /* ===== PREVIEW AREA ===== */
-        .preview-area {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 30px;
-            background: radial-gradient(ellipse at center, rgba(69, 169, 245, 0.03) 0%, transparent 70%);
-        }
-
-        .preview-frame {
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08);
-        }
-
-        .preview-label {
-            text-align: center;
-            margin-top: 12px;
-            font-size: 0.72rem;
-            color: var(--text-light);
-        }
-
-        .preview-label b { color: var(--blue); }
-
-        /* ===== AD CANVAS ===== */
-        .ad-canvas {
-            width: 1080px;
-            height: 1920px;
-            position: relative;
-            overflow: hidden;
-            background: #1a1a1a;
-            transform-origin: top left;
-        }
-
-        .ad-canvas .bg-icons {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 1;
-            pointer-events: none;
-        }
-
-        .ad-canvas .bg-icons svg {
-            position: absolute;
-            opacity: 0.08;
-            fill: #ffffff;
-        }
-
-        .ad-canvas .ad-content {
-            position: relative;
-            z-index: 10;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: space-between;
-            padding: 80px 60px 70px;
-        }
-
-        .ad-canvas .ad-header {
-            text-align: center;
-        }
-
-        .ad-canvas .ad-logo {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .ad-canvas .ad-logo .n-big {
-            width: 180px;
-            height: 180px;
-            background: var(--blue);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 7rem;
-            font-weight: 900;
-            color: #1a1a1a;
-            line-height: 1;
-        }
-
-        .ad-canvas .ad-logo .brand-name {
-            font-size: 3rem;
-            font-weight: 700;
-            color: #ffffff;
-            letter-spacing: 2px;
-        }
-
-        .ad-canvas .ad-logo .brand-sub {
-            font-size: 2rem;
-            color: #ffffff;
-            letter-spacing: 3px;
-            opacity: 0.7;
-            margin-top: -5px;
-        }
-
-        .ad-canvas .ad-center {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .ad-canvas .ad-center .service-icon-wrap {
-            width: 500px;
-            height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .ad-canvas .ad-center .service-icon-wrap .icon-glow {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(69, 169, 245, 0.15) 0%, transparent 70%);
-        }
-
-        .ad-canvas .ad-center .service-icon-wrap svg {
-            position: relative;
-            z-index: 2;
-        }
-
-        .ad-canvas .ad-center .service-title {
-            font-size: 3.2rem;
-            font-weight: 700;
-            color: #e0e0e0;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            line-height: 1.2;
-        }
-
-        .ad-canvas .ad-footer {
-            text-align: center;
-        }
-
-        .ad-canvas .ad-footer .phone {
-            font-size: 5.5rem;
-            font-weight: 900;
-            color: var(--blue);
-            letter-spacing: 3px;
-        }
-
-        /* ===== TOAST ===== */
-        .toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--blue);
-            color: var(--bg);
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.85rem;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-        }
-        .toast.show { transform: translateX(-50%) translateY(0); }
-
-        .loading {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.7);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 500;
-        }
-        .loading.active { display: flex; }
-        .loading .spin {
-            width: 44px; height: 44px;
-            border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: var(--blue);
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        /* ===== RESPONSIVE ===== */
-        @media (max-width: 900px) {
-            .main-content { flex-direction: column; }
-            .editor-panel {
-                width: 100%;
-                max-height: 40vh;
-                border-right: none;
-                border-bottom: 1px solid rgba(255,255,255,0.08);
-            }
-            .preview-area { padding: 20px; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dollar Shop</title>
+  <!-- Tailwind CSS para diseño moderno -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  <!-- FontAwesome para Iconos -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 flex flex-col min-h-screen transition-colors duration-200">
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-        <div class="logo">
-            <div class="n-logo">N</div>
-            <span>NETXCOM</span> Ad Generator
+  <!-- NAVBAR -->
+  <header class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-40 transition-colors duration-200">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-store text-indigo-600 dark:text-indigo-400 text-2xl"></i>
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white">Dollar Shop</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <!-- Interruptor Modo Claro / Oscuro -->
+        <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition" title="Cambiar tema">
+          <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
+        </button>
+        <!-- Botón Iniciar/Cerrar Sesión -->
+        <button id="auth-btn" class="bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+          <i class="fa-solid fa-lock"></i> <span id="auth-btn-text">Iniciar Sesión</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="max-w-7xl mx-auto px-4 py-8 flex-1 w-full">
+    
+    <!-- SECCIÓN CLIENTE -->
+    <section id="catalog-section">
+      <!-- Buscador y Filtros -->
+      <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+        <!-- Buscador -->
+        <div class="relative w-full md:w-1/3">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-3.5 text-gray-400 dark:text-gray-500"></i>
+          <input type="text" id="search-input" placeholder="Buscar productos..." class="w-full pl-10 pr-4 py-2 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500">
         </div>
-        <div class="top-actions">
-            <button class="btn btn-magic" onclick="randomStyle()">
-                <i class="fas fa-dice"></i> Aleatorio
+        
+        <!-- Categorías (Filtros dinámicos) -->
+        <div id="category-filters" class="flex gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0">
+          <button class="category-btn active bg-indigo-600 text-white px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap" data-category="todos">
+            Todos
+          </button>
+        </div>
+      </div>
+
+      <!-- Grid de Productos -->
+      <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- Tarjetas de productos se cargan dinámicamente -->
+      </div>
+      <p id="no-products-msg" class="hidden text-center text-gray-500 dark:text-gray-400 my-12">No hay productos disponibles en esta categoría.</p>
+    </section>
+
+    <!-- PANEL DE ADMINISTRACIÓN (Oculto por defecto) -->
+    <section id="admin-panel" class="hidden space-y-8">
+      <div class="bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 p-4 rounded-xl flex justify-between items-center">
+        <div>
+          <h2 class="text-lg font-bold text-indigo-900 dark:text-indigo-200">Modo Administrador</h2>
+          <p class="text-sm text-indigo-700 dark:text-indigo-400">Gestiona los artículos de Dollar Shop</p>
+        </div>
+        <span id="user-email" class="text-sm bg-indigo-200 dark:bg-indigo-800 text-indigo-800 dark:text-indigo-200 px-3 py-1 rounded-full font-medium"></span>
+      </div>
+
+      <!-- Formulario para agregar / editar productos (Sin Vista Previa) -->
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border dark:border-gray-700">
+        <div class="flex justify-between items-center mb-4">
+          <h3 id="form-title" class="text-md font-bold text-gray-800 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-plus text-indigo-600 dark:text-indigo-400"></i> Agregar Nuevo Artículo
+          </h3>
+          <button id="cancel-edit-btn" class="hidden bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 px-3 py-1 rounded-lg text-sm transition">
+            Cancelar Edición
+          </button>
+        </div>
+        
+        <form id="add-product-form" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input type="hidden" id="edit-prod-id" value="">
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre del producto</label>
+            <input type="text" id="prod-title" required class="w-full p-2 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Categoría</label>
+            <input type="text" id="prod-category" placeholder="ej. Calzado, Electrónica..." required class="w-full p-2 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio ($)</label>
+            <input type="number" step="0.01" id="prod-price" required class="w-full p-2 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              Imagen (Subir desde Galería o Cámara)
+            </label>
+            <input type="file" id="prod-file" accept="image/*" class="w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 dark:file:bg-gray-700 dark:file:text-indigo-300">
+            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">La imagen se comprimirá automáticamente antes de guardarse.</p>
+          </div>
+          
+          <div class="md:col-span-2">
+            <button type="submit" id="submit-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold py-2 rounded-lg transition flex justify-center items-center gap-2">
+              <span id="submit-btn-text">Guardar Artículo</span>
+              <i id="submit-spinner" class="fa-solid fa-spinner fa-spin hidden"></i>
             </button>
-            <button class="btn btn-export" onclick="exportPNG()">
-                <i class="fas fa-download"></i> Exportar PNG
+          </div>
+        </form>
+      </div>
+
+      <!-- Tabla de administración de productos con Edición y Eliminación -->
+      <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border dark:border-gray-700">
+        <h3 class="text-md font-bold text-gray-800 dark:text-white mb-4">Inventario Actual</h3>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
+                <th class="p-3">Imagen</th>
+                <th class="p-3">Nombre</th>
+                <th class="p-3">Categoría</th>
+                <th class="p-3">Precio</th>
+                <th class="p-3 text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="admin-table-body" class="divide-y dark:divide-gray-700 text-sm">
+              <!-- Filas de la tabla -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL DE LOGIN -->
+  <div id="login-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-6 relative border dark:border-gray-700">
+      <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+        <i class="fa-solid fa-xmark text-xl"></i>
+      </button>
+      <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Acceso Administrativo</h2>
+      <form id="login-form" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Correo Electrónico</label>
+          <input type="email" id="login-email" required class="w-full p-2 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
+          <input type="password" id="login-password" required class="w-full p-2 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+        </div>
+        <p id="auth-error" class="text-red-500 text-xs hidden"></p>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold py-2 rounded-lg transition">
+          Ingresar
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPT FIREBASE Y LÓGICA -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    // Configuración de tu proyecto Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyCPdvXiBKQxFmxNJdqov1CSbNe16WWIXm8",
+      authDomain: "nextcom--multiservicos-server.firebaseapp.com",
+      projectId: "nextcom--multiservicos-server",
+      storageBucket: "nextcom--multiservicos-server.firebasestorage.app",
+      messagingSenderId: "1011344400777",
+      appId: "1:1011344400777:web:e40a1a66d9f77046bd8158",
+      measurementId: "G-YJZYPHRXZ6"
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    // Estado global
+    let allProducts = [];
+    let selectedCategory = 'todos';
+    let currentEditImageData = '';
+
+    // Referencias DOM
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const authBtn = document.getElementById('auth-btn');
+    const authBtnText = document.getElementById('auth-btn-text');
+    const loginModal = document.getElementById('login-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const loginForm = document.getElementById('login-form');
+    const adminPanel = document.getElementById('admin-panel');
+    const userEmailSpan = document.getElementById('user-email');
+    const authError = document.getElementById('auth-error');
+    
+    const addProductForm = document.getElementById('add-product-form');
+    const editProdId = document.getElementById('edit-prod-id');
+    const formTitle = document.getElementById('form-title');
+    const submitBtnText = document.getElementById('submit-btn-text');
+    const submitSpinner = document.getElementById('submit-spinner');
+    const cancelEditBtn = document.getElementById('cancel-edit-btn');
+    const prodFileInput = document.getElementById('prod-file');
+
+    const productGrid = document.getElementById('product-grid');
+    const categoryFiltersContainer = document.getElementById('category-filters');
+    const searchInput = document.getElementById('search-input');
+    const adminTableBody = document.getElementById('admin-table-body');
+    const noProductsMsg = document.getElementById('no-products-msg');
+
+    // MODO CLARO / OSCURO
+    if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+      themeIcon.classList.replace('fa-moon', 'fa-sun');
+    } else {
+      document.documentElement.classList.remove('dark');
+      themeIcon.classList.replace('fa-sun', 'fa-moon');
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        themeIcon.classList.replace('fa-sun', 'fa-moon');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        themeIcon.classList.replace('fa-moon', 'fa-sun');
+      }
+    });
+
+    // COMPRESIÓN DE IMÁGENES (HTML Canvas)
+    function compressImage(file, maxWidth = 800, quality = 0.7) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (e) => {
+          const img = new Image();
+          img.src = e.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Retorna Base64 optimizado en JPEG
+            resolve(canvas.toDataURL('image/jpeg', quality));
+          };
+          img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+      });
+    }
+
+    // AUTENTICACIÓN
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        authBtnText.textContent = "Cerrar Sesión";
+        adminPanel.classList.remove('hidden');
+        userEmailSpan.textContent = user.email;
+      } else {
+        authBtnText.textContent = "Iniciar Sesión";
+        adminPanel.classList.add('hidden');
+      }
+    });
+
+    authBtn.addEventListener('click', () => {
+      if (auth.currentUser) {
+        signOut(auth);
+      } else {
+        loginModal.classList.remove('hidden');
+        loginModal.classList.add('flex');
+      }
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      loginModal.classList.add('hidden');
+      loginModal.classList.remove('flex');
+      authError.classList.add('hidden');
+    });
+
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        loginModal.classList.add('hidden');
+        loginModal.classList.remove('flex');
+        loginForm.reset();
+        authError.classList.add('hidden');
+      } catch (error) {
+        authError.textContent = "Credenciales incorrectas o usuario no encontrado.";
+        authError.classList.remove('hidden');
+      }
+    });
+
+    // FIRESTORE: Sincronización en tiempo real
+    const productsRef = collection(db, 'productos');
+    onSnapshot(productsRef, (snapshot) => {
+      allProducts = [];
+      snapshot.forEach((doc) => {
+        allProducts.push({ id: doc.id, ...doc.data() });
+      });
+      renderCatalog();
+      renderAdminTable();
+    });
+
+    // RENDERIZAR CATÁLOGO
+    function renderCatalog() {
+      // Categorías únicas
+      const categories = ['todos', ...new Set(allProducts.map(p => p.category.toLowerCase().trim()))];
+      
+      categoryFiltersContainer.innerHTML = categories.map(cat => `
+        <button class="category-btn ${selectedCategory === cat ? 'bg-indigo-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'} px-4 py-2 rounded-full text-sm font-medium capitalize whitespace-nowrap transition" 
+                data-category="${cat}">
+          ${cat}
+        </button>
+      `).join('');
+
+      document.querySelectorAll('.category-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          selectedCategory = e.target.dataset.category;
+          renderCatalog();
+        });
+      });
+
+      // Filtrado por búsqueda y categoría
+      const searchTerm = searchInput.value.toLowerCase();
+      const filtered = allProducts.filter(p => {
+        const matchesCategory = selectedCategory === 'todos' || p.category.toLowerCase().trim() === selectedCategory;
+        const matchesSearch = p.title.toLowerCase().includes(searchTerm) || p.category.toLowerCase().includes(searchTerm);
+        return matchesCategory && matchesSearch;
+      });
+
+      // Render de tarjetas
+      if (filtered.length === 0) {
+        productGrid.innerHTML = '';
+        noProductsMsg.classList.remove('hidden');
+      } else {
+        noProductsMsg.classList.add('hidden');
+        productGrid.innerHTML = filtered.map(prod => `
+          <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col border dark:border-gray-700">
+            <img src="${prod.image}" alt="${prod.title}" class="h-48 w-full object-cover">
+            <div class="p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <span class="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-semibold px-2 py-1 rounded-md uppercase">${prod.category}</span>
+                <h3 class="font-bold text-gray-900 dark:text-white mt-2 text-lg">${prod.title}</h3>
+              </div>
+              <div class="mt-4 flex justify-between items-center">
+                <span class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400">$${parseFloat(prod.price).toFixed(2)}</span>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    searchInput.addEventListener('input', renderCatalog);
+
+    // GUARDAR O EDITAR PRODUCTO
+    addProductForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const title = document.getElementById('prod-title').value;
+      const category = document.getElementById('prod-category').value.trim();
+      const price = parseFloat(document.getElementById('prod-price').value);
+      const file = prodFileInput.files[0];
+      const isEditing = !!editProdId.value;
+
+      if (!isEditing && !file) {
+        alert("Por favor selecciona una imagen o toma una foto.");
+        return;
+      }
+
+      // Activar indicador de carga
+      submitSpinner.classList.remove('hidden');
+      submitBtnText.textContent = isEditing ? "Actualizando..." : "Guardando...";
+
+      try {
+        let imageData = currentEditImageData;
+        
+        // Si el usuario seleccionó un nuevo archivo, comprimirlo
+        if (file) {
+          imageData = await compressImage(file, 800, 0.7);
+        }
+
+        const productData = { title, category, price, image: imageData };
+
+        if (isEditing) {
+          await updateDoc(doc(db, 'productos', editProdId.value), productData);
+          resetForm();
+        } else {
+          await addDoc(productsRef, productData);
+          resetForm();
+        }
+      } catch (err) {
+        alert("Error al guardar: " + err.message);
+      } finally {
+        submitSpinner.classList.add('hidden');
+      }
+    });
+
+    // CANCELAR EDICIÓN
+    cancelEditBtn.addEventListener('click', resetForm);
+
+    function resetForm() {
+      addProductForm.reset();
+      editProdId.value = '';
+      currentEditImageData = '';
+      formTitle.innerHTML = `<i class="fa-solid fa-plus text-indigo-600 dark:text-indigo-400"></i> Agregar Nuevo Artículo`;
+      submitBtnText.textContent = "Guardar Artículo";
+      cancelEditBtn.classList.add('hidden');
+      prodFileInput.required = true;
+    }
+
+    // RENDERIZAR TABLA DE ADMINISTRACIÓN
+    function renderAdminTable() {
+      adminTableBody.innerHTML = allProducts.map(prod => `
+        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+          <td class="p-3"><img src="${prod.image}" class="w-12 h-12 rounded object-cover"></td>
+          <td class="p-3 font-semibold text-gray-800 dark:text-gray-200">${prod.title}</td>
+          <td class="p-3 text-gray-600 dark:text-gray-400 capitalize">${prod.category}</td>
+          <td class="p-3 font-medium text-gray-900 dark:text-white">$${parseFloat(prod.price).toFixed(2)}</td>
+          <td class="p-3 text-right space-x-2">
+            <button onclick="editProduct('${prod.id}')" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 p-2" title="Editar">
+              <i class="fa-solid fa-pen-to-square"></i>
             </button>
-        </div>
-    </div>
+            <button onclick="deleteProduct('${prod.id}')" class="text-red-500 hover:text-red-700 dark:text-red-400 p-2" title="Eliminar">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
 
-    <!-- TOOLBAR SCROLLABLE -->
-    <div class="toolbar-wrapper">
-        <div class="toolbar-label">
-            <i class="fas fa-wrench"></i> Herramientas — Desliza para ver más →
-        </div>
-        <div class="toolbar-scroll" id="toolbarScroll">
-            <!-- Se genera dinámicamente -->
-        </div>
-    </div>
+    // CARGAR DATOS EN EL FORMULARIO PARA EDITAR
+    window.editProduct = (id) => {
+      const prod = allProducts.find(p => p.id === id);
+      if (!prod) return;
 
-    <!-- MAIN CONTENT -->
-    <div class="main-content">
+      editProdId.value = prod.id;
+      document.getElementById('prod-title').value = prod.title;
+      document.getElementById('prod-category').value = prod.category;
+      document.getElementById('prod-price').value = prod.price;
+      currentEditImageData = prod.image;
+      prodFileInput.required = false; // No es obligatorio subir nueva imagen al editar
 
-        <!-- EDITOR PANEL -->
-        <div class="editor-panel">
-            <div class="editor-section">
-                <h3><i class="fas fa-font"></i> Texto del Anuncio</h3>
-                <div class="glass-box">
-                    <div class="field">
-                        <label>Nombre del Negocio</label>
-                        <input type="text" id="brandName" value="NETXCOM" oninput="render()">
-                    </div>
-                    <div class="field">
-                        <label>Subtítulo</label>
-                        <input type="text" id="brandSub" value="MULTISERVICES" oninput="render()">
-                    </div>
-                    <div class="field">
-                        <label>Título del Servicio</label>
-                        <input type="text" id="serviceTitle" value="CAMBIO DE PANTALLA" oninput="render()">
-                    </div>
-                    <div class="field">
-                        <label>Teléfono</label>
-                        <input type="text" id="phoneNum" value="75120282" oninput="render()">
-                    </div>
-                </div>
-            </div>
+      formTitle.innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-600 dark:text-indigo-400"></i> Editar Artículo`;
+      submitBtnText.textContent = "Actualizar Artículo";
+      cancelEditBtn.classList.remove('hidden');
 
-            <div class="editor-section">
-                <h3><i class="fas fa-palette"></i> Colores</h3>
-                <div class="glass-box">
-                    <div class="color-row" style="margin-bottom:8px;">
-                        <input type="color" id="bgColor" value="#1a1a1a" oninput="render()">
-                        <span class="color-hex" id="bgHex">#1a1a1a</span>
-                        <span class="color-name">Fondo</span>
-                    </div>
-                    <div class="color-row" style="margin-bottom:8px;">
-                        <input type="color" id="accentColor" value="#45a9f5" oninput="render()">
-                        <span class="color-hex" id="accentHex">#45a9f5</span>
-                        <span class="color-name">Acento (Logo/Icono)</span>
-                    </div>
-                    <div class="color-row" style="margin-bottom:8px;">
-                        <input type="color" id="textColor" value="#e0e0e0" oninput="render()">
-                        <span class="color-hex" id="textHex">#e0e0e0</span>
-                        <span class="color-name">Texto</span>
-                    </div>
-                    <div class="color-row">
-                        <input type="color" id="phoneColor" value="#45a9f5" oninput="render()">
-                        <span class="color-hex" id="phoneHex">#45a9f5</span>
-                        <span class="color-name">Teléfono</span>
-                    </div>
-                </div>
-            </div>
+      window.scrollTo({ top: adminPanel.offsetTop - 80, behavior: 'smooth' });
+    };
 
-            <div class="editor-section">
-                <h3><i class="fas fa-sliders"></i> Ajustes</h3>
-                <div class="glass-box">
-                    <div class="slider-field">
-                        <div class="slider-header">
-                            <label>Opacidad iconos fondo</label>
-                            <span class="val" id="bgIconOpVal">0.08</span>
-                        </div>
-                        <input type="range" id="bgIconOpacity" min="0" max="25" value="8" oninput="render()">
-                    </div>
-                    <div class="slider-field">
-                        <div class="slider-header">
-                            <label>Tamaño icono central</label>
-                            <span class="val" id="centerIconSizeVal">380</span>
-                        </div>
-                        <input type="range" id="centerIconSize" min="200" max="550" value="380" oninput="render()">
-                    </div>
-                    <div class="slider-field">
-                        <div class="slider-header">
-                            <label>Tamaño logo N</label>
-                            <span class="val" id="logoSizeVal">180</span>
-                        </div>
-                        <input type="range" id="logoSize" min="100" max="250" value="180" oninput="render()">
-                    </div>
-                    <div class="slider-field">
-                        <div class="slider-header">
-                            <label>Tamaño título</label>
-                            <span class="val" id="titleSizeVal">3.2rem</span>
-                        </div>
-                        <input type="range" id="titleSize" min="20" max="55" value="32" oninput="render()">
-                    </div>
-                    <div class="slider-field">
-                        <div class="slider-header">
-                            <label>Tamaño teléfono</label>
-                            <span class="val" id="phoneSizeVal">5.5rem</span>
-                        </div>
-                        <input type="range" id="phoneSize" min="30" max="80" value="55" oninput="render()">
-                    </div>
-                    <div class="slider-field">
-                        <div class="slider-header">
-                            <label>Opacidad brillo central</label>
-                            <span class="val" id="glowOpVal">0.15</span>
-                        </div>
-                        <input type="range" id="glowOpacity" min="0" max="40" value="15" oninput="render()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="editor-section">
-                <h3><i class="fas fa-image"></i> Icono Central</h3>
-                <div class="glass-box">
-                    <div class="field">
-                        <label>Seleccionar icono</label>
-                        <select id="iconSelect" onchange="render()">
-                            <!-- Se llena dinámicamente -->
-                        </select>
-                    </div>
-                    <div class="slider-field">
-                        <div class="slider-header">
-                            <label>Rotación del icono</label>
-                            <span class="val" id="iconRotVal">0°</span>
-                        </div>
-                        <input type="range" id="iconRotation" min="-45" max="45" value="0" oninput="render()">
-                    </div>
-                    <div class="slider-field">
-                        <div class="slider-header">
-                            <label>Opacidad del icono</label>
-                            <span class="val" id="iconOpVal">1.00</span>
-                        </div>
-                        <input type="range" id="iconOpacity" min="20" max="100" value="100" oninput="render()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="editor-section" style="padding-bottom: 40px;">
-                <button class="btn btn-export" style="width:100%;justify-content:center;margin-bottom:8px;" onclick="exportPNG()">
-                    <i class="fas fa-download"></i> Exportar como PNG (1080×1920)
-                </button>
-                <button class="btn" style="width:100%;justify-content:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-light);" onclick="resetAll()">
-                    <i class="fas fa-rotate-left"></i> Resetear
-                </button>
-            </div>
-        </div>
-
-        <!-- PREVIEW AREA -->
-        <div class="preview-area">
-            <div>
-                <div class="preview-frame" id="previewFrame">
-                    <div class="ad-canvas" id="adCanvas">
-                        <!-- BG Icons -->
-                        <div class="bg-icons" id="bgIcons"></div>
-
-                        <!-- Content -->
-                        <div class="ad-content">
-                            <div class="ad-header">
-                                <div class="ad-logo">
-                                    <div class="n-big" id="nLogo">N</div>
-                                    <div class="brand-name" id="brandDisplay">NETXCOM</div>
-                                    <div class="brand-sub" id="brandSubDisplay">MULTISERVICES</div>
-                                </div>
-                            </div>
-
-                            <div class="ad-center">
-                                <div class="service-icon-wrap">
-                                    <div class="icon-glow" id="iconGlow"></div>
-                                    <div id="centerIcon"></div>
-                                </div>
-                                <div class="service-title" id="serviceTitleDisplay">CAMBIO DE PANTALLA</div>
-                            </div>
-
-                            <div class="ad-footer">
-                                <div class="phone" id="phoneDisplay">75120282</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="preview-label">Vista previa • Resolución real: <b>1080 × 1920 px</b> (WhatsApp Status)</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- TOAST & LOADING -->
-    <div class="toast" id="toast"></div>
-    <div class="loading" id="loading"><div class="spin"></div></div>
-
-    <script>
-        // ==========================================
-        // SERVICE TEMPLATES
-        // ==========================================
-        const services = [
-            {
-                id: 'pantalla',
-                label: 'Cambio Pantalla',
-                title: 'CAMBIO DE PANTALLA',
-                svg: `<svg width="380" height="480" viewBox="0 0 380 480" fill="none">
-                    <rect x="40" y="20" width="300" height="440" rx="40" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="60" y="50" width="260" height="370" rx="10" fill="#1a1a1a"/>
-                    <path d="M140 180 L190 240 L170 240 L240 320" stroke="#1a1a1a" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                </svg>`
-            },
-            {
-                id: 'puertoc',
-                label: 'Puerto Carga',
-                title: 'CAMBIO DE PUERTO DE CARGA',
-                extraText: 'TIPO C',
-                svg: `<svg width="420" height="280" viewBox="0 0 420 280" fill="none">
-                    <rect x="20" y="40" width="380" height="200" rx="50" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="60" y="80" width="300" height="120" rx="30" fill="#1a1a1a"/>
-                    <rect x="110" y="110" width="200" height="60" rx="20" fill="#e0e0e0"/>
-                </svg>`
-            },
-            {
-                id: 'puertomicro',
-                label: 'Puerto Micro',
-                title: 'CAMBIO DE PUERTO DE CARGA',
-                extraText: 'TIPO MICRO',
-                svg: `<svg width="420" height="260" viewBox="0 0 420 260" fill="none">
-                    <polygon points="40,60 80,60 340,60 380,120 380,200 40,200" fill="#e0e0e0" opacity="0.9"/>
-                    <polygon points="80,90 120,90 300,90 340,140 340,180 80,180" fill="#1a1a1a"/>
-                    <rect x="130" y="110" width="160" height="50" fill="#e0e0e0"/>
-                </svg>`
-            },
-            {
-                id: 'bateria',
-                label: 'Batería',
-                title: 'CAMBIO DE BATERÍA',
-                svg: `<svg width="340" height="500" viewBox="0 0 340 500" fill="none">
-                    <rect x="70" y="10" width="200" height="480" rx="20" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="90" y="50" width="160" height="400" rx="10" fill="#1a1a1a"/>
-                    <rect x="120" y="100" width="100" height="300" rx="5" fill="#45a9f5" opacity="0.3"/>
-                    <rect x="130" y="120" width="80" height="80" rx="5" fill="#45a9f5" opacity="0.5"/>
-                    <rect x="130" y="220" width="80" height="80" rx="5" fill="#45a9f5" opacity="0.5"/>
-                    <rect x="130" y="320" width="80" height="60" rx="5" fill="#45a9f5" opacity="0.5"/>
-                    <rect x="140" y="-10" width="60" height="30" rx="5" fill="#e0e0e0"/>
-                </svg>`
-            },
-            {
-                id: 'impresiones',
-                label: 'Impresiones',
-                title: 'IMPRESIONES Y COPIAS',
-                svg: `<svg width="420" height="380" viewBox="0 0 420 380" fill="none">
-                    <rect x="100" y="10" width="220" height="100" rx="10" fill="#45a9f5" opacity="0.9"/>
-                    <rect x="60" y="110" width="300" height="160" rx="15" fill="#45a9f5" opacity="0.9"/>
-                    <rect x="110" y="150" width="200" height="15" rx="5" fill="#1a1a1a" opacity="0.3"/>
-                    <rect x="110" y="180" width="160" height="15" rx="5" fill="#1a1a1a" opacity="0.3"/>
-                    <rect x="110" y="210" width="180" height="15" rx="5" fill="#1a1a1a" opacity="0.3"/>
-                    <rect x="130" y="270" width="160" height="100" rx="5" fill="#45a9f5" opacity="0.9"/>
-                    <rect x="150" y="290" width="120" height="12" rx="4" fill="#1a1a1a" opacity="0.4"/>
-                    <rect x="150" y="315" width="120" height="12" rx="4" fill="#1a1a1a" opacity="0.4"/>
-                    <rect x="150" y="340" width="80" height="12" rx="4" fill="#1a1a1a" opacity="0.4"/>
-                </svg>`
-            },
-            {
-                id: 'computadoras',
-                label: 'Computadoras',
-                title: 'REPARACIÓN DE COMPUTADORAS',
-                svg: `<svg width="480" height="360" viewBox="0 0 480 360" fill="none">
-                    <rect x="40" y="20" width="400" height="250" rx="15" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="60" y="35" width="360" height="210" rx="8" fill="#45a9f5"/>
-                    <circle cx="240" cy="140" r="30" fill="#1a1a1a" opacity="0.4"/>
-                    <circle cx="200" cy="120" r="25" fill="#1a1a1a" opacity="0.4"/>
-                    <circle cx="280" cy="160" r="20" fill="#1a1a1a" opacity="0.4"/>
-                    <polygon points="180,270 300,270 340,330 140,330" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="200" y="340" width="80" height="10" rx="3" fill="#e0e0e0" opacity="0.7"/>
-                </svg>`
-            },
-            {
-                id: 'software',
-                label: 'Software',
-                title: 'REPARACIÓN DE SOFTWARE',
-                svg: `<svg width="380" height="380" viewBox="0 0 380 380" fill="none">
-                    <circle cx="190" cy="190" r="160" fill="none" stroke="#e0e0e0" stroke-width="8" opacity="0.9"/>
-                    <path d="M130 140 L170 190 L130 240" stroke="#e0e0e0" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"/>
-                    <path d="M250 140 L210 190 L250 240" stroke="#e0e0e0" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"/>
-                    <circle cx="190" cy="190" r="40" fill="#45a9f5" opacity="0.3"/>
-                </svg>`
-            },
-            {
-                id: 'camara',
-                label: 'Cámara',
-                title: 'CAMBIO DE CÁMARA',
-                svg: `<svg width="380" height="340" viewBox="0 0 380 340" fill="none">
-                    <rect x="30" y="60" width="320" height="240" rx="30" fill="#e0e0e0" opacity="0.9"/>
-                    <circle cx="190" cy="180" r="80" fill="#1a1a1a" opacity="0.3"/>
-                    <circle cx="190" cy="180" r="55" fill="#1a1a1a" opacity="0.5"/>
-                    <circle cx="190" cy="180" r="30" fill="#45a9f5" opacity="0.4"/>
-                    <circle cx="190" cy="180" r="15" fill="#1a1a1a" opacity="0.6"/>
-                    <rect x="120" y="30" width="80" height="40" rx="8" fill="#e0e0e0" opacity="0.5"/>
-                </svg>`
-            },
-            {
-                id: 'agua',
-                label: 'Daño por Agua',
-                title: 'REPARACIÓN DAÑO POR AGUA',
-                svg: `<svg width="340" height="440" viewBox="0 0 340 440" fill="none">
-                    <rect x="40" y="20" width="260" height="400" rx="35" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="60" y="50" width="220" height="330" rx="10" fill="#1a1a1a"/>
-                    <path d="M170 120 Q170 200 140 260 Q170 220 170 180" stroke="#45a9f5" stroke-width="8" fill="none" opacity="0.6"/>
-                    <path d="M170 120 Q170 200 200 260 Q170 220 170 180" stroke="#45a9f5" stroke-width="8" fill="none" opacity="0.6"/>
-                    <circle cx="170" cy="310" r="25" fill="#45a9f5" opacity="0.2"/>
-                    <circle cx="155" cy="300" r="8" fill="#45a9f5" opacity="0.3"/>
-                    <circle cx="185" cy="320" r="6" fill="#45a9f5" opacity="0.3"/>
-                </svg>`
-            },
-            {
-                id: 'datos',
-                label: 'Recuperar Datos',
-                title: 'RECUPERACIÓN DE DATOS',
-                svg: `<svg width="360" height="400" viewBox="0 0 360 400" fill="none">
-                    <rect x="80" y="40" width="200" height="140" rx="15" fill="#e0e0e0" opacity="0.9"/>
-                    <circle cx="180" cy="110" r="40" fill="#45a9f5" opacity="0.3"/>
-                    <path d="M180 80 L180 110 L200 130" stroke="#45a9f5" stroke-width="6" stroke-linecap="round" fill="none"/>
-                    <rect x="120" y="220" width="120" height="140" rx="10" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="145" y="245" width="70" height="8" rx="3" fill="#1a1a1a" opacity="0.2"/>
-                    <rect x="145" y="265" width="70" height="8" rx="3" fill="#1a1a1a" opacity="0.2"/>
-                    <rect x="145" y="285" width="70" height="8" rx="3" fill="#1a1a1a" opacity="0.2"/>
-                    <rect x="145" y="305" width="50" height="8" rx="3" fill="#1a1a1a" opacity="0.2"/>
-                    <path d="M180 190 L180 210" stroke="#e0e0e0" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
-                </svg>`
-            },
-            {
-                id: 'desbloqueo',
-                label: 'Desbloqueo',
-                title: 'DESLOQUEO DE CELULARES',
-                svg: `<svg width="340" height="440" viewBox="0 0 340 440" fill="none">
-                    <rect x="40" y="20" width="260" height="400" rx="35" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="60" y="50" width="220" height="330" rx="10" fill="#1a1a1a"/>
-                    <path d="M170 150 A40 40 0 0 1 170 230" stroke="#45a9f5" stroke-width="8" fill="none" stroke-linecap="round"/>
-                    <path d="M155 230 L155 280 L185 280 L185 230" stroke="#45a9f5" stroke-width="8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="170" cy="320" r="15" fill="#45a9f5" opacity="0.5"/>
-                    <path d="M170 180 L170 200" stroke="#45a9f5" stroke-width="6" stroke-linecap="round"/>
-                </svg>`
-            },
-            {
-                id: 'botones',
-                label: 'Botones',
-                title: 'CAMBIO DE BOTONES',
-                svg: `<svg width="340" height="440" viewBox="0 0 340 440" fill="none">
-                    <rect x="40" y="20" width="260" height="400" rx="35" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="60" y="50" width="220" height="330" rx="10" fill="#1a1a1a"/>
-                    <rect x="150" y="120" width="40" height="120" rx="8" fill="#e0e0e0" opacity="0.3"/>
-                    <rect x="150" y="270" width="40" height="120" rx="8" fill="#e0e0e0" opacity="0.3"/>
-                    <rect x="150" y="150" width="40" height="60" rx="8" fill="#45a9f5" opacity="0.4"/>
-                    <rect x="150" y="300" width="40" height="60" rx="8" fill="#45a9f5" opacity="0.4"/>
-                </svg>`
-            },
-            {
-                id: 'cable',
-                label: 'Cable de Red',
-                title: 'INSTALACIÓN DE REDES',
-                svg: `<svg width="420" height="320" viewBox="0 0 420 320" fill="none">
-                    <rect x="40" y="80" width="340" height="160" rx="20" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="80" y="110" width="80" height="100" rx="8" fill="#1a1a1a" opacity="0.3"/>
-                    <rect x="190" y="110" width="80" height="100" rx="8" fill="#1a1a1a" opacity="0.3"/>
-                    <rect x="300" y="110" width="40" height="100" rx="8" fill="#1a1a1a" opacity="0.3"/>
-                    <path d="M120 60 L120 80" stroke="#45a9f5" stroke-width="6" stroke-linecap="round"/>
-                    <path d="M230 60 L230 80" stroke="#45a9f5" stroke-width="6" stroke-linecap="round"/>
-                    <path d="M320 60 L320 80" stroke="#45a9f5" stroke-width="6" stroke-linecap="round"/>
-                    <rect x="105" y="40" width="30" height="25" rx="5" fill="#45a9f5" opacity="0.6"/>
-                    <rect x="215" y="40" width="30" height="25" rx="5" fill="#45a9f5" opacity="0.6"/>
-                    <rect x="305" y="40" width="30" height="25" rx="5" fill="#45a9f5" opacity="0.6"/>
-                </svg>`
-            },
-            {
-                id: 'altavoz',
-                label: 'Altavoz',
-                title: 'CAMBIO DE ALTAVOZ',
-                svg: `<svg width="380" height="380" viewBox="0 0 380 380" fill="none">
-                    <rect x="40" y="60" width="300" height="260" rx="30" fill="#e0e0e0" opacity="0.9"/>
-                    <circle cx="190" cy="190" r="90" fill="#1a1a1a" opacity="0.3"/>
-                    <circle cx="190" cy="190" r="60" fill="#1a1a1a" opacity="0.4"/>
-                    <circle cx="190" cy="190" r="30" fill="#45a9f5" opacity="0.4"/>
-                    <circle cx="190" cy="190" r="10" fill="#1a1a1a" opacity="0.5"/>
-                    <path d="M310 130 Q350 160 350 190 Q350 220 310 250" stroke="#e0e0e0" stroke-width="6" fill="none" opacity="0.5"/>
-                    <path d="M330 100 Q380 140 380 190 Q380 240 330 280" stroke="#e0e0e0" stroke-width="4" fill="none" opacity="0.3"/>
-                </svg>`
-            },
-            {
-                id: 'formateo',
-                label: 'Formateo PC',
-                title: 'FORMATEO DE COMPUTADORAS',
-                svg: `<svg width="480" height="360" viewBox="0 0 480 360" fill="none">
-                    <rect x="40" y="20" width="400" height="250" rx="15" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="60" y="35" width="360" height="210" rx="8" fill="#1a1a1a"/>
-                    <text x="240" y="130" text-anchor="middle" fill="#45a9f5" font-size="28" font-weight="bold" opacity="0.8">C:\\&gt; format</text>
-                    <text x="240" y="170" text-anchor="middle" fill="#45a9f5" font-size="20" opacity="0.5">Erasing all data...</text>
-                    <rect x="140" y="195" width="200" height="12" rx="6" fill="#e0e0e0" opacity="0.15"/>
-                    <rect x="140" y="195" width="130" height="12" rx="6" fill="#45a9f5" opacity="0.4"/>
-                    <polygon points="180,270 300,270 340,330 140,330" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="200" y="340" width="80" height="10" rx="3" fill="#e0e0e0" opacity="0.7"/>
-                </svg>`
-            },
-            {
-                id: 'antivirus',
-                label: 'Antivirus',
-                title: 'INSTALACIÓN DE ANTIVIRUS',
-                svg: `<svg width="380" height="400" viewBox="0 0 380 400" fill="none">
-                    <path d="M190 30 L330 90 L330 220 Q330 320 190 370 Q50 320 50 220 L50 90 Z" fill="#e0e0e0" opacity="0.9"/>
-                    <path d="M190 60 L310 110 L310 220 Q310 300 190 345 Q70 300 70 220 L70 110 Z" fill="#1a1a1a" opacity="0.3"/>
-                    <path d="M140 200 L175 240 L250 160" stroke="#45a9f5" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-                </svg>`
-            },
-            {
-                id: 'limpieza',
-                label: 'Limpieza PC',
-                title: 'LIMPIEZA DE COMPUTADORAS',
-                svg: `<svg width="400" height="380" viewBox="0 0 400 380" fill="none">
-                    <rect x="30" y="30" width="340" height="220" rx="12" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="50" y="45" width="300" height="180" rx="6" fill="#45a9f5"/>
-                    <circle cx="200" cy="135" r="40" fill="#1a1a1a" opacity="0.15"/>
-                    <path d="M185 120 L200 105 L215 120" stroke="#e0e0e0" stroke-width="4" fill="none"/>
-                    <rect x="160" y="155" width="80" height="6" rx="3" fill="#e0e0e0" opacity="0.4"/>
-                    <polygon points="140,250 260,250 280,300 120,300" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="170" y="310" width="60" height="8" rx="3" fill="#e0e0e0" opacity="0.5"/>
-                    <circle cx="340" cy="60" r="25" fill="#4caf50" opacity="0.3"/>
-                    <path d="M330 55 L338 65 L350 45" stroke="#4caf50" stroke-width="4" stroke-linecap="round" fill="none"/>
-                </svg>`
-            },
-            {
-                id: 'wifi',
-                label: 'WiFi / Redes',
-                title: 'CONFIGURACIÓN DE REDES',
-                svg: `<svg width="380" height="380" viewBox="0 0 380 380" fill="none">
-                    <path d="M190 300 Q190 200 190 150" stroke="#e0e0e0" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
-                    <path d="M190 150 Q130 100 90 130" stroke="#e0e0e0" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.5"/>
-                    <path d="M190 150 Q250 100 290 130" stroke="#e0e0e0" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.5"/>
-                    <path d="M190 200 Q120 150 70 190" stroke="#e0e0e0" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.4"/>
-                    <path d="M190 200 Q260 150 310 190" stroke="#e0e0e0" stroke-width="4" stroke-linecap="round" fill="none" opacity="0.4"/>
-                    <path d="M190 250 Q100 200 50 250" stroke="#e0e0e0" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.3"/>
-                    <path d="M190 250 Q280 200 330 250" stroke="#e0e0e0" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.3"/>
-                    <circle cx="190" cy="300" r="15" fill="#45a9f5" opacity="0.6"/>
-                    <circle cx="190" cy="300" r="6" fill="#e0e0e0" opacity="0.8"/>
-                </svg>`
-            },
-            {
-                id: 'toner',
-                label: 'Tóner',
-                title: 'RECARGA DE TÓNER',
-                svg: `<svg width="360" height="420" viewBox="0 0 360 420" fill="none">
-                    <rect x="80" y="60" width="200" height="280" rx="15" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="100" y="80" width="160" height="100" rx="8" fill="#1a1a1a" opacity="0.2"/>
-                    <rect x="110" y="190" width="140" height="120" rx="8" fill="#45a9f5" opacity="0.3"/>
-                    <rect x="130" y="100" width="100" height="60" rx="5" fill="#1a1a1a" opacity="0.15"/>
-                    <path d="M180 340 L180 380" stroke="#e0e0e0" stroke-width="6" stroke-linecap="round" opacity="0.5"/>
-                    <rect x="140" y="380" width="80" height="20" rx="5" fill="#e0e0e0" opacity="0.5"/>
-                    <path d="M180 210 L180 280" stroke="#45a9f5" stroke-width="4" stroke-linecap="round" opacity="0.5"/>
-                </svg>`
-            },
-            {
-                id: 'memoria',
-                label: 'Memoria RAM',
-                title: 'AMPLIACIÓN DE MEMORIA RAM',
-                svg: `<svg width="400" height="280" viewBox="0 0 400 280" fill="none">
-                    <rect x="20" y="60" width="360" height="160" rx="12" fill="#e0e0e0" opacity="0.9"/>
-                    <rect x="50" y="80" width="50" height="120" rx="5" fill="#1a1a1a" opacity="0.25"/>
-                    <rect x="120" y="80" width="50" height="120" rx="5" fill="#1a1a1a" opacity="0.25"/>
-                    <rect x="190" y="80" width="50" height="120" rx="5" fill="#45a9f5" opacity="0.4"/>
-                    <rect x="260" y="80" width="50" height="120" rx="5" fill="#1a1a1a" opacity="0.25"/>
-                    <rect x="330" y="80" width="20" height="120" rx="5" fill="#1a1a1a" opacity="0.25"/>
-                    <rect x="50" y="50" width="300" height="15" rx="5" fill="#e0e0e0" opacity="0.5"/>
-                </svg>`
-            },
-            {
-                id: 'disco',
-                label: 'Disco Duro / SSD',
-                title: 'CAMBIO A DISCO SSD',
-                svg: `<svg width="380" height="380" viewBox="0 0 380 380" fill="none">
-                    <rect x="40" y="60" width="300" height="260" rx="15" fill="#e0e0e0" opacity="0.9"/>
-                    <circle cx="190" cy="190" r="100" fill="#1a1a1a" opacity="0.2"/>
-                    <circle cx="190" cy="190" r="70" fill="#1a1a1a" opacity="0.25"/>
-                    <circle cx="190" cy="190" r="40" fill="#45a9f5" opacity="0.3"/>
-                    <circle cx="190" cy="190" r="15" fill="#e0e0e0" opacity="0.5"/>
-                    <path d="M190 90 L190 130" stroke="#45a9f5" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
-                    <path d="M190 250 L190 290" stroke="#45a9f5" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
-                    <path d="M90 190 L130 190" stroke="#45a9f5" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
-                    <path d="M250 190 L290 190" stroke="#45a9f5" stroke-width="4" stroke-linecap="round" opacity="0.4"/>
-                </svg>`
-            }
-        ];
-
-        // Background decorative icons SVGs
-        const bgIconSVGs = [
-            `<svg width="80" height="80" viewBox="0 0 80 80"><path d="M15 10 L40 55 L65 10" stroke="currentColor" stroke-width="4" fill="none" stroke-linejoin="round"/></svg>`,
-            `<svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="40" r="25" stroke="currentColor" stroke-width="4" fill="none"/><path d="M30 40 L38 48 L52 32" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
-            `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="15" y="20" width="50" height="40" rx="5" stroke="currentColor" stroke-width="4" fill="none"/><path d="M30 60 L30 68 M50 60 L50 68" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`,
-            `<svg width="80" height="80" viewBox="0 0 80 80"><path d="M20 60 Q40 15 60 60" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
-            `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="20" y="15" width="40" height="50" rx="8" stroke="currentColor" stroke-width="4" fill="none"/><circle cx="40" cy="50" r="8" stroke="currentColor" stroke-width="3" fill="none"/></svg>`,
-            `<svg width="80" height="80" viewBox="0 0 80 80"><path d="M15 50 L40 20 L65 50" stroke="currentColor" stroke-width="4" fill="none" stroke-linejoin="round"/><rect x="30" y="50" width="20" height="15" stroke="currentColor" stroke-width="3" fill="none"/></svg>`,
-            `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="20" y="25" width="40" height="30" rx="5" stroke="currentColor" stroke-width="4" fill="none"/><path d="M25 35 L55 35 M25 42 L45 42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
-            `<svg width="80" height="80" viewBox="0 0 80 80"><circle cx="40" cy="35" r="15" stroke="currentColor" stroke-width="4" fill="none"/><path d="M35 35 L40 30 L45 35" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M25 55 Q40 45 55 55" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`,
-            `<svg width="80" height="80" viewBox="0 0 80 80"><path d="M20 60 L20 25 Q20 15 30 15 L50 15 Q60 15 60 25 L60 60" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M20 60 L60 60" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>`,
-            `<svg width="80" height="80" viewBox="0 0 80 80"><rect x="15" y="20" width="50" height="40" rx="3" stroke="currentColor" stroke-width="4" fill="none"/><path d="M25 30 L55 30 M25 38 L55 38 M25 46 L45 46" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`
-        ];
-
-        // ==========================================
-        // INITIALIZE
-        // ==========================================
-        function init() {
-            buildToolbar();
-            buildIconSelect();
-            buildBgIcons();
-            selectService(3); // Default: Cambio de Pantalla
-            render();
-            scaleCanvas();
-            window.addEventListener('resize', scaleCanvas);
+    // ELIMINAR PRODUCTO
+    window.deleteProduct = async (id) => {
+      if (confirm("¿Estás seguro de que deseas eliminar este artículo de Dollar Shop?")) {
+        try {
+          await deleteDoc(doc(db, 'productos', id));
+          if (editProdId.value === id) resetForm();
+        } catch (err) {
+          alert("Error al eliminar: " + err.message);
         }
-
-        function buildToolbar() {
-            const toolbar = document.getElementById('toolbarScroll');
-            toolbar.innerHTML = '';
-            services.forEach((s, i) => {
-                const card = document.createElement('div');
-                card.className = 'tool-card';
-                card.dataset.index = i;
-                card.innerHTML = `
-                    <div class="tool-icon">
-                        <svg width="28" height="28" viewBox="0 0 100 100" style="color: var(--blue);">
-                            ${getMiniIcon(s.id)}
-                        </svg>
-                    </div>
-                    <div class="tool-label">${s.label}</div>
-                `;
-                card.onclick = () => selectService(i);
-                toolbar.appendChild(card);
-            });
-        }
-
-        function getMiniIcon(id) {
-            const icons = {
-                pantalla: '<rect x="20" y="10" width="60" height="80" rx="10" stroke="currentColor" stroke-width="5" fill="none"/><path d="M35 40 L50 55 L45 55 L60 70" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round"/>',
-                puertoc: '<rect x="10" y="30" width="80" height="40" rx="15" stroke="currentColor" stroke-width="5" fill="none"/><rect x="25" y="40" width="50" height="20" rx="8" stroke="currentColor" stroke-width="3" fill="none"/>',
-                puertomicro: '<polygon points="10,35 15,35 85,35 90,50 90,65 10,65" stroke="currentColor" stroke-width="5" fill="none"/><rect x="25" y="42" width="50" height="16" stroke="currentColor" stroke-width="3" fill="none"/>',
-                bateria: '<rect x="30" y="10" width="40" height="80" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><rect x="38" y="25" width="24" height="50" rx="2" fill="currentColor" opacity="0.3"/><rect x="42" y="2" width="16" height="10" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>',
-                impresiones: '<rect x="25" y="10" width="50" height="30" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><rect x="15" y="40" width="70" height="35" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><rect x="25" y="75" width="50" height="20" rx="3" stroke="currentColor" stroke-width="4" fill="none"/>',
-                computadoras: '<rect x="15" y="10" width="70" height="50" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><polygon points="30,60 70,60 80,80 20,80" stroke="currentColor" stroke-width="5" fill="none"/>',
-                software: '<circle cx="50" cy="50" r="35" stroke="currentColor" stroke-width="5" fill="none"/><path d="M38 42 L46 50 L38 58" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M62 42 L54 50 L62 58" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round"/>',
-                camara: '<rect x="10" y="25" width="80" height="55" rx="10" stroke="currentColor" stroke-width="5" fill="none"/><circle cx="50" cy="52" r="18" stroke="currentColor" stroke-width="4" fill="none"/>',
-                agua: '<rect x="20" y="10" width="60" height="80" rx="8" stroke="currentColor" stroke-width="5" fill="none"/><path d="M50 30 Q50 50 40 65 Q50 55 50 45" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>',
-                datos: '<rect x="20" y="10" width="60" height="40" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><rect x="30" y="55" width="40" height="40" rx="4" stroke="currentColor" stroke-width="4" fill="none"/>',
-                desbloqueo: '<rect x="20" y="10" width="60" height="80" rx="8" stroke="currentColor" stroke-width="5" fill="none"/><path d="M40 45 A12 12 0 0 1 60 45" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M40 45 L40 58 L60 58 L60 45" stroke="currentColor" stroke-width="4" fill="none"/>',
-                botones: '<rect x="20" y="10" width="60" height="80" rx="8" stroke="currentColor" stroke-width="5" fill="none"/><rect x="38" y="30" width="24" height="50" rx="4" stroke="currentColor" stroke-width="3" fill="none"/>',
-                cable: '<rect x="10" y="30" width="80" height="40" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><path d="M30 30 L30 15 M50 30 L50 15 M70 30 L70 15" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>',
-                altavoz: '<rect x="15" y="20" width="70" height="60" rx="10" stroke="currentColor" stroke-width="5" fill="none"/><circle cx="50" cy="50" r="18" stroke="currentColor" stroke-width="4" fill="none"/>',
-                formateo: '<rect x="10" y="10" width="80" height="50" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><text x="50" y="42" text-anchor="middle" font-size="14" fill="currentColor" opacity="0.6">&gt;_</text><polygon points="25,60 75,60 85,80 15,80" stroke="currentColor" stroke-width="5" fill="none"/>',
-                antivirus: '<path d="M50 10 L85 25 L85 55 Q85 75 50 90 Q15 75 15 55 L15 25 Z" stroke="currentColor" stroke-width="5" fill="none"/><path d="M35 50 L45 60 L65 40" stroke="currentColor" stroke-width="5" fill="none" stroke-linecap="round"/>',
-                limpieza: '<rect x="10" y="10" width="80" height="55" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><polygon points="25,65 75,65 85,80 15,80" stroke="currentColor" stroke-width="5" fill="none"/>',
-                wifi: '<path d="M50 65 Q50 40 50 30" stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"/><path d="M50 40 Q30 25 20 35" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M50 40 Q70 25 80 35" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="50" cy="65" r="6" fill="currentColor" opacity="0.5"/>',
-                toner: '<rect x="20" y="15" width="60" height="70" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><rect x="28" y="25" width="44" height="30" rx="3" stroke="currentColor" stroke-width="3" fill="none"/>',
-                memoria: '<rect x="10" y="25" width="80" height="50" rx="5" stroke="currentColor" stroke-width="5" fill="none"/><rect x="18" y="30" width="10" height="40" rx="2" fill="currentColor" opacity="0.2"/><rect x="35" y="30" width="10" height="40" rx="2" fill="currentColor" opacity="0.2"/><rect x="52" y="30" width="10" height="40" rx="2" fill="currentColor" opacity="0.2"/><rect x="69" y="30" width="10" height="40" rx="2" fill="currentColor" opacity="0.2"/>',
-                disco: '<rect x="15" y="20" width="70" height="60" rx="8" stroke="currentColor" stroke-width="5" fill="none"/><circle cx="50" cy="50" r="20" stroke="currentColor" stroke-width="4" fill="none"/>',
-            };
-            return icons[id] || icons.pantalla;
-        }
-
-        function buildIconSelect() {
-            const sel = document.getElementById('iconSelect');
-            services.forEach((s, i) => {
-                const opt = document.createElement('option');
-                opt.value = i;
-                opt.textContent = s.label;
-                sel.appendChild(opt);
-            });
-        }
-
-        function buildBgIcons() {
-            const container = document.getElementById('bgIcons');
-            container.innerHTML = '';
-            const positions = [
-                { x: 50, y: 150, r: -20 },
-                { x: 850, y: 100, r: 15 },
-                { x: 100, y: 400, r: 10 },
-                { x: 900, y: 350, r: -10 },
-                { x: 50, y: 700, r: 25 },
-                { x: 920, y: 650, r: -15 },
-                { x: 150, y: 1000, r: -5 },
-                { x: 800, y: 950, r: 20 },
-                { x: 80, y: 1300, r: 15 },
-                { x: 880, y: 1250, r: -25 },
-                { x: 120, y: 1600, r: 10 },
-                { x: 850, y: 1550, r: -10 },
-                { x: 200, y: 1750, r: -15 },
-                { x: 750, y: 1700, r: 20 },
-                { x: 300, y: 250, r: 30 },
-                { x: 600, y: 200, r: -30 },
-                { x: 400, y: 1800, r: 10 },
-                { x: 500, y: 100, r: -20 },
-            ];
-
-            positions.forEach((pos, i) => {
-                const div = document.createElement('div');
-                div.style.cssText = `position:absolute;left:${pos.x}px;top:${pos.y}px;transform:rotate(${pos.r}deg);opacity:var(--bg-icon-op,0.08);`;
-                div.innerHTML = bgIconSVGs[i % bgIconSVGs.length];
-                div.querySelector('svg').style.width = '70px';
-                div.querySelector('svg').style.height = '70px';
-                div.querySelector('svg').style.color = 'white';
-                container.appendChild(div);
-            });
-        }
-
-        // ==========================================
-        // SELECT SERVICE
-        // ==========================================
-        function selectService(index) {
-            const s = services[index];
-
-            // Update toolbar active state
-            document.querySelectorAll('.tool-card').forEach((c, i) => {
-                c.classList.toggle('active', i === index);
-            });
-
-            // Update icon select
-            document.getElementById('iconSelect').value = index;
-
-            // Update fields
-            document.getElementById('serviceTitle').value = s.title;
-
-            // Center icon
-            document.getElementById('centerIcon').innerHTML = s.svg;
-
-            render();
-        }
-
-        // ==========================================
-        // RENDER CANVAS
-        // ==========================================
-        function render() {
-            const bgColor = document.getElementById('bgColor').value;
-            const accentColor = document.getElementById('accentColor').value;
-            const textColor = document.getElementById('textColor').value;
-            const phoneColor = document.getElementById('phoneColor').value;
-
-            const brandName = document.getElementById('brandName').value || 'NETXCOM';
-            const brandSub = document.getElementById('brandSub').value || 'MULTISERVICES';
-            const serviceTitle = document.getElementById('serviceTitle').value || 'SERVICIO';
-            const phone = document.getElementById('phoneNum').value || '00000000';
-
-            // Slider values
-            const bgIconOp = document.getElementById('bgIconOpacity').value / 100;
-            const centerIconSz = document.getElementById('centerIconSize').value;
-            const logoSz = document.getElementById('logoSize').value;
-            const titleSz = document.getElementById('titleSize').value / 10;
-            const phoneSz = document.getElementById('phoneSize').value / 10;
-            const glowOp = document.getElementById('glowOpacity').value / 100;
-            const iconRot = document.getElementById('iconRotation').value;
-            const iconOp = document.getElementById('iconOpacity').value / 100;
-
-            // Update hex labels
-            document.getElementById('bgHex').textContent = bgColor;
-            document.getElementById('accentHex').textContent = accentColor;
-            document.getElementById('textHex').textContent = textColor;
-            document.getElementById('phoneHex').textContent = phoneColor;
-
-            // Update slider value displays
-            document.getElementById('bgIconOpVal').textContent = bgIconOp.toFixed(2);
-            document.getElementById('centerIconSizeVal').textContent = centerIconSz;
-            document.getElementById('logoSizeVal').textContent = logoSz;
-            document.getElementById('titleSizeVal').textContent = titleSz.toFixed(1) + 'rem';
-            document.getElementById('phoneSizeVal').textContent = phoneSz.toFixed(1) + 'rem';
-            document.getElementById('glowOpVal').textContent = glowOp.toFixed(2);
-            document.getElementById('iconRotVal').textContent = iconRot + '°';
-            document.getElementById('iconOpVal').textContent = iconOp.toFixed(2);
-
-            // Canvas background
-            const canvas = document.getElementById('adCanvas');
-            canvas.style.background = bgColor;
-
-            // N Logo
-            const nLogo = document.getElementById('nLogo');
-            nLogo.style.width = logoSz + 'px';
-            nLogo.style.height = logoSz + 'px';
-            nLogo.style.fontSize = (logoSz * 0.55) + 'px';
-            nLogo.style.background = accentColor;
-            nLogo.style.borderRadius = Math.round(logoSz * 0.12) + 'px';
-            nLogo.style.color = bgColor;
-
-            // Brand text
-            document.getElementById('brandDisplay').textContent = brandName;
-            document.getElementById('brandDisplay').style.color = textColor;
-            document.getElementById('brandDisplay').style.fontSize = Math.round(logoSz * 0.2) + 'px';
-
-            document.getElementById('brandSubDisplay').textContent = brandSub;
-            document.getElementById('brandSubDisplay').style.color = textColor;
-            document.getElementById('brandSubDisplay').style.fontSize = Math.round(logoSz * 0.14) + 'px';
-
-            // Center icon
-            const centerIconWrap = document.querySelector('.service-icon-wrap');
-            centerIconWrap.style.width = centerIconSz + 'px';
-            centerIconWrap.style.height = centerIconSz + 'px';
-
-            const centerIcon = document.getElementById('centerIcon');
-            centerIcon.style.opacity = iconOp;
-            centerIcon.style.transform = `rotate(${iconRot}deg)`;
-
-            const centerSVG = centerIcon.querySelector('svg');
-            if (centerSVG) {
-                centerSVG.style.width = Math.round(centerIconSz * 0.9) + 'px';
-                centerSVG.style.height = Math.round(centerIconSz * 0.85) + 'px';
-
-                // Apply accent color to SVG elements
-                const accentElements = centerSVG.querySelectorAll('[fill*="#45a9f5"], [fill*="45a9f5"], [stroke*="#45a9f5"]');
-                accentElements.forEach(el => {
-                    const fill = el.getAttribute('fill');
-                    const stroke = el.getAttribute('stroke');
-                    if (fill && (fill.includes('45a9f5') || fill.includes('#45a9f5'))) {
-                        el.setAttribute('fill', fill.replace(/45a9f5/g, accentColor.replace('#', '')));
-                    }
-                    if (stroke && (stroke.includes('45a9f5') || stroke.includes('#45a9f5'))) {
-                        el.setAttribute('stroke', accentColor);
-                    }
-                });
-            }
-
-            // Glow
-            document.getElementById('iconGlow').style.background = `radial-gradient(circle, ${accentColor}22 0%, transparent 70%)`;
-
-            // Service title
-            document.getElementById('serviceTitleDisplay').textContent = serviceTitle;
-            document.getElementById('serviceTitleDisplay').style.color = textColor;
-            document.getElementById('serviceTitleDisplay').style.fontSize = titleSz + 'rem';
-
-            // Phone
-            document.getElementById('phoneDisplay').textContent = phone;
-            document.getElementById('phoneDisplay').style.color = phoneColor;
-            document.getElementById('phoneDisplay').style.fontSize = phoneSz + 'rem';
-
-            // BG icons opacity
-            const bgIcons = document.getElementById('bgIcons');
-            bgIcons.style.setProperty('--bg-icon-op', bgIconOp);
-            bgIcons.querySelectorAll('div').forEach(d => {
-                d.style.opacity = bgIconOp;
-            });
-        }
-
-        // ==========================================
-        // SCALE CANVAS
-        // ==========================================
-        function scaleCanvas() {
-            const canvas = document.getElementById('adCanvas');
-            const frame = document.getElementById('previewFrame');
-            const maxW = frame.parentElement.clientWidth - 60;
-            const maxH = window.innerHeight - 250;
-            const scaleW = maxW / 1080;
-            const scaleH = maxH / 1920;
-            const scale = Math.min(scaleW, scaleH, 0.5);
-            canvas.style.transform = `scale(${scale})`;
-            canvas.style.transformOrigin = 'top left';
-            frame.style.width = Math.round(1080 * scale) + 'px';
-            frame.style.height = Math.round(1920 * scale) + 'px';
-        }
-
-        // ==========================================
-        // EXPORT PNG
-        // ==========================================
-        async function exportPNG() {
-            const loading = document.getElementById('loading');
-            loading.classList.add('active');
-
-            try {
-                const canvas = document.getElementById('adCanvas');
-                const origTransform = canvas.style.transform;
-                canvas.style.transform = 'none';
-
-                const result = await html2canvas(canvas, {
-                    width: 1080,
-                    height: 1920,
-                    scale: 1,
-                    useCORS: true,
-                    backgroundColor: null,
-                    logging: false,
-                    allowTaint: true
-                });
-
-                canvas.style.transform = origTransform;
-
-                const link = document.createElement('a');
-                const title = document.getElementById('serviceTitle').value.replace(/\s+/g, '_').toLowerCase();
-                link.download = `netxcom_${title}_${Date.now()}.png`;
-                link.href = result.toDataURL('image/png');
-                link.click();
-
-                showToast('✅ Imagen exportada exitosamente');
-            } catch (e) {
-                console.error(e);
-                showToast('❌ Error al exportar');
-            } finally {
-                loading.classList.remove('active');
-            }
-        }
-
-        // ==========================================
-        // RANDOM STYLE
-        // ==========================================
-        function randomStyle() {
-            const colors = [
-                { bg: '#1a1a1a', accent: '#45a9f5', text: '#e0e0e0', phone: '#45a9f5' },
-                { bg: '#0f0f23', accent: '#00d4ff', text: '#ffffff', phone: '#00d4ff' },
-                { bg: '#1a0a2e', accent: '#a78bfa', text: '#ffffff', phone: '#a78bfa' },
-                { bg: '#0a1a0a', accent: '#4caf50', text: '#ffffff', phone: '#4caf50' },
-                { bg: '#1a0a0a', accent: '#ef4444', text: '#ffffff', phone: '#ef4444' },
-                { bg: '#0f172a', accent: '#f59e0b', text: '#ffffff', phone: '#f59e0b' },
-                { bg: '#ffffff', accent: '#2563eb', text: '#1a1a2e', phone: '#2563eb' },
-                { bg: '#fafafa', accent: '#059669', text: '#0f172a', phone: '#059669' },
-                { bg: '#0c0a09', accent: '#d4a574', text: '#f5f5f4', phone: '#d4a574' },
-                { bg: '#1e1b4b', accent: '#818cf8', text: '#e2e8f0', phone: '#818cf8' },
-            ];
-
-            const c = colors[Math.floor(Math.random() * colors.length)];
-            document.getElementById('bgColor').value = c.bg;
-            document.getElementById('accentColor').value = c.accent;
-            document.getElementById('textColor').value = c.text;
-            document.getElementById('phoneColor').value = c.phone;
-
-            // Random service
-            const randIdx = Math.floor(Math.random() * services.length);
-            selectService(randIdx);
-
-            // Random adjustments
-            document.getElementById('bgIconOpacity').value = Math.floor(Math.random() * 20) + 3;
-            document.getElementById('iconRotation').value = Math.floor(Math.random() * 30) - 15;
-
-            render();
-            showToast('🎲 Estilo aleatorio aplicado');
-        }
-
-        // ==========================================
-        // RESET
-        // ==========================================
-        function resetAll() {
-            document.getElementById('brandName').value = 'NETXCOM';
-            document.getElementById('brandSub').value = 'MULTISERVICES';
-            document.getElementById('serviceTitle').value = 'CAMBIO DE PANTALLA';
-            document.getElementById('phoneNum').value = '75120282';
-
-            document.getElementById('bgColor').value = '#1a1a1a';
-            document.getElementById('accentColor').value = '#45a9f5';
-            document.getElementById('textColor').value = '#e0e0e0';
-            document.getElementById('phoneColor').value = '#45a9f5';
-
-            document.getElementById('bgIconOpacity').value = 8;
-            document.getElementById('centerIconSize').value = 380;
-            document.getElementById('logoSize').value = 180;
-            document.getElementById('titleSize').value = 32;
-            document.getElementById('phoneSize').value = 55;
-            document.getElementById('glowOpacity').value = 15;
-            document.getElementById('iconRotation').value = 0;
-            document.getElementById('iconOpacity').value = 100;
-
-            selectService(3);
-            render();
-            showToast('🔄 Reset completado');
-        }
-
-        // ==========================================
-        // TOAST
-        // ==========================================
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => t.classList.remove('show'), 2500);
-        }
-
-        // ==========================================
-        // START
-        // ==========================================
-        window.addEventListener('DOMContentLoaded', init);
-    </script>
+      }
+    };
+  </script>
 </body>
 </html>
