@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" class="dark">
+<html lang="es" class="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -55,7 +55,7 @@
         </button>
         <!-- Interruptor Modo Claro / Oscuro -->
         <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition" title="Cambiar tema">
-          <i id="theme-icon" class="fa-solid fa-sun text-lg"></i>
+          <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
         </button>
         <!-- Botón Iniciar/Cerrar Sesión (solo ícono) -->
         <button id="auth-btn" title="Iniciar Sesión" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition">
@@ -534,15 +534,15 @@
     });
 
     // MODO CLARO / OSCURO
-    // El modo oscuro es el predeterminado de Dollar Shop (el HTML ya carga
-    // con la clase "dark" para evitar parpadeos). Solo se usa modo claro
-    // si el usuario lo eligió explícitamente antes.
-    if (localStorage.getItem('theme') === 'light') {
-      document.documentElement.classList.remove('dark');
-      themeIcon.classList.replace('fa-sun', 'fa-moon');
-    } else {
+    // El modo claro es el predeterminado de Dollar Shop. Solo se usa modo
+    // oscuro si el usuario lo eligió explícitamente antes (se recuerda en
+    // localStorage); si nunca lo tocó, siempre abre en claro.
+    if (localStorage.getItem('theme') === 'dark') {
       document.documentElement.classList.add('dark');
       themeIcon.classList.replace('fa-moon', 'fa-sun');
+    } else {
+      document.documentElement.classList.remove('dark');
+      themeIcon.classList.replace('fa-sun', 'fa-moon');
     }
 
     updateViewButtons();
