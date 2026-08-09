@@ -119,6 +119,9 @@
         <!-- Tarjetas de productos se cargan dinámicamente -->
       </div>
       <p id="no-products-msg" class="hidden text-center text-gray-500 dark:text-gray-400 my-12">No hay productos disponibles con estos filtros.</p>
+
+      <!-- Paginación del catálogo -->
+      <div id="catalog-pagination" class="hidden flex-wrap items-center justify-center gap-2 mt-8"></div>
     </section>
 
     <!-- PANEL DE ADMINISTRACIÓN (Oculto por defecto) -->
@@ -209,7 +212,12 @@
       <!-- Tabla de administración de productos con Edición y Eliminación -->
       <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border dark:border-gray-700">
         <h3 class="text-md font-bold text-gray-800 dark:text-white mb-4">Inventario Actual</h3>
-        <div class="overflow-x-auto">
+
+        <!-- Vista de tarjetas para móvil: stock, editar y eliminar siempre visibles, sin scroll lateral -->
+        <div id="admin-cards-mobile" class="md:hidden space-y-3"></div>
+
+        <!-- Vista de tabla para escritorio -->
+        <div class="hidden md:block overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">
@@ -227,6 +235,9 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Paginación del inventario -->
+        <div id="admin-pagination" class="hidden flex-wrap items-center justify-center gap-2 mt-6"></div>
       </div>
     </section>
   </main>
@@ -296,6 +307,9 @@
           <span>Total</span>
           <span id="cart-total">$0.00</span>
         </div>
+        <p id="cart-outofstock-warning" class="hidden text-xs text-red-500 font-medium text-center">
+          <i class="fa-solid fa-triangle-exclamation"></i> Elimina los artículos agotados para poder enviar tu pedido por WhatsApp.
+        </p>
         <a id="cart-whatsapp-btn" href="#" target="_blank" rel="noopener" class="w-full inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe57] text-white font-semibold px-4 py-2.5 rounded-lg transition shadow-sm justify-center">
           <i class="fa-brands fa-whatsapp text-lg"></i> Enviar pedido por WhatsApp
         </a>
@@ -370,6 +384,14 @@
     const WHATSAPP_NUMBER = '50368401719';
     let selectedTallas = new Set();   // filtro activo de tallas (valores en minúsculas)
     let selectedColores = new Set();  // filtro activo de colores (valores en minúsculas)
+
+    // Paginación del catálogo (cliente)
+    let catalogCurrentPage = 1;
+    const CATALOG_PAGE_SIZE = 12;
+
+    // Paginación del inventario (admin)
+    let adminCurrentPage = 1;
+    const ADMIN_PAGE_SIZE = 10;
     // Vista predeterminada: si el cliente nunca eligió una vista antes, se usa
     // "lista" en pantallas móviles (más cómoda para scroll vertical) y
     // "cuadrícula" en pantallas de escritorio. Una vez que el usuario elige
@@ -417,7 +439,11 @@
     const categoryFiltersContainer = document.getElementById('category-filters');
     const searchInput = document.getElementById('search-input');
     const adminTableBody = document.getElementById('admin-table-body');
+    const adminCardsMobile = document.getElementById('admin-cards-mobile');
+    const adminPagination = document.getElementById('admin-pagination');
     const noProductsMsg = document.getElementById('no-products-msg');
+    const catalogPagination = document.getElementById('catalog-pagination');
+    const cartOutOfStockWarning = document.getElementById('cart-outofstock-warning');
 
     // Referencias de características (admin)
     const attrTypeSelect = document.getElementById('attr-type');
@@ -488,7 +514,7 @@
       selectedTallas.clear();
       selectedColores.clear();
       selectedCategory = 'todos';
-      renderCatalog();
+      renderCatalogFromStart();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
@@ -835,7 +861,7 @@
         btn.addEventListener('click', () => {
           const v = btn.dataset.value;
           selectedTallas.has(v) ? selectedTallas.delete(v) : selectedTallas.add(v);
-          renderCatalog();
+          renderCatalogFromStart();
         });
       });
 
@@ -843,7 +869,7 @@
         btn.addEventListener('click', () => {
           const v = btn.dataset.value;
           selectedColores.has(v) ? selectedColores.delete(v) : selectedColores.add(v);
-          renderCatalog();
+          renderCatalogFromStart();
         });
       });
     }
@@ -861,11 +887,11 @@
       selectedColores.clear();
       searchInput.value = '';
       selectedCategory = 'todos';
-      renderCatalog();
+      renderCatalogFromStart();
     });
 
-    filterPriceMin.addEventListener('input', renderCatalog);
-    filterPriceMax.addEventListener('input', renderCatalog);
+    filterPriceMin.addEventListener('input', renderCatalogFromStart);
+    filterPriceMax.addEventListener('input', renderCatalogFromStart);
 
     // ---------- MODAL DE VISTA PREVIA ----------
 
@@ -917,8 +943,17 @@
       // automáticamente este mismo producto (con su imagen) en el modal.
       const productLink = getProductLink(prod.id);
 
-      const waMessage = encodeURIComponent(`Hola, me interesa este artículo: ${prod.title}\n${productLink}`);
-      modalWhatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
+      // Si el producto está agotado, no se permite enviar el mensaje por WhatsApp
+      if (inStock) {
+        const waMessage = encodeURIComponent(`Hola, me interesa este artículo: ${prod.title}\n${productLink}`);
+        modalWhatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${waMessage}`;
+        modalWhatsappBtn.removeAttribute('aria-disabled');
+        modalWhatsappBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+      } else {
+        modalWhatsappBtn.removeAttribute('href');
+        modalWhatsappBtn.setAttribute('aria-disabled', 'true');
+        modalWhatsappBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+      }
 
       // Actualiza la URL del navegador para que se pueda copiar/compartir
       // directamente desde la barra de direcciones también.
@@ -1043,6 +1078,13 @@
         }
       }
     }
+
+    // Bloquea el envío por WhatsApp si el producto está agotado (aria-disabled="true")
+    modalWhatsappBtn.addEventListener('click', (e) => {
+      if (modalWhatsappBtn.getAttribute('aria-disabled') === 'true') {
+        e.preventDefault();
+      }
+    });
 
     closeProductModalBtn.addEventListener('click', () => closeProductModal());
     productModal.addEventListener('click', (e) => {
@@ -1172,6 +1214,13 @@
       cartModal.classList.remove('flex');
     }
 
+    // Bloquea el envío del pedido por WhatsApp si hay productos agotados en el carrito
+    cartWhatsappBtn.addEventListener('click', (e) => {
+      if (cartWhatsappBtn.getAttribute('aria-disabled') === 'true') {
+        e.preventDefault();
+      }
+    });
+
     cartBtn.addEventListener('click', openCartModal);
     closeCartModalBtn.addEventListener('click', closeCartModal);
     cartModal.addEventListener('click', (e) => {
@@ -1216,6 +1265,7 @@
         cartItemsContainer.innerHTML = '';
         cartEmptyMsg.classList.remove('hidden');
         cartFooter.classList.add('hidden');
+        cartOutOfStockWarning.classList.add('hidden');
         updateCartBadge();
         return;
       }
@@ -1252,7 +1302,20 @@
       }).join('');
 
       cartTotalEl.textContent = `$${total.toFixed(2)}`;
-      cartWhatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildCartWhatsAppMessage(items))}`;
+
+      // Si algún producto del carrito está agotado, no se permite enviar el pedido por WhatsApp
+      const hasOutOfStock = items.some(({ prod }) => !isInStock(prod));
+      if (hasOutOfStock) {
+        cartWhatsappBtn.removeAttribute('href');
+        cartWhatsappBtn.setAttribute('aria-disabled', 'true');
+        cartWhatsappBtn.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        cartOutOfStockWarning.classList.remove('hidden');
+      } else {
+        cartWhatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildCartWhatsAppMessage(items))}`;
+        cartWhatsappBtn.removeAttribute('aria-disabled');
+        cartWhatsappBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+        cartOutOfStockWarning.classList.add('hidden');
+      }
 
       document.querySelectorAll('.cart-qty-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -1270,6 +1333,72 @@
       updateCartBadge();
     }
 
+    // ---------- PAGINACIÓN (genérica, usada por catálogo e inventario) ----------
+
+    // Calcula qué números de página mostrar, colapsando con "…" cuando hay muchas
+    function getPageList(current, total) {
+      const delta = 1;
+      const range = [];
+      for (let i = Math.max(2, current - delta); i <= Math.min(total - 1, current + delta); i++) {
+        range.push(i);
+      }
+      const result = [1];
+      if (range.length && range[0] > 2) result.push('...');
+      result.push(...range);
+      if (range.length && range[range.length - 1] < total - 1) result.push('...');
+      if (total > 1) result.push(total);
+      return result;
+    }
+
+    // Dibuja los controles de paginación dentro de "container" y engancha los clics.
+    // onPageChange(nuevaPagina) se llama cuando el usuario cambia de página.
+    function renderPagination(container, totalItems, currentPage, pageSize, onPageChange) {
+      const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+
+      if (totalPages <= 1) {
+        container.innerHTML = '';
+        container.classList.add('hidden');
+        container.classList.remove('flex');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      container.classList.add('flex');
+
+      const navBtnClass = (disabled) => `pagination-btn w-9 h-9 flex items-center justify-center rounded-lg border dark:border-gray-700 text-sm transition ${disabled ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'}`;
+
+      let html = `<button data-page="prev" ${currentPage === 1 ? 'disabled' : ''} class="${navBtnClass(currentPage === 1)}" title="Página anterior">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>`;
+
+      getPageList(currentPage, totalPages).forEach(p => {
+        if (p === '...') {
+          html += `<span class="w-9 h-9 flex items-center justify-center text-gray-400 dark:text-gray-600 text-sm">…</span>`;
+        } else {
+          const active = p === currentPage;
+          html += `<button data-page="${p}" class="pagination-btn w-9 h-9 flex items-center justify-center rounded-lg border text-sm font-semibold transition ${active ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700 hover:border-indigo-400'}">${p}</button>`;
+        }
+      });
+
+      html += `<button data-page="next" ${currentPage === totalPages ? 'disabled' : ''} class="${navBtnClass(currentPage === totalPages)}" title="Página siguiente">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>`;
+
+      container.innerHTML = html;
+
+      container.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          if (btn.disabled) return;
+          const val = btn.dataset.page;
+          let newPage;
+          if (val === 'prev') newPage = currentPage - 1;
+          else if (val === 'next') newPage = currentPage + 1;
+          else newPage = parseInt(val, 10);
+          onPageChange(newPage);
+        });
+      });
+    }
+
     // RENDERIZAR CATÁLOGO
     function renderCatalog() {
       // Categorías únicas
@@ -1285,7 +1414,7 @@
       document.querySelectorAll('.category-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
           selectedCategory = e.target.dataset.category;
-          renderCatalog();
+          renderCatalogFromStart();
         });
       });
 
@@ -1310,13 +1439,22 @@
       // Layout según la vista seleccionada
       setProductGridLayout();
 
+      // Paginación: valida que la página actual siga existiendo tras filtrar
+      const totalCatalogPages = Math.max(1, Math.ceil(filtered.length / CATALOG_PAGE_SIZE));
+      if (catalogCurrentPage > totalCatalogPages) catalogCurrentPage = totalCatalogPages;
+      if (catalogCurrentPage < 1) catalogCurrentPage = 1;
+      const pageStart = (catalogCurrentPage - 1) * CATALOG_PAGE_SIZE;
+      const pageItems = filtered.slice(pageStart, pageStart + CATALOG_PAGE_SIZE);
+
       // Render de tarjetas
       if (filtered.length === 0) {
         productGrid.innerHTML = '';
         noProductsMsg.classList.remove('hidden');
+        catalogPagination.innerHTML = '';
+        catalogPagination.classList.add('hidden');
       } else {
         noProductsMsg.classList.add('hidden');
-        productGrid.innerHTML = filtered.map(renderProductCard).join('');
+        productGrid.innerHTML = pageItems.map(renderProductCard).join('');
 
         document.querySelectorAll('.product-card').forEach(card => {
           card.addEventListener('click', () => openProductModal(card.dataset.id));
@@ -1328,10 +1466,22 @@
             addToCart(btn.dataset.addCart);
           });
         });
+
+        renderPagination(catalogPagination, filtered.length, catalogCurrentPage, CATALOG_PAGE_SIZE, (newPage) => {
+          catalogCurrentPage = newPage;
+          renderCatalog();
+          catalogSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
       }
     }
 
-    searchInput.addEventListener('input', renderCatalog);
+    // Vuelve a la página 1 del catálogo (usar cuando cambian filtros/búsqueda)
+    function renderCatalogFromStart() {
+      catalogCurrentPage = 1;
+      renderCatalog();
+    }
+
+    searchInput.addEventListener('input', renderCatalogFromStart);
 
     // GUARDAR O EDITAR PRODUCTO
     addProductForm.addEventListener('submit', async (e) => {
@@ -1402,7 +1552,15 @@
 
     // RENDERIZAR TABLA DE ADMINISTRACIÓN
     function renderAdminTable() {
-      adminTableBody.innerHTML = allProducts.map(prod => {
+      // Paginación: valida que la página actual siga existiendo
+      const totalAdminPages = Math.max(1, Math.ceil(allProducts.length / ADMIN_PAGE_SIZE));
+      if (adminCurrentPage > totalAdminPages) adminCurrentPage = totalAdminPages;
+      if (adminCurrentPage < 1) adminCurrentPage = 1;
+      const startIdx = (adminCurrentPage - 1) * ADMIN_PAGE_SIZE;
+      const pageProducts = allProducts.slice(startIdx, startIdx + ADMIN_PAGE_SIZE);
+
+      // Vista de tabla (escritorio)
+      adminTableBody.innerHTML = pageProducts.map(prod => {
         const inStock = isInStock(prod);
         return `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
@@ -1427,6 +1585,41 @@
         </tr>
       `;
       }).join('');
+
+      // Vista de tarjetas (móvil): todo el contenido en columna, sin necesidad
+      // de desplazar hacia la derecha para ver "Stock" o "Editar"/"Eliminar".
+      adminCardsMobile.innerHTML = pageProducts.map(prod => {
+        const inStock = isInStock(prod);
+        return `
+        <div class="border dark:border-gray-700 rounded-xl p-3 flex gap-3">
+          <img src="${prod.image}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0">
+          <div class="flex-1 min-w-0">
+            <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm truncate">${prod.title}${prod.promo ? ' <span class="ml-1 text-[10px] bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 px-1.5 py-0.5 rounded-full align-middle"><i class="fa-solid fa-tag"></i> Promo</span>' : ''}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 capitalize mt-0.5">${prod.category} · $${parseFloat(prod.price).toFixed(2)}</p>
+            ${prod.attributes && prod.attributes.length ? `<div class="mt-1.5">${renderAttrSummaryAdmin(prod)}</div>` : ''}
+            <div class="flex items-center justify-between gap-2 mt-2.5">
+              <button onclick="toggleStock('${prod.id}')" class="text-xs font-semibold px-2.5 py-1 rounded-full transition ${inStock ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400'}" title="Clic para cambiar disponibilidad">
+                <i class="fa-solid ${inStock ? 'fa-check' : 'fa-xmark'}"></i> ${inStock ? 'En stock' : 'Agotado'}
+              </button>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                <button onclick="editProduct('${prod.id}')" class="text-indigo-600 dark:text-indigo-400 p-2 -mr-1" title="Editar">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button onclick="deleteProduct('${prod.id}')" class="text-red-500 dark:text-red-400 p-2" title="Eliminar">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      }).join('');
+
+      renderPagination(adminPagination, allProducts.length, adminCurrentPage, ADMIN_PAGE_SIZE, (newPage) => {
+        adminCurrentPage = newPage;
+        renderAdminTable();
+        adminPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
     }
 
     // Alterna rápidamente la disponibilidad de un producto (sin abrir el formulario completo)
