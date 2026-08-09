@@ -24,6 +24,11 @@
         <h1 class="text-xl font-bold text-gray-900 dark:text-white">Dollar Shop</h1>
       </div>
       <div class="flex items-center gap-3">
+        <!-- Botón Carrito -->
+        <button id="cart-btn" class="relative p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition" title="Ver carrito">
+          <i class="fa-solid fa-cart-shopping text-lg"></i>
+          <span id="cart-badge" class="hidden absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+        </button>
         <!-- Interruptor Modo Claro / Oscuro -->
         <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition" title="Cambiar tema">
           <i id="theme-icon" class="fa-solid fa-moon text-lg"></i>
@@ -142,6 +147,12 @@
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Precio ($)</label>
             <input type="number" step="0.01" id="prod-price" required class="w-full p-2 border dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none">
           </div>
+          <div class="flex items-end">
+            <label class="inline-flex items-center gap-2 cursor-pointer select-none p-2">
+              <input type="checkbox" id="prod-instock" checked class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-indigo-600 focus:ring-indigo-500">
+              <span class="text-sm font-medium text-gray-700 dark:text-gray-300">Producto disponible en stock</span>
+            </label>
+          </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               Imágenes (puedes subir varias desde Galería o Cámara)
@@ -191,6 +202,7 @@
                 <th class="p-3">Categoría</th>
                 <th class="p-3">Precio</th>
                 <th class="p-3">Características</th>
+                <th class="p-3">Stock</th>
                 <th class="p-3 text-right">Acciones</th>
               </tr>
             </thead>
@@ -221,7 +233,11 @@
         <span id="modal-category" class="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-semibold px-2 py-1 rounded-md uppercase"></span>
         <h2 id="modal-title" class="text-2xl font-bold text-gray-900 dark:text-white mt-2"></h2>
         <p id="modal-price" class="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 mt-2"></p>
+        <span id="modal-stock-badge" class="hidden inline-block text-xs font-bold px-2 py-1 rounded-md uppercase mt-1"></span>
         <div class="mt-3 flex flex-col sm:flex-row gap-2">
+          <button id="modal-add-cart-btn" type="button" class="inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-lg transition shadow-sm w-full sm:w-auto justify-center">
+            <i class="fa-solid fa-cart-plus"></i> <span id="modal-add-cart-text">Agregar al carrito</span>
+          </button>
           <a id="modal-whatsapp-btn" href="#" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe57] text-white font-semibold px-4 py-2.5 rounded-lg transition shadow-sm w-full sm:w-auto justify-center">
             <i class="fa-brands fa-whatsapp text-lg"></i> Solicitar producto
           </a>
@@ -236,6 +252,39 @@
           </p>
           <div id="modal-similar" class="grid grid-cols-3 gap-3"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DE CARRITO DE COMPRAS -->
+  <div id="cart-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg overflow-hidden relative border dark:border-gray-700 max-h-[90vh] flex flex-col">
+      <div class="flex justify-between items-center p-5 border-b dark:border-gray-700">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+          <i class="fa-solid fa-cart-shopping text-indigo-600 dark:text-indigo-400"></i> Mi Carrito
+        </h2>
+        <button id="close-cart-modal-btn" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+
+      <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-3"></div>
+      <p id="cart-empty-msg" class="hidden text-center text-gray-500 dark:text-gray-400 py-10 px-5">
+        <i class="fa-solid fa-cart-shopping text-3xl mb-2 block"></i>
+        Tu carrito está vacío.
+      </p>
+
+      <div id="cart-footer" class="border-t dark:border-gray-700 p-5 space-y-3">
+        <div class="flex justify-between items-center text-lg font-bold text-gray-900 dark:text-white">
+          <span>Total</span>
+          <span id="cart-total">$0.00</span>
+        </div>
+        <a id="cart-whatsapp-btn" href="#" target="_blank" rel="noopener" class="w-full inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#1ebe57] text-white font-semibold px-4 py-2.5 rounded-lg transition shadow-sm justify-center">
+          <i class="fa-brands fa-whatsapp text-lg"></i> Enviar pedido por WhatsApp
+        </a>
+        <button id="clear-cart-btn" type="button" class="w-full text-sm text-red-500 hover:text-red-600 dark:hover:text-red-400 font-medium py-1">
+          <i class="fa-solid fa-trash"></i> Vaciar carrito
+        </button>
       </div>
     </div>
   </div>
@@ -298,6 +347,17 @@
     let selectedColores = new Set();  // filtro activo de colores (valores en minúsculas)
     let viewMode = localStorage.getItem('viewMode') || 'grid'; // 'single' | 'grid' | 'list'
 
+    // Carrito de compras: se guarda solo {id, qty} y se persiste en localStorage
+    // para que sobreviva a recargas de página. Los datos del producto (título,
+    // precio, imagen) se resuelven siempre desde allProducts al momento de mostrarlo.
+    let cart = [];
+    try {
+      cart = JSON.parse(localStorage.getItem('cart') || '[]');
+      if (!Array.isArray(cart)) cart = [];
+    } catch (err) {
+      cart = [];
+    }
+
     // Referencias DOM
     const themeToggleBtn = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
@@ -357,6 +417,21 @@
     const modalSimilar = document.getElementById('modal-similar');
     const modalCopyLinkBtn = document.getElementById('modal-copy-link-btn');
     const modalCopyLinkText = document.getElementById('modal-copy-link-text');
+    const modalStockBadge = document.getElementById('modal-stock-badge');
+    const modalAddCartBtn = document.getElementById('modal-add-cart-btn');
+    const modalAddCartText = document.getElementById('modal-add-cart-text');
+
+    // Referencias del carrito de compras
+    const cartBtn = document.getElementById('cart-btn');
+    const cartBadge = document.getElementById('cart-badge');
+    const cartModal = document.getElementById('cart-modal');
+    const closeCartModalBtn = document.getElementById('close-cart-modal-btn');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartEmptyMsg = document.getElementById('cart-empty-msg');
+    const cartFooter = document.getElementById('cart-footer');
+    const cartTotalEl = document.getElementById('cart-total');
+    const cartWhatsappBtn = document.getElementById('cart-whatsapp-btn');
+    const clearCartBtn = document.getElementById('clear-cart-btn');
 
     // MODO CLARO / OSCURO
     if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -368,6 +443,7 @@
     }
 
     updateViewButtons();
+    updateCartBadge();
 
     themeToggleBtn.addEventListener('click', () => {
       if (document.documentElement.classList.contains('dark')) {
@@ -595,35 +671,54 @@
     }
 
     function renderProductCard(prod) {
+      const inStock = isInStock(prod);
+      const addBtnHtml = inStock
+        ? `<button type="button" data-add-cart="${prod.id}" class="add-cart-btn bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-3 py-2 rounded-lg transition flex items-center gap-1.5 flex-shrink-0">
+             <i class="fa-solid fa-cart-plus"></i> Agregar
+           </button>`
+        : `<span class="bg-gray-200 dark:bg-gray-700 text-gray-500 dark:text-gray-400 text-xs font-semibold px-3 py-2 rounded-lg flex-shrink-0">Agotado</span>`;
+      const stockBadge = !inStock
+        ? `<span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded-md uppercase z-10">Agotado</span>`
+        : '';
+
       if (viewMode === 'list') {
         return `
-          <div class="product-card bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition flex items-center gap-4 p-3 border dark:border-gray-700 cursor-pointer" data-id="${prod.id}">
-            <img src="${prod.image}" alt="${prod.title}" class="w-20 h-20 rounded-lg object-cover flex-shrink-0">
+          <div class="product-card bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition flex items-center gap-4 p-3 border dark:border-gray-700 cursor-pointer relative" data-id="${prod.id}">
+            <div class="relative flex-shrink-0">
+              ${stockBadge}
+              <img src="${prod.image}" alt="${prod.title}" class="w-20 h-20 rounded-lg object-cover ${!inStock ? 'opacity-50' : ''}">
+            </div>
             <div class="flex-1 min-w-0">
               <span class="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-semibold px-2 py-0.5 rounded-md uppercase">${prod.category}</span>
               <h3 class="font-bold text-gray-900 dark:text-white mt-1 truncate">${prod.title}</h3>
               ${renderAttrSummary(prod)}
             </div>
-            <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400 flex-shrink-0">$${parseFloat(prod.price).toFixed(2)}</span>
+            <div class="flex flex-col items-end gap-2 flex-shrink-0">
+              <span class="text-lg font-extrabold text-indigo-600 dark:text-indigo-400">$${parseFloat(prod.price).toFixed(2)}</span>
+              ${addBtnHtml}
+            </div>
           </div>
         `;
       }
       return `
-        <div class="product-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col border dark:border-gray-700 cursor-pointer" data-id="${prod.id}">
-          <img src="${prod.image}" alt="${prod.title}" class="${viewMode === 'single' ? 'h-64' : 'h-48'} w-full object-cover">
+        <div class="product-card bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden hover:shadow-lg transition flex flex-col border dark:border-gray-700 cursor-pointer relative" data-id="${prod.id}">
+          ${stockBadge}
+          <img src="${prod.image}" alt="${prod.title}" class="${viewMode === 'single' ? 'h-64' : 'h-48'} w-full object-cover ${!inStock ? 'opacity-50' : ''}">
           <div class="p-4 flex-1 flex flex-col justify-between">
             <div>
               <span class="text-xs bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-semibold px-2 py-1 rounded-md uppercase">${prod.category}</span>
               <h3 class="font-bold text-gray-900 dark:text-white mt-2 text-lg">${prod.title}</h3>
               ${renderAttrSummary(prod)}
             </div>
-            <div class="mt-4 flex justify-between items-center">
+            <div class="mt-4 flex justify-between items-center gap-2">
               <span class="text-xl font-extrabold text-indigo-600 dark:text-indigo-400">$${parseFloat(prod.price).toFixed(2)}</span>
+              ${addBtnHtml}
             </div>
           </div>
         </div>
       `;
     }
+
 
     // ---------- FILTROS DE TALLA / COLOR (dinámicos, según inventario) ----------
 
@@ -717,6 +812,25 @@
       modalCategory.textContent = prod.category;
       modalTitle.textContent = prod.title;
       modalPrice.textContent = `$${parseFloat(prod.price).toFixed(2)}`;
+
+      const inStock = isInStock(prod);
+      if (inStock) {
+        modalStockBadge.classList.add('hidden');
+      } else {
+        modalStockBadge.textContent = 'Agotado';
+        modalStockBadge.className = 'inline-block text-xs font-bold px-2 py-1 rounded-md uppercase mt-1 bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400';
+      }
+
+      modalAddCartBtn.dataset.id = prod.id;
+      if (inStock) {
+        modalAddCartBtn.disabled = false;
+        modalAddCartBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        modalAddCartText.textContent = 'Agregar al carrito';
+      } else {
+        modalAddCartBtn.disabled = true;
+        modalAddCartBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        modalAddCartText.textContent = 'Agotado';
+      }
 
       // Enlace individual del producto: al abrirlo, el catálogo muestra
       // automáticamente este mismo producto (con su imagen) en el modal.
@@ -901,6 +1015,180 @@
       }
     }
 
+    // ---------- CARRITO DE COMPRAS ----------
+
+    function saveCart() {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartBadge();
+    }
+
+    function updateCartBadge() {
+      const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+      if (totalQty > 0) {
+        cartBadge.textContent = totalQty > 99 ? '99+' : totalQty;
+        cartBadge.classList.remove('hidden');
+      } else {
+        cartBadge.classList.add('hidden');
+      }
+    }
+
+    // Agrega un producto al carrito (o incrementa su cantidad si ya está)
+    window.addToCart = (id) => {
+      const prod = allProducts.find(p => p.id === id);
+      if (!prod || !isInStock(prod)) return;
+
+      const existing = cart.find(item => item.id === id);
+      if (existing) {
+        existing.qty += 1;
+      } else {
+        cart.push({ id, qty: 1 });
+      }
+      saveCart();
+
+      // Pequeña confirmación visual si el botón de "Agregar al carrito" del modal está activo
+      if (modalAddCartBtn.dataset.id === id) {
+        const original = modalAddCartText.textContent;
+        modalAddCartText.textContent = '¡Agregado!';
+        setTimeout(() => {
+          if (modalAddCartBtn.dataset.id === id) modalAddCartText.textContent = original;
+        }, 1200);
+      }
+    };
+
+    function addToCart(id) { window.addToCart(id); }
+
+    window.removeFromCart = (id) => {
+      cart = cart.filter(item => item.id !== id);
+      saveCart();
+      renderCartModal();
+    };
+
+    window.updateCartQty = (id, qty) => {
+      const item = cart.find(i => i.id === id);
+      if (!item) return;
+      if (qty <= 0) {
+        cart = cart.filter(i => i.id !== id);
+      } else {
+        item.qty = qty;
+      }
+      saveCart();
+      renderCartModal();
+    };
+
+    modalAddCartBtn.addEventListener('click', () => {
+      if (modalAddCartBtn.disabled) return;
+      addToCart(modalAddCartBtn.dataset.id);
+    });
+
+    function openCartModal() {
+      renderCartModal();
+      cartModal.classList.remove('hidden');
+      cartModal.classList.add('flex');
+    }
+
+    function closeCartModal() {
+      cartModal.classList.add('hidden');
+      cartModal.classList.remove('flex');
+    }
+
+    cartBtn.addEventListener('click', openCartModal);
+    closeCartModalBtn.addEventListener('click', closeCartModal);
+    cartModal.addEventListener('click', (e) => {
+      if (e.target === cartModal) closeCartModal();
+    });
+
+    clearCartBtn.addEventListener('click', () => {
+      if (cart.length === 0) return;
+      if (confirm('¿Vaciar todo el carrito?')) {
+        cart = [];
+        saveCart();
+        renderCartModal();
+      }
+    });
+
+    // Arma el mensaje de WhatsApp con todos los productos del carrito,
+    // incluyendo el enlace individual de cada uno para que el vendedor
+    // sepa exactamente qué artículos y de qué producto se trata.
+    function buildCartWhatsAppMessage(items) {
+      let msg = 'Hola, quiero hacer el siguiente pedido:\n\n';
+      let total = 0;
+      items.forEach((entry, idx) => {
+        const subtotal = entry.prod.price * entry.qty;
+        total += subtotal;
+        msg += `${idx + 1}. ${entry.prod.title} x${entry.qty} - $${subtotal.toFixed(2)}\n${getProductLink(entry.prod.id)}\n\n`;
+      });
+      msg += `Total: $${total.toFixed(2)}`;
+      return msg;
+    }
+
+    function renderCartModal() {
+      // Resuelve cada línea del carrito contra el catálogo actual;
+      // descarta silenciosamente productos que ya no existan.
+      const items = cart
+        .map(item => {
+          const prod = allProducts.find(p => p.id === item.id);
+          return prod ? { prod, qty: item.qty } : null;
+        })
+        .filter(Boolean);
+
+      if (items.length === 0) {
+        cartItemsContainer.innerHTML = '';
+        cartEmptyMsg.classList.remove('hidden');
+        cartFooter.classList.add('hidden');
+        updateCartBadge();
+        return;
+      }
+
+      cartEmptyMsg.classList.add('hidden');
+      cartFooter.classList.remove('hidden');
+
+      let total = 0;
+      cartItemsContainer.innerHTML = items.map(({ prod, qty }) => {
+        const subtotal = parseFloat(prod.price) * qty;
+        total += subtotal;
+        const outOfStock = !isInStock(prod);
+        return `
+          <div class="flex items-center gap-3 border-b dark:border-gray-700 pb-3 last:border-0">
+            <img src="${prod.image}" alt="${prod.title}" class="w-16 h-16 rounded-lg object-cover flex-shrink-0 ${outOfStock ? 'opacity-50' : ''}">
+            <div class="flex-1 min-w-0">
+              <p class="font-semibold text-gray-900 dark:text-white text-sm truncate">${prod.title}</p>
+              ${outOfStock ? '<p class="text-[11px] text-red-500 font-semibold">Ya no disponible en stock</p>' : ''}
+              <p class="text-xs text-gray-500 dark:text-gray-400">$${parseFloat(prod.price).toFixed(2)} c/u</p>
+              <div class="flex items-center gap-2 mt-1.5">
+                <button data-qty-id="${prod.id}" data-delta="-1" class="cart-qty-btn w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600">-</button>
+                <span class="text-sm font-medium w-5 text-center">${qty}</span>
+                <button data-qty-id="${prod.id}" data-delta="1" class="cart-qty-btn w-6 h-6 rounded bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600">+</button>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-2 flex-shrink-0">
+              <span class="font-bold text-indigo-600 dark:text-indigo-400 text-sm">$${subtotal.toFixed(2)}</span>
+              <button data-remove-id="${prod.id}" class="cart-remove-btn text-red-400 hover:text-red-600 dark:hover:text-red-400 text-xs">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      cartTotalEl.textContent = `$${total.toFixed(2)}`;
+      cartWhatsappBtn.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(buildCartWhatsAppMessage(items))}`;
+
+      document.querySelectorAll('.cart-qty-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.qtyId;
+          const item = cart.find(i => i.id === id);
+          if (!item) return;
+          window.updateCartQty(id, item.qty + parseInt(btn.dataset.delta));
+        });
+      });
+
+      document.querySelectorAll('.cart-remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => window.removeFromCart(btn.dataset.removeId));
+      });
+
+      updateCartBadge();
+    }
+
     // RENDERIZAR CATÁLOGO
     function renderCatalog() {
       // Categorías únicas
@@ -952,6 +1240,13 @@
         document.querySelectorAll('.product-card').forEach(card => {
           card.addEventListener('click', () => openProductModal(card.dataset.id));
         });
+
+        document.querySelectorAll('.add-cart-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            addToCart(btn.dataset.addCart);
+          });
+        });
       }
     }
 
@@ -964,6 +1259,7 @@
       const title = document.getElementById('prod-title').value;
       const category = document.getElementById('prod-category').value.trim();
       const price = parseFloat(document.getElementById('prod-price').value);
+      const inStock = document.getElementById('prod-instock').checked;
       const isEditing = !!editProdId.value;
 
       if (formImages.length === 0) {
@@ -976,7 +1272,7 @@
       submitBtnText.textContent = isEditing ? "Actualizando..." : "Guardando...";
 
       try {
-        const productData = { title, category, price, image: formImages[0], images: formImages, attributes: formAttributes };
+        const productData = { title, category, price, inStock, image: formImages[0], images: formImages, attributes: formAttributes };
 
         if (isEditing) {
           await updateDoc(doc(db, 'productos', editProdId.value), productData);
@@ -1003,6 +1299,7 @@
       formImages = [];
       renderImgPreviews();
       attrHexInput.classList.add('hidden');
+      document.getElementById('prod-instock').checked = true;
       formTitle.innerHTML = `<i class="fa-solid fa-plus text-indigo-600 dark:text-indigo-400"></i> Agregar Nuevo Artículo`;
       submitBtnText.textContent = "Guardar Artículo";
       cancelEditBtn.classList.add('hidden');
@@ -1014,15 +1311,28 @@
       return `<div class="flex flex-wrap gap-1 max-w-[180px]">${prod.attributes.map(a => `<span class="text-[10px] bg-gray-100 dark:bg-gray-900 border dark:border-gray-700 px-1.5 py-0.5 rounded">${a.type}: ${a.value}</span>`).join('')}</div>`;
     }
 
+    // Un producto se considera en stock salvo que se marque explícitamente lo contrario
+    // (compatibilidad con productos creados antes de este campo).
+    function isInStock(prod) {
+      return prod.inStock !== false;
+    }
+
     // RENDERIZAR TABLA DE ADMINISTRACIÓN
     function renderAdminTable() {
-      adminTableBody.innerHTML = allProducts.map(prod => `
+      adminTableBody.innerHTML = allProducts.map(prod => {
+        const inStock = isInStock(prod);
+        return `
         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
           <td class="p-3"><img src="${prod.image}" class="w-12 h-12 rounded object-cover"></td>
           <td class="p-3 font-semibold text-gray-800 dark:text-gray-200">${prod.title}</td>
           <td class="p-3 text-gray-600 dark:text-gray-400 capitalize">${prod.category}</td>
           <td class="p-3 font-medium text-gray-900 dark:text-white">$${parseFloat(prod.price).toFixed(2)}</td>
           <td class="p-3">${renderAttrSummaryAdmin(prod)}</td>
+          <td class="p-3">
+            <button onclick="toggleStock('${prod.id}')" class="text-xs font-semibold px-2.5 py-1 rounded-full transition ${inStock ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/70' : 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/70'}" title="Clic para cambiar disponibilidad">
+              <i class="fa-solid ${inStock ? 'fa-check' : 'fa-xmark'}"></i> ${inStock ? 'En stock' : 'Agotado'}
+            </button>
+          </td>
           <td class="p-3 text-right space-x-2">
             <button onclick="editProduct('${prod.id}')" class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-300 p-2" title="Editar">
               <i class="fa-solid fa-pen-to-square"></i>
@@ -1032,8 +1342,20 @@
             </button>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
+
+    // Alterna rápidamente la disponibilidad de un producto (sin abrir el formulario completo)
+    window.toggleStock = async (id) => {
+      const prod = allProducts.find(p => p.id === id);
+      if (!prod) return;
+      try {
+        await updateDoc(doc(db, 'productos', id), { inStock: !isInStock(prod) });
+      } catch (err) {
+        alert("Error al actualizar disponibilidad: " + err.message);
+      }
+    };
 
     // CARGAR DATOS EN EL FORMULARIO PARA EDITAR
     window.editProduct = (id) => {
@@ -1044,6 +1366,7 @@
       document.getElementById('prod-title').value = prod.title;
       document.getElementById('prod-category').value = prod.category;
       document.getElementById('prod-price').value = prod.price;
+      document.getElementById('prod-instock').checked = isInStock(prod);
 
       formImages = (prod.images && prod.images.length) ? [...prod.images] : (prod.image ? [prod.image] : []);
       renderImgPreviews();
